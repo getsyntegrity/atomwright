@@ -1,0 +1,212 @@
+{
+  "schema": "atomwright.evidence/v1",
+  "change": "establish-atomwright-identity",
+  "outcome": "Atomwright is the user-facing project identity on a verified upstream baseline, with runtime behavior unchanged.",
+  "repository": {
+    "origin": "https://github.com/pablogore/atomwright",
+    "upstream": "https://github.com/Gentleman-Programming/gentle-ai",
+    "upstream_access": "fetch-only"
+  },
+  "commits": {
+    "base": "a7502587b0643472a550a3624b1c60dd00ee6312",
+    "base_describe": "v2.7.0-114-ga7502587",
+    "implementation": "ca184ac6b8933ecc76bdedadf8d8bde133b2cb4f",
+    "branch": "feat/atomwright-identity"
+  },
+  "changed_files": [
+    {
+      "status": "M",
+      "path": "AGENTS.md"
+    },
+    {
+      "status": "M",
+      "path": "CONTRIBUTING.md"
+    },
+    {
+      "status": "M",
+      "path": "LICENSE"
+    },
+    {
+      "status": "M",
+      "path": "README.md"
+    },
+    {
+      "status": "M",
+      "path": "TRADEMARKS.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/atomwright/upstream-baseline.md"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/help.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/help_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/tui/styles/styles.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/tui/styles/styles_test.go"
+    },
+    {
+      "status": "M",
+      "path": "package.json"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "AC1",
+      "criterion": "CLI help banner presents Atomwright as the product name.",
+      "check": "go test ./internal/app -run TestHelpPresentsAtomwrightIdentity",
+      "result": "pass"
+    },
+    {
+      "id": "AC2",
+      "criterion": "TUI welcome tagline presents Atomwright.",
+      "check": "go test ./internal/tui/styles -run TestTaglinePresentsAtomwrightIdentity",
+      "result": "pass"
+    },
+    {
+      "id": "AC3",
+      "criterion": "Help documentation link resolves to the Atomwright repository.",
+      "check": "go test ./internal/app -run TestHelpPresentsAtomwrightIdentity",
+      "result": "pass"
+    },
+    {
+      "id": "AC4",
+      "criterion": "Invocation token and inherited technical identifiers unchanged.",
+      "check": "go test ./internal/app -run TestHelpPreservesInvocationToken; git diff --stat base..head (no changes to go.mod, state.go, registry.go, scripts/, contracts/, internal/assets/, testdata/)",
+      "result": "pass"
+    },
+    {
+      "id": "AC5",
+      "criterion": "Upstream MIT copyright retained; Atomwright copyright added alongside.",
+      "check": "git diff a7502587..HEAD -- LICENSE (addition only, no deletion)",
+      "result": "pass"
+    },
+    {
+      "id": "AC6",
+      "criterion": "TRADEMARKS.md retained with a fork notice.",
+      "check": "git diff a7502587..HEAD -- TRADEMARKS.md (11 insertions, 0 deletions)",
+      "result": "pass"
+    },
+    {
+      "id": "AC7",
+      "criterion": "README carries the Atomwright vision plus upstream attribution.",
+      "check": "manual review of README.md Project origin and License sections",
+      "result": "pass"
+    },
+    {
+      "id": "AC8",
+      "criterion": "Full verification suite passes.",
+      "check": "go build ./... ; go vet ./... ; go test ./... ; go run ./internal/gofmtcheck",
+      "result": "pass"
+    }
+  ],
+  "tdd_evidence": {
+    "red": {
+      "command": "go test ./internal/app/ ./internal/tui/styles/ -run 'Atomwright'",
+      "observed": [
+        "FAIL: TestHelpPresentsAtomwrightIdentity - help output does not present the Atomwright product identity",
+        "FAIL: TestTaglinePresentsAtomwrightIdentity - tagline does not present the Atomwright product identity: \"Gentle-AI v1.0.0-test - Ecosystem, Frameworks, Workflows\""
+      ]
+    },
+    "green": {
+      "command": "go test ./internal/app/ ./internal/tui/styles/",
+      "observed": [
+        "PASS: TestHelpPresentsAtomwrightIdentity",
+        "PASS: TestTaglinePresentsAtomwrightIdentity",
+        "PASS: TestHelpPreservesInvocationToken",
+        "PASS: TestHelpContainsAllCommands",
+        "PASS: TestHelpAdvertisesNoRetiredWorkCommands"
+      ]
+    },
+    "refactor": {
+      "observed": "No refactor required; the change is four string literals."
+    }
+  },
+  "verification": {
+    "baseline_at_base_commit": [
+      {
+        "command": "go build ./...",
+        "exit": 0,
+        "output": "(empty)"
+      },
+      {
+        "command": "go vet ./...",
+        "exit": 0,
+        "output": "(empty)"
+      },
+      {
+        "command": "go test ./...",
+        "exit": 0,
+        "summary": "78 packages ok, 0 failed, 4 with no test files"
+      }
+    ],
+    "final_at_implementation_commit": [
+      {
+        "command": "go run ./internal/gofmtcheck",
+        "exit": 0,
+        "output": "(empty)"
+      },
+      {
+        "command": "go build ./...",
+        "exit": 0,
+        "output": "(empty)"
+      },
+      {
+        "command": "go vet ./...",
+        "exit": 0,
+        "output": "(empty)"
+      },
+      {
+        "command": "go test ./...",
+        "exit": 0,
+        "summary": "79 packages ok, 0 failed"
+      }
+    ],
+    "not_run": [
+      {
+        "command": "./scripts/deadcode-ratchet.sh",
+        "reason": "CI-only ratchet; no Go code added or removed, only string literals and tests"
+      },
+      {
+        "command": "shipwright",
+        "reason": "Shipwright is not configured in this repository at the base commit (zero references)"
+      }
+    ]
+  },
+  "behavior_preservation": {
+    "go_files_changed": [
+      "internal/app/help.go",
+      "internal/tui/styles/styles.go"
+    ],
+    "nature_of_change": "Four string literals in user-facing output. No control flow, signature, type, or dependency change.",
+    "untouched_surfaces": [
+      "go.mod",
+      "internal/state/state.go",
+      "internal/update/registry.go",
+      "internal/update/advisory.go",
+      "scripts/install.sh",
+      "scripts/install.ps1",
+      ".goreleaser.yaml",
+      "internal/releasepolicy/policy.go",
+      "internal/components/sdd/inject.go",
+      "contracts/",
+      "internal/assets/",
+      "testdata/golden/"
+    ]
+  },
+  "known_limitations": [
+    "The shipped CLI is still the inherited Gentle AI runtime; Atomwright's atomic-delivery workflow is not implemented.",
+    "The invocation token is still 'gentle-ai', so the fork does not yet satisfy the TRADEMARKS.md Forks clause at the CLI-identifier level. Must be resolved before public distribution.",
+    "docs/** still contains extensive inherited Gentle AI prose, left untouched to keep this change atomic.",
+    "PRD.md and PRD-AGENT-BUILDER.md retain the historical 'Gentleman AI' name."
+  ]
+}
