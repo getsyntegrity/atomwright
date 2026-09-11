@@ -1,4 +1,8 @@
-# Gentle AI™ — Agent Skills Index
+# Atomwright — Agent Skills Index
+
+> Atomwright is an independent fork of Gentle AI; see [`TRADEMARKS.md`](TRADEMARKS.md).
+> Skill identifiers keep their inherited `gentle-ai-*` names because they are installed on disk
+> under those names; renaming them is a migration, not a rename.
 
 When working on this project, load the relevant skill(s) BEFORE writing any code.
 
