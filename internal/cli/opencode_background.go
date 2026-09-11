@@ -6,12 +6,12 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	opencodeactivation "github.com/gentleman-programming/gentle-ai/v2/internal/opencode"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/verify"
+	"github.com/pablogore/atomwright/v2/internal/envcompat"
+	"github.com/pablogore/atomwright/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	opencodeactivation "github.com/pablogore/atomwright/v2/internal/opencode"
+	"github.com/pablogore/atomwright/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/verify"
 )
 
 // openCodeBackgroundSubagentsEnvSuffix is the unprefixed variable name;

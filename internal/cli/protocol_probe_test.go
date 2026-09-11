@@ -7,13 +7,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/claude"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/gemini"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/kilocode"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/openclaw"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/opencode"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/qwen"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/telemetry"
+	"github.com/pablogore/atomwright/v2/internal/agents/claude"
+	"github.com/pablogore/atomwright/v2/internal/agents/gemini"
+	"github.com/pablogore/atomwright/v2/internal/agents/kilocode"
+	"github.com/pablogore/atomwright/v2/internal/agents/openclaw"
+	"github.com/pablogore/atomwright/v2/internal/agents/opencode"
+	"github.com/pablogore/atomwright/v2/internal/agents/qwen"
+	"github.com/pablogore/atomwright/v2/internal/telemetry"
 )
 
 // telemetryTestSpawnRecorder is the RecordingSpawner installed as

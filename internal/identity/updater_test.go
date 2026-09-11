@@ -22,7 +22,7 @@ func TestUpdateRegistryPrimaryToolIsAtomwright(t *testing.T) {
 		{"Name", regexp.MustCompile(`Name:\s+"atomwright"`)},
 		{"Owner", regexp.MustCompile(`Owner:\s+"pablogore"`)},
 		{"Repo", regexp.MustCompile(`Repo:\s+"atomwright"`)},
-		{"GoImportPath", regexp.MustCompile(`GoImportPath:\s+"github\.com/gentleman-programming/gentle-ai/v2/cmd/atomwright"`)},
+		{"GoImportPath", regexp.MustCompile(`GoImportPath:\s+"github\.com/pablogore/atomwright/v2/cmd/atomwright"`)},
 	}
 
 	for _, tt := range tests {

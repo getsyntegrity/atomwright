@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 // GenerationEngine abstracts the AI CLI tool used to generate a skill.

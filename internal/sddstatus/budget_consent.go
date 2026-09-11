@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/consentenvelope"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/pathquote"
+	"github.com/pablogore/atomwright/v2/internal/consentenvelope"
+	"github.com/pablogore/atomwright/v2/internal/pathquote"
 )
 
 const SDDBudgetConsentSchema = "gentle-ai.sdd-integration.consent/v1"

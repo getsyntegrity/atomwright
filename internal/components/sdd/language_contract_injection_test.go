@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/agentguidance"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/components/agentguidance"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 func TestRemoteAuthorizationSharedPrompts(t *testing.T) {

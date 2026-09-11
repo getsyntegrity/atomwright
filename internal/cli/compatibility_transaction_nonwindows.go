@@ -2,7 +2,7 @@
 
 package cli
 
-import "github.com/gentleman-programming/gentle-ai/v2/internal/model"
+import "github.com/pablogore/atomwright/v2/internal/model"
 
 func usesAnchoredCompatibilityTransaction() bool {
 	return false

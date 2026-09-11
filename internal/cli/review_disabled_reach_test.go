@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/sddstatus"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/sddstatus"
 )
 
 // The maintainer's rule for this file: while the kill switch is off,

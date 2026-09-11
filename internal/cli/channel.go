@@ -2,8 +2,8 @@ package cli
 
 import (
 	"fmt"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/envcompat"
+	"github.com/pablogore/atomwright/v2/internal/identity"
 	"strings"
 )
 

@@ -11,11 +11,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/capabilitymanifest"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/agents/capabilitymanifest"
+	"github.com/pablogore/atomwright/v2/internal/components/filemerge"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/system"
 )
 
 const (

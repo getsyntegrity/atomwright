@@ -7,13 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/agentguidance"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/opencodedefault"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/planner"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/agents"
+	"github.com/pablogore/atomwright/v2/internal/components/agentguidance"
+	"github.com/pablogore/atomwright/v2/internal/components/filemerge"
+	"github.com/pablogore/atomwright/v2/internal/components/opencodedefault"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/planner"
+	"github.com/pablogore/atomwright/v2/internal/system"
 )
 
 func TestComponentPathsSDDIncludesSystemPromptForPromptFileAdapters(t *testing.T) {

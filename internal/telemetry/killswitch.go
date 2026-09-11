@@ -3,7 +3,7 @@ package telemetry
 import (
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/identity"
 )
 
 // Source names which input decided whether telemetry is enabled, in the

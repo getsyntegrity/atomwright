@@ -3,7 +3,7 @@ package agentbuilder
 import (
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 // SDDIntegrationMode defines how a generated agent integrates with SDD phases.

@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewerprovider"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/reviewerprovider"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
 )
 
 // Every in-process reviewer runtime returns free text, and one out-of-schema

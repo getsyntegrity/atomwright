@@ -50,7 +50,7 @@
 
 ```powershell
 # Stable channel (`@latest`, currently v2.6.0)
-go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@latest
+go install github.com/pablogore/atomwright/v2/cmd/atomwright@latest
 ```
 
 This command uses the `/v2` module path. Go requires that suffix for major
@@ -82,17 +82,15 @@ atomwright version
 ### From source
 
 ```bash
-go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@latest
+go install github.com/pablogore/atomwright/v2/cmd/atomwright@latest
 atomwright version
 ```
 
-> **The Go module path was not renamed.** The command is `atomwright`, the
-> release repository is `pablogore/atomwright`, and the state directory is
-> `~/.atomwright/` — but the module path is still
-> `github.com/gentleman-programming/gentle-ai/v2`. Renaming a module path
-> breaks every existing import and source install, so it is a separate future
-> migration. Type the package path above literally: only the final path element
-> (`cmd/atomwright`) carries the new name.
+> **The `/v2` suffix is required.** Go requires the major-version suffix for
+> version 2 and above, so the module path is
+> `github.com/pablogore/atomwright/v2` and the install target is that path plus
+> `/cmd/atomwright`. Type it literally — the module path is never composed from
+> the repository name at runtime.
 
 ## Migrating from `~/.gentle-ai/`
 
@@ -188,7 +186,7 @@ The current stable release is [`v2.6.0`](https://github.com/Gentleman-Programmin
 ### Install the stable channel
 
 ```bash
-go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@latest
+go install github.com/pablogore/atomwright/v2/cmd/atomwright@latest
 atomwright version
 ```
 
@@ -198,11 +196,11 @@ Only use `main` when testing changes that are not part of a release yet:
 
 ```bash
 # macOS / Linux
-go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@main
+go install github.com/pablogore/atomwright/v2/cmd/atomwright@main
 atomwright version
 
 # Windows (PowerShell)
-$env:ATOMWRIGHT_CHANNEL="beta"; go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@main
+$env:ATOMWRIGHT_CHANNEL="beta"; go install github.com/pablogore/atomwright/v2/cmd/atomwright@main
 atomwright version
 ```
 
@@ -228,7 +226,7 @@ curl -fsSL https://raw.githubusercontent.com/pablogore/atomwright/main/scripts/i
 $env:ATOMWRIGHT_CHANNEL="beta"; irm https://raw.githubusercontent.com/pablogore/atomwright/main/scripts/install.ps1 | iex
 ```
 
-> **Go module proxy cache**: `proxy.golang.org` can lag behind new commits on `main` for up to several hours. If manual `go install ...@main` does not update to the newest commit, bypass the cache with `GOPROXY=direct go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@main` (PowerShell: `$env:GOPROXY="direct"; go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@main`).
+> **Go module proxy cache**: `proxy.golang.org` can lag behind new commits on `main` for up to several hours. If manual `go install ...@main` does not update to the newest commit, bypass the cache with `GOPROXY=direct go install github.com/pablogore/atomwright/v2/cmd/atomwright@main` (PowerShell: `$env:GOPROXY="direct"; go install github.com/pablogore/atomwright/v2/cmd/atomwright@main`).
 
 The managed install scripts select the latest version for their chosen channel and do not accept arbitrary release pins. Use `go install` with an exact tag when you need a reproducible prerelease or stable version.
 

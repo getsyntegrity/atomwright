@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/state"
 )
 
 // This file mirrors internal/cli's review-mode home fixtures for the SDD

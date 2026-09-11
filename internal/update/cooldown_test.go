@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/system"
 )
 
 // TestCheckAllWithCooldown_FreshCacheSkipsNetwork verifies that when

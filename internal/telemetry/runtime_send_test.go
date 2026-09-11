@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/state"
 )
 
 const runtimeAck = `{"schema":"gentle-ai.telemetry-runtime-delivery/v1","decision":"stored"}`

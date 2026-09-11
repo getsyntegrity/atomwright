@@ -198,13 +198,13 @@ install_go() {
     # exist. /v2 is part of that path, not decoration — Go refuses to resolve a
     # module whose tags are v2.x unless the import path carries the major
     # version suffix.
-    local go_package="github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@${version}"
+    local go_package="github.com/pablogore/atomwright/v2/cmd/atomwright@${version}"
 
     info "Running: go install ${go_package}"
     if [ "${CHANNEL}" = "beta" ]; then
-        prepend_go_env_pattern GONOSUMDB github.com/gentleman-programming/gentle-ai/v2
-        prepend_go_env_pattern GOPRIVATE github.com/gentleman-programming/gentle-ai/v2
-        prepend_go_env_pattern GONOPROXY github.com/gentleman-programming/gentle-ai/v2
+        prepend_go_env_pattern GONOSUMDB github.com/pablogore/atomwright/v2
+        prepend_go_env_pattern GOPRIVATE github.com/pablogore/atomwright/v2
+        prepend_go_env_pattern GONOPROXY github.com/pablogore/atomwright/v2
         export GONOSUMDB GOPRIVATE GONOPROXY
 
         if ! go install "$go_package"; then

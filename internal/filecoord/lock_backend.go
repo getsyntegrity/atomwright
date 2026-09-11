@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
 )
 
 // acquireCooperativeLock backs the cooperative contract with the hardened

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/assets"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/assets"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 // #3817: the SDD orchestrator contract is maintained as twelve hand-written

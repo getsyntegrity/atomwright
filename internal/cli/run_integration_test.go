@@ -12,15 +12,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/codex"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/kimi"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/backup"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/installcmd"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/pipeline"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/planner"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/agents/codex"
+	"github.com/pablogore/atomwright/v2/internal/agents/kimi"
+	"github.com/pablogore/atomwright/v2/internal/backup"
+	"github.com/pablogore/atomwright/v2/internal/installcmd"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/pipeline"
+	"github.com/pablogore/atomwright/v2/internal/planner"
+	"github.com/pablogore/atomwright/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/system"
 )
 
 // missingBinaryLookPath simulates all installable binaries (engram, gga) as

@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/assets"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/catalog"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewerprovider"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/assets"
+	"github.com/pablogore/atomwright/v2/internal/catalog"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/reviewerprovider"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
 )
 
 // boundedReviewRequiredClausesFor is agent-parameterized because two of these

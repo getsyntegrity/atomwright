@@ -16,8 +16,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
 )
 
 const ReviewIntegrationOperationSchema = "gentle-ai.review-integration.operation/v1"

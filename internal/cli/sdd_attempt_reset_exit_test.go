@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/sddstatus"
+	"github.com/pablogore/atomwright/v2/internal/sddstatus"
 )
 
 // TestSDDAttemptBeginNamesTheResetThatClearsDrift is the discoverability proof

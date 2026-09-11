@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/telemetry"
+	"github.com/pablogore/atomwright/v2/internal/telemetry"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 

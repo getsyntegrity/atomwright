@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/agents"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 func TestCodeGraphCompatibilityTableIsExhaustive(t *testing.T) {

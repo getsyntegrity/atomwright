@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/system"
 )
 
 // Package-level vars for testability (swap in tests via t.Cleanup).

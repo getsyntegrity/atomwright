@@ -53,12 +53,12 @@ Restart OpenCode after enabling managed activation. Restart the shell if the lau
 ## Windows Notes
 
 - **Install from source** with Go 1.25.10+:
-  `go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@latest`.
+  `go install github.com/pablogore/atomwright/v2/cmd/atomwright@latest`.
   The Go module path is deliberately unchanged; only the final element
   (`cmd/atomwright`) carries the new command name.
 - **`atomwright upgrade` updates itself automatically on release channels when Go 1.25.10+ is on `PATH`.** It runs `go install …/cmd/atomwright@vX.Y.Z` pinned to the exact release tag. The module is verified against the Go checksum database (`sum.golang.org`) — a different trust anchor than the minisign signature used for the Linux/macOS release binaries, not a missing one.
   Because `go install` writes to `GOBIN` (or `GOPATH\bin`), which is not necessarily the directory your shell resolves, the upgrade checks the destination afterwards and warns — naming both full paths — if a different `atomwright.exe` earlier on `PATH` would keep running.
-   On the beta/development channel, `$env:ATOMWRIGHT_CHANNEL="beta"; atomwright upgrade` advances the binary from `main` and refreshes managed tools. If a manual source install sees stale `main` commits, run `GOPROXY=direct go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@main` (PowerShell: `$env:GOPROXY="direct"; go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@main`).
+   On the beta/development channel, `$env:ATOMWRIGHT_CHANNEL="beta"; atomwright upgrade` advances the binary from `main` and refreshes managed tools. If a manual source install sees stale `main` commits, run `GOPROXY=direct go install github.com/pablogore/atomwright/v2/cmd/atomwright@main` (PowerShell: `$env:GOPROXY="direct"; go install github.com/pablogore/atomwright/v2/cmd/atomwright@main`).
    Re-running either installer defaults to stable, so preserve beta explicitly: `curl -fsSL https://raw.githubusercontent.com/Gentleman-Programming/gentle-ai/main/scripts/install.sh | bash -s -- --channel beta` on macOS/Linux, or `$env:ATOMWRIGHT_CHANNEL="beta"; irm https://raw.githubusercontent.com/Gentleman-Programming/gentle-ai/main/scripts/install.ps1 | iex` in PowerShell.
 - **Without Go on `PATH`, the upgrader fails closed.** It downloads and executes nothing, and prints the runnable `go install` command instead.
 - **Scoop and official Windows binaries are still temporarily unavailable.** No unsigned artifact is ever downloaded and `atomwright upgrade` never executes a remote update script.

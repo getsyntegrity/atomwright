@@ -3,7 +3,7 @@ package persona
 import (
 	"path/filepath"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 // OutputStylePaths describes the output-style resources owned for one persona.

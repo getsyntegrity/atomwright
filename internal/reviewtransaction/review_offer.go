@@ -8,7 +8,7 @@ import (
 	"io/fs"
 	"os"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/state"
 )
 
 // Offer is OfferReviewAfterVerify's complete mode-only result. Available

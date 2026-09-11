@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/system"
 )
 
 const WindowsDistributionHoldMessage = "Windows binary distribution and Scoop are temporarily unavailable until publicly trusted Authenticode signing is enforced."

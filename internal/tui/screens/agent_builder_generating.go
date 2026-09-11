@@ -3,7 +3,7 @@ package screens
 import (
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/tui/styles"
+	"github.com/pablogore/atomwright/v2/internal/tui/styles"
 )
 
 // RenderABGenerating renders the generation-in-progress (or error) screen.

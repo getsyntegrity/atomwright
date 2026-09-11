@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/assets"
+	"github.com/pablogore/atomwright/v2/internal/assets"
 )
 
 // #3818: Go owns the phase result contract, and the OpenCode plugin still

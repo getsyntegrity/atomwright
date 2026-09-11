@@ -206,9 +206,13 @@ The public CLI identifiers have been renamed: the command is `atomwright`, state
 `~/.atomwright/`, and environment variables use the `ATOMWRIGHT_` prefix (with `GENTLE_AI_*` kept
 as a deprecated, still-read alias).
 
+The Go module path is now Atomwright's own: `github.com/pablogore/atomwright/v2`, installed with
+`go install github.com/pablogore/atomwright/v2/cmd/atomwright@latest`. It had to move because the
+inherited path resolves through the Go module proxy to the upstream repository, which this project
+cannot publish to, so `go install` could not install Atomwright at all.
+
 Other technical identifiers inherited from Gentle AI remain unchanged on purpose, because renaming
-each is a migration rather than a rename: the Go module path
-`github.com/gentleman-programming/gentle-ai/v2`, the `gentle-ai.<name>/vN` protocol identifiers, the
+each is a migration rather than a rename: the `gentle-ai.<name>/vN` protocol identifiers, the
 `<!-- gentle-ai:... -->` markers injected into agent configuration files, the `GENTLE_AI_REVIEW_*`
 reviewer prompt markers, the `GENTLE_AI_TELEMETRY` value pinned in the published telemetry contract,
 the `<git-common-dir>/gentle-ai/` review authority store path, the `gentle-ai-*` skill IDs, the

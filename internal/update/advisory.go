@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/identity"
 )
 
 // advisoryMaxBytes is the maximum number of bytes read from an advisory

@@ -13,11 +13,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/engram"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/doctor"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/storage"
+	"github.com/pablogore/atomwright/v2/internal/components/engram"
+	"github.com/pablogore/atomwright/v2/internal/doctor"
+	"github.com/pablogore/atomwright/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/storage"
 )
 
 type CheckStatus = doctor.Status

@@ -13,9 +13,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/app"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/assets"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/cli"
+	"github.com/pablogore/atomwright/v2/internal/app"
+	"github.com/pablogore/atomwright/v2/internal/assets"
+	"github.com/pablogore/atomwright/v2/internal/cli"
 )
 
 // This corpus exists because of #2506: the product states runnable commands

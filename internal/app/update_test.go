@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/update"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/update/upgrade"
+	"github.com/pablogore/atomwright/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/update"
+	"github.com/pablogore/atomwright/v2/internal/update/upgrade"
 )
 
 func TestRunUpdate_ReturnsErrorWhenChecksFail(t *testing.T) {

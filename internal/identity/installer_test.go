@@ -42,19 +42,23 @@ func TestPosixInstallerHasNoHomebrewPath(t *testing.T) {
 	}
 }
 
-// TestPosixInstallerGoInstallUsesPreservedModulePath asserts the `go install`
-// target is the LITERAL preserved module path.
+// TestPosixInstallerGoInstallUsesLiteralModulePath asserts the `go install`
+// target is the LITERAL module path.
 //
 // The landmine: the installer used to compose its module path from the release
 // coordinates, e.g. github.com/${owner_lc}/${GITHUB_REPO}/v2/cmd/${BINARY_NAME}.
-// With the release coordinates now pablogore/atomwright, that composition names
-// a module that does not exist and every source install fails.
-func TestPosixInstallerGoInstallUsesPreservedModulePath(t *testing.T) {
+// Now that the module path is github.com/pablogore/atomwright/v2, that
+// composition happens to produce the same string — which makes this guard MORE
+// important, not less. A composed path would look correct today and silently
+// name a module that does not exist the day either coordinate changes, taking
+// every source install with it. This is also the guard that keeps the module
+// path from being derived from the branding variables at all.
+func TestPosixInstallerGoInstallUsesLiteralModulePath(t *testing.T) {
 	script := readRepositoryFile(t, "scripts/install.sh")
 
-	const want = "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@"
+	const want = "github.com/pablogore/atomwright/v2/cmd/atomwright@"
 	if !strings.Contains(script, want) {
-		t.Errorf("scripts/install.sh go install target is missing the literal preserved module path %q", want)
+		t.Errorf("scripts/install.sh go install target is missing the literal module path %q", want)
 	}
 
 	// Only a MODULE path composed from the release coordinates is a defect. The
@@ -71,14 +75,14 @@ func TestPosixInstallerGoInstallUsesPreservedModulePath(t *testing.T) {
 }
 
 // TestWindowsInstallerUsesAtomwrightIdentity asserts the PowerShell installer
-// installs the new executable from the preserved module path.
+// installs the new executable from the literal module path.
 func TestWindowsInstallerUsesAtomwrightIdentity(t *testing.T) {
 	script := readRepositoryFile(t, "scripts/install.ps1")
 
 	for _, want := range []string{
 		`$BINARY_NAME = "atomwright"`,
 		`$GITHUB_REPO = "atomwright"`,
-		"github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright",
+		"github.com/pablogore/atomwright/v2/cmd/atomwright",
 	} {
 		if !strings.Contains(script, want) {
 			t.Errorf("scripts/install.ps1 is missing %q", want)

@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/consentenvelope"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/pathquote"
+	"github.com/pablogore/atomwright/v2/internal/consentenvelope"
+	"github.com/pablogore/atomwright/v2/internal/pathquote"
 )
 
 // Issue #2563 (S4b of #2540): the status layer owns the change-instance

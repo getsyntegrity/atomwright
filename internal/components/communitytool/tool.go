@@ -9,11 +9,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents"
-	piagent "github.com/gentleman-programming/gentle-ai/v2/internal/agents/pi"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/catalog"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/agents"
+	piagent "github.com/pablogore/atomwright/v2/internal/agents/pi"
+	"github.com/pablogore/atomwright/v2/internal/catalog"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/system"
 )
 
 type Availability string

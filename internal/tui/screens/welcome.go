@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/tui/styles"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/update"
+	"github.com/pablogore/atomwright/v2/internal/tui/styles"
+	"github.com/pablogore/atomwright/v2/internal/update"
 	"github.com/rivo/uniseg"
 )
 

@@ -70,7 +70,7 @@ func TestWindowsInstallAndUpgradeContainNoRemoteBinaryOrScriptPath(t *testing.T)
 	}
 	for _, required := range []string{
 		"Windows binary distribution and Scoop are temporarily unavailable",
-		"go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@latest",
+		"go install github.com/pablogore/atomwright/v2/cmd/atomwright@latest",
 	} {
 		if !strings.Contains(installer, required) {
 			t.Errorf("Windows installer is missing safe source guidance %q", required)

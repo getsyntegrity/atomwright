@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/sddstatus"
+	"github.com/pablogore/atomwright/v2/internal/sddstatus"
 )
 
 // RunSDDArchiveCompose composes an OpenSpec canonical spec with a delta spec

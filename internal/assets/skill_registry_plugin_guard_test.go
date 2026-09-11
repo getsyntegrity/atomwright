@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/skillregistry"
+	"github.com/pablogore/atomwright/v2/internal/skillregistry"
 )
 
 // TestSkillRegistryPluginSkipsNonProjectDirectories runs the real plugin

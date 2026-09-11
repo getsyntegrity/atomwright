@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/providercontractbundle"
+	"github.com/pablogore/atomwright/v2/internal/providercontractbundle"
 )
 
 const contractSemverFile = "contracts/review-provider-contract/CONTRACT_SEMVER"

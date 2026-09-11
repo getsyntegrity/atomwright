@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/sddstatus"
+	"github.com/pablogore/atomwright/v2/internal/sddstatus"
 )
 
 func sddReviewDisabledForWorkspace(workspaceRoot string) (bool, error) {

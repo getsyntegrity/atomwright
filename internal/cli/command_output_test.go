@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	componentuninstall "github.com/gentleman-programming/gentle-ai/v2/internal/components/uninstall"
+	componentuninstall "github.com/pablogore/atomwright/v2/internal/components/uninstall"
 )
 
 func TestExecuteCommandQuietModeIncludesCapturedOutputOnFailure(t *testing.T) {

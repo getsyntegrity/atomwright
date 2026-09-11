@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewerprovider"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/reviewerprovider"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
 )
 
 func startFacadeReview(t *testing.T, repo string) ReviewFacadeStartResult {

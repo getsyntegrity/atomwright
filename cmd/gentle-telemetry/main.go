@@ -20,7 +20,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/telemetrycollector"
+	"github.com/pablogore/atomwright/v2/internal/telemetrycollector"
 )
 
 const (

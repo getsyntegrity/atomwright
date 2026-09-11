@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/pi"
+	"github.com/pablogore/atomwright/v2/internal/agents/pi"
 )
 
 func TestRetirePiSystemPromptBlocksStripsManagedSectionsAndPreservesUserContent(t *testing.T) {

@@ -8,10 +8,10 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/tui/screens"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/tui/screens"
 )
 
 var updateTUIGoldens = flag.Bool("update", false, "update TUI golden files")

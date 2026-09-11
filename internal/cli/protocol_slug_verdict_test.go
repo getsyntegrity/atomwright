@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 // TestComputeSlugSlimVerdictsSafestWinsAcrossDivergentPair pins JD-017: the

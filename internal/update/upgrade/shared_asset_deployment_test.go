@@ -7,8 +7,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/opencode"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/assets"
+	"github.com/pablogore/atomwright/v2/internal/agents/opencode"
+	"github.com/pablogore/atomwright/v2/internal/assets"
 )
 
 // embeddedSharedFileNames returns the names of every file embedded under

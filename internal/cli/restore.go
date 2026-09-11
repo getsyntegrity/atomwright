@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/backup"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/backup"
+	"github.com/pablogore/atomwright/v2/internal/state"
 )
 
 // RestoreFunc is the function signature for restoring a backup from its manifest.

@@ -5,7 +5,7 @@ import (
 	"html"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 const systemPromptBase = `You are an expert AI agent skill designer for the Gentleman AI ecosystem.

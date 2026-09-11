@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/assets"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/assets"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 const (

@@ -11,9 +11,9 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/assets"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/opencode"
+	"github.com/pablogore/atomwright/v2/internal/assets"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/opencode"
 )
 
 // requiredLedgerClauses is the OpenCode binding of the shared clause set: the

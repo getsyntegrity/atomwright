@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/identity"
 )
 
 // Lookup resolves suffix against the current prefix first and the legacy prefix

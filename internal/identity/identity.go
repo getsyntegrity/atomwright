@@ -14,12 +14,18 @@
 //     this project cannot edit, so the legacy prefix stays readable.
 //   - The release coordinates say where artifacts are published. They move when
 //     ownership moves.
-//   - The source module path is a permanent identifier of the code itself. It
-//     is resolved by the Go module proxy and is NOT a branding surface; renaming
-//     it would break every existing import and source install.
+//   - The source module path is Atomwright's own Go module path. It is a
+//     separate concept from the release coordinates because it is what the Go
+//     module proxy resolves and what every import statement in this repository
+//     spells out — not because it is spelled differently.
 //
 // The module path and the release coordinates are the pair most often conflated.
-// They are asserted to be independent in the package tests.
+// They currently share the same owner and repository segments, which makes the
+// conflation cheap to introduce and invisible to a textual check: composing the
+// module path from the release coordinates would produce the right string today
+// and the wrong one the day either changes. They are therefore declared
+// independently, and the package tests assert the declaration against the real
+// go.mod rather than against a composed value.
 package identity
 
 const (
@@ -30,7 +36,7 @@ const (
 	legacyStateDirName = ".gentle-ai"
 	releaseOwner       = "pablogore"
 	releaseRepo        = "atomwright"
-	sourceModulePath   = "github.com/gentleman-programming/gentle-ai/v2"
+	sourceModulePath   = "github.com/pablogore/atomwright/v2"
 )
 
 // Executable is the public command name: the token a user types, the file
@@ -57,10 +63,12 @@ func ReleaseOwner() string { return releaseOwner }
 // ReleaseRepo is the GitHub repository that publishes Atomwright releases.
 func ReleaseRepo() string { return releaseRepo }
 
-// SourceModulePath is the Go module path of this codebase. It is inherited and
-// intentionally unchanged: it is resolved by the module proxy, not a brand.
+// SourceModulePath is the Go module path of this codebase, declared here as a
+// literal and never composed from the release coordinates. It must stay equal
+// to the module directive in go.mod: it is what the Go module proxy resolves
+// and what every import path in this repository begins with.
 func SourceModulePath() string { return sourceModulePath }
 
 // GoInstallPackage is the package a source install targets. It is the one place
-// the preserved module path and the new executable name legitimately meet.
+// the module path and the executable name legitimately meet.
 func GoInstallPackage() string { return sourceModulePath + "/cmd/" + executable }

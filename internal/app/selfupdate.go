@@ -12,12 +12,12 @@ import (
 
 	"github.com/mattn/go-isatty"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/update"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/update/upgrade"
+	"github.com/pablogore/atomwright/v2/internal/envcompat"
+	"github.com/pablogore/atomwright/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/update"
+	"github.com/pablogore/atomwright/v2/internal/update/upgrade"
 )
 
 // selfUpdateNowFn returns the current time; injected for test determinism.

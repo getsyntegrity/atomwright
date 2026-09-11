@@ -12,9 +12,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/components/filemerge"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/state"
 )
 
 // reviewStopHookSchema identifies the reminder envelope this hook prints to

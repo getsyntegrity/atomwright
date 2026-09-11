@@ -26,20 +26,28 @@ derived from, and are not a claim of endorsement or affiliation.
 Some technical identifiers inherited from Gentle AI remain in this repository **temporarily, for
 compatibility**. They include, among others:
 
-- the Go module path `github.com/gentleman-programming/gentle-ai/v2`
-- the `gentle-ai` command name
-- the `~/.gentle-ai/` configuration directory
-- `GENTLE_AI_*` environment variables
-- injected configuration markers of the form `<!-- gentle-ai:... -->`
-- `gentle-ai.<name>/v<N>` protocol identifiers
+- injected configuration markers of the form `<!-- gentle-ai:... -->`, which are already written
+  into users' files and cannot be renamed without orphaning them
+- `gentle-ai.<name>/v<N>` protocol identifiers, which are negotiated wire contracts
+- the `gentle-ai` path component of the review authority store inside a repository's Git directory
+- the `gentle-ai-review-provider-contract-<semver>` release bundle name, which third-party review
+  providers resolve by name
+- `GENTLE_AI_*` spellings of runtime environment variables, still read as deprecated aliases
+- `~/.gentle-ai/`, read only to migrate compatible state and never written to
+- `gentle-ai-*` skill identifiers and agent-side filenames installed on disk under those names
 
 Retaining them is a compatibility measure, not a claim of any right to them, and it is not a
 statement about how the upstream trademark policy applies to them. `TRADEMARKS.md` states that
 policy; this notice does not.
 
-**These identifiers must be migrated before Atomwright is publicly distributed.**
-[`docs/atomwright/upstream-baseline.md`](docs/atomwright/upstream-baseline.md) records each one as
-deferred work.
+The public command name, the Go module path, the primary configuration directory and the primary
+environment prefix are no longer inherited: they are `atomwright`, `github.com/pablogore/atomwright/v2`,
+`~/.atomwright/` and `ATOMWRIGHT_`. **No executable or release asset named `gentle-ai` is
+distributed.**
+
+**The identifiers listed above must still be migrated before they stop being compatibility
+surfaces.** [`docs/atomwright/upstream-baseline.md`](docs/atomwright/upstream-baseline.md) records
+each one, with the reason it is retained.
 
 ## License
 

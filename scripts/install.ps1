@@ -32,7 +32,7 @@ $WINDOWS_DISTRIBUTION_HOLD = "Windows binary distribution and Scoop are temporar
 # The module path is spelled out literally and is never composed from
 # $GITHUB_OWNER/$GITHUB_REPO: the published artifacts moved to
 # pablogore/atomwright, the Go module path did not.
-$STABLE_SOURCE_COMMAND = "go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@latest"
+$STABLE_SOURCE_COMMAND = "go install github.com/pablogore/atomwright/v2/cmd/atomwright@latest"
 
 function Write-Info    { param([string]$Message) Write-Host "[info]    $Message" -ForegroundColor Blue }
 function Write-Success { param([string]$Message) Write-Host "[ok]      $Message" -ForegroundColor Green }
@@ -99,13 +99,13 @@ function Install-ViaGo {
     # artifacts moved, the Go module path did not. /v2 is part of that path, not
     # decoration - Go refuses to resolve a module whose tags are v2.x unless the
     # import path carries the major version suffix.
-    $goPackage = "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@$version"
+    $goPackage = "github.com/pablogore/atomwright/v2/cmd/atomwright@$version"
     Write-Info "Running: go install $goPackage"
 
     if ($Channel -eq "beta") {
-        Add-GoEnvPattern -Name "GONOSUMDB" -Pattern "github.com/gentleman-programming/gentle-ai/v2"
-        Add-GoEnvPattern -Name "GOPRIVATE" -Pattern "github.com/gentleman-programming/gentle-ai/v2"
-        Add-GoEnvPattern -Name "GONOPROXY" -Pattern "github.com/gentleman-programming/gentle-ai/v2"
+        Add-GoEnvPattern -Name "GONOSUMDB" -Pattern "github.com/pablogore/atomwright/v2"
+        Add-GoEnvPattern -Name "GOPRIVATE" -Pattern "github.com/pablogore/atomwright/v2"
+        Add-GoEnvPattern -Name "GONOPROXY" -Pattern "github.com/pablogore/atomwright/v2"
     }
 
     & go install $goPackage

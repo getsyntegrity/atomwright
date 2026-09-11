@@ -101,15 +101,16 @@ func TestGoreleaserHasNoHomebrewPublishing(t *testing.T) {
 	}
 }
 
-// TestGoreleaserLdflagsPreserveModulePath asserts the ldflags injection target
-// still uses the PRESERVED Go module path. Renaming it here would silently stop
-// injecting the release signing keys, leaving upgrades unverifiable.
-func TestGoreleaserLdflagsPreserveModulePath(t *testing.T) {
+// TestGoreleaserLdflagsUseModulePath asserts the ldflags injection target uses
+// the current Go module path. `-X` silently does nothing when the symbol path
+// does not resolve, so a stale path here stops injecting the release signing
+// keys and leaves every upgrade unverifiable with no build error.
+func TestGoreleaserLdflagsUseModulePath(t *testing.T) {
 	config := readRepositoryFile(t, ".goreleaser.yaml")
 
-	const want = "github.com/gentleman-programming/gentle-ai/v2/internal/update/upgrade.releaseMinisignPublicKeys"
+	const want = "github.com/pablogore/atomwright/v2/internal/update/upgrade.releaseMinisignPublicKeys"
 	if !strings.Contains(config, want) {
-		t.Errorf(".goreleaser.yaml ldflags no longer reference the preserved module path symbol %q", want)
+		t.Errorf(".goreleaser.yaml ldflags no longer reference the module path symbol %q", want)
 	}
 }
 
@@ -117,8 +118,7 @@ func TestGoreleaserLdflagsPreserveModulePath(t *testing.T) {
 // rename, nothing in the release path may declare an artifact, binary, archive
 // or asset named gentle-ai.
 //
-// Two substrings are explicitly allowed:
-//   - "gentleman-programming/gentle-ai" — the PRESERVED Go module path.
+// One substring is explicitly allowed:
 //   - "gentle-ai-review-provider-contract-" — the frozen provider-contract
 //     bundle name, which is a published contract identity and not the CLI.
 //
@@ -145,9 +145,6 @@ func TestNoPublicReleaseArtifactNamedGentleAI(t *testing.T) {
 				at := offset + idx
 				offset = at + len("gentle-ai")
 
-				if strings.HasSuffix(lower[:at], "gentleman-programming/") {
-					continue
-				}
 				if strings.HasPrefix(lower[offset:], "-review-provider-contract-") {
 					continue
 				}
@@ -185,14 +182,27 @@ func TestCommandDirectoryIsAtomwright(t *testing.T) {
 	}
 }
 
-// TestGoModulePathIsPreserved guards the single most dangerous accidental
-// change: renaming the module itself would break every `go install` of any
-// previously published version.
-func TestGoModulePathIsPreserved(t *testing.T) {
-	gomod := readRepositoryFile(t, "go.mod")
+// TestGoModulePathMatchesReleaseConfig pins the Go module path in go.mod and
+// asserts .goreleaser.yaml injects its signing keys through a symbol path built
+// on that exact same module path.
+//
+// These two must never drift. The module path is what `go install` resolves
+// through the Go module proxy, and the ldflags `-X` symbol path is resolved at
+// link time against the packages of that same module. A mismatch is silent in
+// both directions: `go install` targets a module that does not exist, and the
+// linker quietly injects nothing, shipping a release binary that cannot verify
+// any upgrade.
+func TestGoModulePathMatchesReleaseConfig(t *testing.T) {
+	const modulePath = "github.com/pablogore/atomwright/v2"
 
-	const want = "module github.com/gentleman-programming/gentle-ai/v2"
-	if !bytes.Contains([]byte(gomod), []byte(want)) {
-		t.Fatalf("go.mod no longer declares %q; the module path must be preserved across the rename", want)
+	gomod := readRepositoryFile(t, "go.mod")
+	if want := "module " + modulePath; !bytes.Contains([]byte(gomod), []byte(want)) {
+		t.Fatalf("go.mod no longer declares %q", want)
+	}
+
+	config := readRepositoryFile(t, ".goreleaser.yaml")
+	want := modulePath + "/internal/update/upgrade.releaseMinisignPublicKeys"
+	if !strings.Contains(config, want) {
+		t.Errorf(".goreleaser.yaml ldflags symbol path %q is not built on the go.mod module path %q; the two must never drift", want, modulePath)
 	}
 }

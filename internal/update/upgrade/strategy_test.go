@@ -13,8 +13,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/update"
+	"github.com/pablogore/atomwright/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/update"
 )
 
 func TestMain(m *testing.M) {
@@ -135,14 +135,14 @@ func TestRunStrategy_BetaGentleAISelfUpgradeUsesGoInstallMain(t *testing.T) {
 	if gotName != "go" {
 		t.Fatalf("exec name = %q, want %q", gotName, "go")
 	}
-	wantArgs := []string{"install", "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@main"}
+	wantArgs := []string{"install", "github.com/pablogore/atomwright/v2/cmd/atomwright@main"}
 	if len(gotArgs) != len(wantArgs) || gotArgs[0] != wantArgs[0] || gotArgs[1] != wantArgs[1] {
 		t.Fatalf("exec args = %v, want %v", gotArgs, wantArgs)
 	}
 	for _, want := range []string{
-		"GONOSUMDB=github.com/gentleman-programming/gentle-ai/v2",
-		"GOPRIVATE=github.com/gentleman-programming/gentle-ai/v2",
-		"GONOPROXY=github.com/gentleman-programming/gentle-ai/v2",
+		"GONOSUMDB=github.com/pablogore/atomwright/v2",
+		"GOPRIVATE=github.com/pablogore/atomwright/v2",
+		"GONOPROXY=github.com/pablogore/atomwright/v2",
 	} {
 		if !envContains(gotCmd.Env, want) {
 			t.Fatalf("go install env missing %q in %v", want, gotCmd.Env)
@@ -160,19 +160,19 @@ func envContains(env []string, want string) bool {
 }
 
 func TestGoProxyBypassEnvPreservesExistingPatterns(t *testing.T) {
-	module := "github.com/gentleman-programming/gentle-ai/v2"
+	module := "github.com/pablogore/atomwright/v2"
 	env := goProxyBypassEnv([]string{
 		"PATH=/usr/bin",
 		"GONOSUMDB=example.com/private",
 		"GOPRIVATE=github.com/acme/*",
-		"GONOPROXY=github.com/gentleman-programming/gentle-ai/v2",
+		"GONOPROXY=github.com/pablogore/atomwright/v2",
 	}, module)
 
 	for _, want := range []string{
 		"PATH=/usr/bin",
-		"GONOSUMDB=github.com/gentleman-programming/gentle-ai/v2,example.com/private",
-		"GOPRIVATE=github.com/gentleman-programming/gentle-ai/v2,github.com/acme/*",
-		"GONOPROXY=github.com/gentleman-programming/gentle-ai/v2",
+		"GONOSUMDB=github.com/pablogore/atomwright/v2,example.com/private",
+		"GOPRIVATE=github.com/pablogore/atomwright/v2,github.com/acme/*",
+		"GONOPROXY=github.com/pablogore/atomwright/v2",
 	} {
 		if !envContains(env, want) {
 			t.Fatalf("env missing %q in %v", want, env)

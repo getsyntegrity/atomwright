@@ -32,7 +32,7 @@ var Tools = []ToolInfo{
 		// preserved module path, not the release coordinates above: the module is
 		// resolved by the Go proxy and never moved when ownership moved, so this
 		// path keeps the inherited module prefix and only the command renamed.
-		GoImportPath: "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright",
+		GoImportPath: "github.com/pablogore/atomwright/v2/cmd/atomwright",
 	},
 	{
 		Name:              "engram",

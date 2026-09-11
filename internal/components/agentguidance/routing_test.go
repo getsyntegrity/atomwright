@@ -7,9 +7,9 @@ import (
 	"testing"
 	"unicode"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/capabilitymanifest"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/catalog"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/agents/capabilitymanifest"
+	"github.com/pablogore/atomwright/v2/internal/catalog"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 // supportedAgentCount guards the catalog itself: routing is unconditional for

@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/backup"
-	componentskills "github.com/gentleman-programming/gentle-ai/v2/internal/components/skills"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/pipeline"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/planner"
+	"github.com/pablogore/atomwright/v2/internal/backup"
+	componentskills "github.com/pablogore/atomwright/v2/internal/components/skills"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/pipeline"
+	"github.com/pablogore/atomwright/v2/internal/planner"
 )
 
 func temporaryUserHome(t *testing.T) string {

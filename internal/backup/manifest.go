@@ -3,7 +3,7 @@ package backup
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/state"
 	"os"
 	"path/filepath"
 	"strings"

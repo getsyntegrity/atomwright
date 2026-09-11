@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
+	"github.com/pablogore/atomwright/v2/internal/envcompat"
 )
 
 // TestLookupResolvesPrefixedVariables covers the full state table of the

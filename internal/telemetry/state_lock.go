@@ -3,7 +3,7 @@ package telemetry
 import (
 	"os"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/state"
 )
 
 func lockFilePath(homeDir string) string {

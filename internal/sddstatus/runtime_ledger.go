@@ -18,8 +18,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/pathquote"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/pathquote"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
 )
 
 const (

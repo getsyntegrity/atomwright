@@ -58,7 +58,7 @@ func example() int { return 1 }
 import (
 	"context"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
 )
 
 func example(ctx context.Context) {

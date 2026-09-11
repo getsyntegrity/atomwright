@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/assets"
+	"github.com/pablogore/atomwright/v2/internal/assets"
 )
 
 const freshV2RerunInstruction = "Start a fresh implementation state and rerun `gentle-ai sdd-status --contract gentle-ai.sdd-status/v2`."

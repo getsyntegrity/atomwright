@@ -9,13 +9,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/opencode"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/assets"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/telemetryruntime"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/pipeline"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/planner"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/telemetry"
+	"github.com/pablogore/atomwright/v2/internal/agents/opencode"
+	"github.com/pablogore/atomwright/v2/internal/assets"
+	"github.com/pablogore/atomwright/v2/internal/components/telemetryruntime"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/pipeline"
+	"github.com/pablogore/atomwright/v2/internal/planner"
+	"github.com/pablogore/atomwright/v2/internal/telemetry"
 )
 
 func TestOpenCodeTelemetryRollbackPreservesLateEdits(t *testing.T) {

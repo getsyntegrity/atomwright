@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/components/filemerge"
+	"github.com/pablogore/atomwright/v2/internal/envcompat"
+	"github.com/pablogore/atomwright/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/state"
 )
 
 // PiBackgroundSubagentsEnv is the environment source for the managed Pi

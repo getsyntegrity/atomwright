@@ -3,7 +3,7 @@ package screens
 import (
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 func TestAgentOptionsShowsAntigravityOnly(t *testing.T) {

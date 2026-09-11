@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 // versionPattern mirrors event.schema.json's `version` pattern: a numeric

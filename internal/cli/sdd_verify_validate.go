@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/sddstatus"
+	"github.com/pablogore/atomwright/v2/internal/sddstatus"
 )
 
 const maxVerifyReportBytes = sddstatus.MaxVerifyReportBytes

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/identity"
 )
 
 // TestIdentityValues pins every identity concept to an exact value. The six
@@ -26,8 +26,8 @@ func TestIdentityValues(t *testing.T) {
 		{"LegacyStateDirName", identity.LegacyStateDirName(), ".gentle-ai"},
 		{"ReleaseOwner", identity.ReleaseOwner(), "pablogore"},
 		{"ReleaseRepo", identity.ReleaseRepo(), "atomwright"},
-		{"SourceModulePath", identity.SourceModulePath(), "github.com/gentleman-programming/gentle-ai/v2"},
-		{"GoInstallPackage", identity.GoInstallPackage(), "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright"},
+		{"SourceModulePath", identity.SourceModulePath(), "github.com/pablogore/atomwright/v2"},
+		{"GoInstallPackage", identity.GoInstallPackage(), "github.com/pablogore/atomwright/v2/cmd/atomwright"},
 	}
 
 	for _, tt := range tests {
@@ -54,38 +54,44 @@ func TestIdentityConceptsAreDistinctValues(t *testing.T) {
 	}
 }
 
-// TestSourceModulePathIsDecoupledFromReleaseCoordinates proves the module path
-// is NOT derived from the release owner/repo.
+// TestSourceModulePathMatchesGoMod pins identity.SourceModulePath() to the
+// module directive in the repository's own go.mod.
 //
-// This is the documented landmine in scripts/install.sh: the installer composed
-// its `go install` target as github.com/${GITHUB_OWNER}/${GITHUB_REPO}/v2/cmd/...
-// Once the release coordinates moved to pablogore/atomwright, that composition
-// resolves to a module that does not exist, and every source install breaks.
-// The Go module path is a permanent identifier of the code and deliberately
-// stays github.com/gentleman-programming/gentle-ai/v2; the release coordinates
-// are where artifacts are published. They must never be derived from each other.
-func TestSourceModulePathIsDecoupledFromReleaseCoordinates(t *testing.T) {
-	module := identity.SourceModulePath()
-	owner := identity.ReleaseOwner()
-	repo := identity.ReleaseRepo()
+// The failure this prevents is the identity package silently drifting from the
+// real module path: go.mod is what the Go module proxy and every import path
+// actually follow, so a stale constant here makes `go install` and the
+// installer scripts target a package that does not exist, while every unit
+// test that compares the constant to itself still passes.
+//
+// This replaces an earlier textual assertion that the module path did not
+// contain the release owner or repository. After the module moved to
+// github.com/pablogore/atomwright/v2 it legitimately contains both, so that
+// wording no longer expressed the invariant. The real invariant — that the
+// module path is declared literally and never COMPOSED from the branding
+// variables — is enforced where the composition actually happened, in
+// TestPosixInstallerGoInstallUsesLiteralModulePath over scripts/install.sh.
+func TestSourceModulePathMatchesGoMod(t *testing.T) {
+	gomod := readRepositoryFile(t, "go.mod")
 
-	if !strings.Contains(module, "gentleman-programming/gentle-ai") {
-		t.Fatalf("SourceModulePath() = %q, want it to preserve the original module path substring %q", module, "gentleman-programming/gentle-ai")
+	var declared string
+	for _, line := range strings.Split(gomod, "\n") {
+		if rest, ok := strings.CutPrefix(strings.TrimSpace(line), "module "); ok {
+			declared = strings.TrimSpace(rest)
+			break
+		}
 	}
-	if strings.Contains(module, owner) {
-		t.Errorf("SourceModulePath() = %q contains ReleaseOwner() %q; the module path must not be derived from the release coordinates", module, owner)
+	if declared == "" {
+		t.Fatal("go.mod declares no module directive")
 	}
-	if strings.Contains(module, repo) {
-		t.Errorf("SourceModulePath() = %q contains ReleaseRepo() %q; the module path must not be derived from the release coordinates", module, repo)
-	}
-	if composed := "github.com/" + owner + "/" + repo + "/v2"; module == composed {
-		t.Errorf("SourceModulePath() = %q equals the composed release path %q; composing the module path from release coordinates breaks `go install`", module, composed)
+
+	if got := identity.SourceModulePath(); got != declared {
+		t.Errorf("SourceModulePath() = %q, want the go.mod module directive %q; the identity package must never drift from the real module path", got, declared)
 	}
 }
 
 // TestGoInstallPackageIsModulePathPlusExecutable verifies the install target is
-// the preserved module path joined with the NEW executable command directory —
-// the one place where the two otherwise-independent concepts legitimately meet.
+// the module path joined with the executable command directory — the one place
+// where the two otherwise-independent concepts legitimately meet.
 func TestGoInstallPackageIsModulePathPlusExecutable(t *testing.T) {
 	want := identity.SourceModulePath() + "/cmd/" + identity.Executable()
 	if got := identity.GoInstallPackage(); got != want {

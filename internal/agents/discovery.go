@@ -4,8 +4,8 @@ import (
 	"context"
 	"os"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/state"
 )
 
 // InstalledAgent pairs an agent ID with its resolved config root directory.

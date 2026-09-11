@@ -13,7 +13,7 @@ package telemetry
 import (
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
+	"github.com/pablogore/atomwright/v2/internal/identity"
 )
 
 // EventSchema identifies the JSON POST body sent to the collector.

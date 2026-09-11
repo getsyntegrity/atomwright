@@ -32,12 +32,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/opencode"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/assets"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/sdd"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewerprovider"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/versions"
+	"github.com/pablogore/atomwright/v2/internal/agents/opencode"
+	"github.com/pablogore/atomwright/v2/internal/assets"
+	"github.com/pablogore/atomwright/v2/internal/components/sdd"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/reviewerprovider"
+	"github.com/pablogore/atomwright/v2/internal/versions"
 )
 
 const (

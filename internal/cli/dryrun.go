@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/planner"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/planner"
+	"github.com/pablogore/atomwright/v2/internal/system"
 )
 
 func RenderDryRun(result InstallResult) string {

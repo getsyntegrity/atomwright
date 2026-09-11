@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
 )
 
 func TestReviewReopenResultsRemovesSelectedCanonicalEntryWithoutSidecar(t *testing.T) {

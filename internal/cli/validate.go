@@ -7,9 +7,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/catalog"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/catalog"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/system"
 )
 
 type InstallInput struct {

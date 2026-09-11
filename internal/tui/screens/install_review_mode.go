@@ -3,8 +3,8 @@ package screens
 import (
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/tui/styles"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/tui/styles"
 )
 
 func InstallReviewModeOptions(err error) []string {

@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/telemetry"
+	"github.com/pablogore/atomwright/v2/internal/telemetry"
 )
 
 func (s *Server) handleRuntimeEvents(w http.ResponseWriter, r *http.Request) {

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewerprovider"
+	"github.com/pablogore/atomwright/v2/internal/reviewerprovider"
 )
 
 func TestPiCaptureWindowsFallbackPreservesParentTest(t *testing.T) {

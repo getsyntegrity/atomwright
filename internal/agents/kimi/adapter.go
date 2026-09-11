@@ -14,12 +14,12 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/capabilitymanifest"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/assets"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/installcmd"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/agents/capabilitymanifest"
+	"github.com/pablogore/atomwright/v2/internal/assets"
+	"github.com/pablogore/atomwright/v2/internal/components/filemerge"
+	"github.com/pablogore/atomwright/v2/internal/installcmd"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/system"
 )
 
 var LookPathOverride = exec.LookPath

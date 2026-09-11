@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/pathquote"
+	"github.com/pablogore/atomwright/v2/internal/pathquote"
 )
 
 // Issue #2547 (S1 of #2540): work units carry no structured target field, so

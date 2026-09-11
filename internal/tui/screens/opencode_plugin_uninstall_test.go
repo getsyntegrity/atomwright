@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/opencodeplugin"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/components/opencodeplugin"
+	"github.com/pablogore/atomwright/v2/internal/model"
 )
 
 // ─── RenderOpenCodePluginUninstallSelect ────────────────────────────────────

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/update"
+	"github.com/pablogore/atomwright/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/update"
 )
 
 // TestEffectiveMethodWindowsPrecedenceIsUnchanged pins the rules that run before
@@ -38,7 +38,7 @@ func TestEffectiveMethodWindowsPrecedenceIsUnchanged(t *testing.T) {
 			// happens to share the executable name is somebody else's. Its own
 			// self-upgrade policy is checked before Homebrew and decides alone.
 			name:          "self-upgrade policy wins over a same-named brew package on Windows",
-			tool:          update.ToolInfo{Name: "atomwright", InstallMethod: update.InstallBinary, GoImportPath: "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright"},
+			tool:          update.ToolInfo{Name: "atomwright", InstallMethod: update.InstallBinary, GoImportPath: "github.com/pablogore/atomwright/v2/cmd/atomwright"},
 			profile:       system.PlatformProfile{OS: "windows", PackageManager: "brew", GoAvailable: true},
 			brewInstalled: true,
 			want:          update.InstallGoInstall,
@@ -52,7 +52,7 @@ func TestEffectiveMethodWindowsPrecedenceIsUnchanged(t *testing.T) {
 		},
 		{
 			name:    "no Go on Windows keeps the declared method",
-			tool:    update.ToolInfo{Name: "atomwright", InstallMethod: update.InstallBinary, GoImportPath: "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright"},
+			tool:    update.ToolInfo{Name: "atomwright", InstallMethod: update.InstallBinary, GoImportPath: "github.com/pablogore/atomwright/v2/cmd/atomwright"},
 			profile: system.PlatformProfile{OS: "windows", PackageManager: "winget", GoAvailable: false},
 			want:    update.InstallBinary,
 		},
@@ -77,7 +77,7 @@ func TestEffectiveMethodWindowsPrecedenceIsUnchanged(t *testing.T) {
 // gentleAIImportPath is the module path gentle-ai publishes its command under.
 // It is asserted against the registry below so the tests and the shipped
 // declaration cannot drift apart.
-const gentleAIImportPath = "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright"
+const gentleAIImportPath = "github.com/pablogore/atomwright/v2/cmd/atomwright"
 
 // registryGentleAI returns the shipped gentle-ai registry entry. Routing tests
 // use the real declaration rather than a hand-built ToolInfo so a regression in
@@ -441,7 +441,7 @@ func TestGentleAIWindowsWithoutGoNamesRunnableSourceInstall(t *testing.T) {
 			Owner:         "pablogore",
 			Repo:          "atomwright",
 			InstallMethod: update.InstallBinary,
-			GoImportPath:  "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright",
+			GoImportPath:  "github.com/pablogore/atomwright/v2/cmd/atomwright",
 		},
 		LatestVersion: "2.2.0",
 		Status:        update.UpdateAvailable,
@@ -458,7 +458,7 @@ func TestGentleAIWindowsWithoutGoNamesRunnableSourceInstall(t *testing.T) {
 	}
 	for _, required := range []string{
 		"Windows binary distribution and Scoop are temporarily unavailable",
-		"go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@v2.2.0",
+		"go install github.com/pablogore/atomwright/v2/cmd/atomwright@v2.2.0",
 	} {
 		if !strings.Contains(result.ManualHint, required) {
 			t.Errorf("manual hint is missing %q: %s", required, result.ManualHint)

@@ -78,4 +78,4 @@ Pinned backups are never automatically deleted, even when the retention limit is
 
 - Prerequisite packages installed via `brew install`, `apt-get install`, or `pacman -S` are not uninstalled during rollback. The snapshot system handles configuration files only.
 - If you need to undo a package install, use your platform's package manager directly (e.g., `brew uninstall`, `sudo apt-get remove`, `sudo pacman -R`).
-- The `atomwright` binary itself is not rolled back. Reinstall a specific version with `go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@vX.Y.Z`.
+- The `atomwright` binary itself is not rolled back. Reinstall a specific version with `go install github.com/pablogore/atomwright/v2/cmd/atomwright@vX.Y.Z`.

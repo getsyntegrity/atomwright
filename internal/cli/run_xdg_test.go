@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/sdd"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
+	"github.com/pablogore/atomwright/v2/internal/components/sdd"
+	"github.com/pablogore/atomwright/v2/internal/system"
 )
 
 // TestRunInstallOpenCodeSDDVerifiesUnderXDGConfigHome pins #3219: the SDD

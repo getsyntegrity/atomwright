@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
 )
 
 // These helpers outlive sdd_attempt_remediation_exit_test.go and

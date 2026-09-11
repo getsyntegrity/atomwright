@@ -21,7 +21,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
+	"github.com/pablogore/atomwright/v2/internal/components/filemerge"
 )
 
 // CompletionMarkerName is the file that records a finished migration. It is

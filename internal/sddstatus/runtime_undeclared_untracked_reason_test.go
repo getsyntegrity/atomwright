@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
+	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
 )
 
 // Tests for #3881: every settlementUntrackedSelection refusal is a

@@ -11,10 +11,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/opencode"
-	"github.com/gentleman-programming/gentle-ai/v2/internal/telemetry"
+	"github.com/pablogore/atomwright/v2/internal/components/filemerge"
+	"github.com/pablogore/atomwright/v2/internal/model"
+	"github.com/pablogore/atomwright/v2/internal/opencode"
+	"github.com/pablogore/atomwright/v2/internal/telemetry"
 )
 
 const OpenCodeSchema = "gentle-ai.telemetry-opencode/v1"
