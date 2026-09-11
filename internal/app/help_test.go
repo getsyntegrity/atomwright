@@ -108,7 +108,7 @@ func TestHelpDocumentsUserControlledReviewModeKillSwitch(t *testing.T) {
 		"asks per candidate",
 		"nothing is granted for later candidates",
 		"'not now' applies to that candidate only",
-		"gentle-ai review mode disable",
+		"atomwright review mode disable",
 		"[--locale <en|es>]",
 	} {
 		if !strings.Contains(output, want) {
@@ -150,16 +150,16 @@ func TestHelpPresentsAtomwrightIdentity(t *testing.T) {
 	}
 }
 
-// TestHelpPreservesInvocationToken guards the behavior-preservation half of the
-// rename: the command users actually type must not change in this change.
+// TestHelpPreservesInvocationToken guards the invocation token the help text
+// documents: it must be the command users actually type.
 func TestHelpPreservesInvocationToken(t *testing.T) {
 	var buf bytes.Buffer
 	printHelp(&buf, "v1.0.0-test")
 	output := buf.String()
 
 	for _, invocation := range []string{
-		"gentle-ai <command> [flags]",
-		"Run 'gentle-ai help' for this message.",
+		"atomwright <command> [flags]",
+		"Run 'atomwright help' for this message.",
 	} {
 		if !strings.Contains(output, invocation) {
 			t.Errorf("help output no longer documents the unchanged invocation %q", invocation)

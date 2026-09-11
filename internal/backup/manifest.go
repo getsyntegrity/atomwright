@@ -3,6 +3,7 @@ package backup
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 	"os"
 	"path/filepath"
 	"strings"
@@ -173,7 +174,7 @@ func backupRoot() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("resolve home directory: %w", err)
 	}
-	return filepath.Join(home, ".gentle-ai", "backups"), nil
+	return filepath.Join(state.Root(home), "backups"), nil
 }
 
 // BackupRootFn is the function used to resolve the backup root directory.
@@ -182,7 +183,7 @@ func backupRoot() (string, error) {
 var BackupRootFn = backupRoot
 
 // isRootDirUnderBackupRoot validates that dir is a direct or indirect subdirectory
-// of the expected backup root (~/.gentle-ai/backups/). This prevents a tampered
+// of the expected backup root (<state root>/backups/). This prevents a tampered
 // manifest with root_dir set to "/" or another sensitive path from deleting arbitrary files.
 //
 // Symlink note: if the path already exists on disk, EvalSymlinks is used to

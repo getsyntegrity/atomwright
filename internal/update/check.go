@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
 )
 
@@ -168,11 +169,17 @@ func checkSingleTool(ctx context.Context, tool ToolInfo, currentBuildVersion str
 }
 
 func usesBetaMainHeadCheck(tool ToolInfo, currentVersion string) bool {
-	return isGentleAIRepo(tool) && (isBetaUpdateChannel() || isGoPseudoVersionWithCommit(currentVersion))
+	return isAtomwrightRepo(tool) && (isBetaUpdateChannel() || isGoPseudoVersionWithCommit(currentVersion))
 }
 
-func isGentleAIRepo(tool ToolInfo) bool {
-	return tool.Name == "gentle-ai" && strings.EqualFold(tool.Owner, "Gentleman-Programming") && tool.Repo == "gentle-ai"
+// isAtomwrightRepo recognises this product's own registry entry. It must stay in
+// lockstep with the primary entry in registry.go: if the triple drifts, the
+// beta/main-head channel silently disables itself and every beta user is served
+// the latest stable release instead.
+func isAtomwrightRepo(tool ToolInfo) bool {
+	return tool.Name == identity.Executable() &&
+		strings.EqualFold(tool.Owner, identity.ReleaseOwner()) &&
+		tool.Repo == identity.ReleaseRepo()
 }
 
 func isBetaUpdateChannel() bool {

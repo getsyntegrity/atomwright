@@ -25,7 +25,7 @@ fork history is the upstream history. The three pre-fork seed commits that previ
 
 | Surface | Location |
 | --- | --- |
-| Product CLI binary | `cmd/gentle-ai/main.go` → `internal/app.Run()` |
+| Product CLI binary | `cmd/atomwright/main.go` → `internal/app.Run()` (was `cmd/gentle-ai/main.go` at the baseline) |
 | Telemetry collector binary | `cmd/gentle-telemetry/main.go` |
 | Command dispatcher | `internal/app/app.go` (hand-written `switch`; no cobra) |
 | Help banner | `internal/app/help.go` |
@@ -68,26 +68,52 @@ a7502587..HEAD -- TRADEMARKS.md` produces no output. The fork statement lives in
 instead; nothing in this repository reinterprets, amends, or narrows the upstream policy.
 | `package.json` | `description`, `repository`, `bugs`, `homepage` metadata |
 
+## Resolved since the baseline (public CLI rename)
+
+These identifiers were listed as deferred in the first change and have since been renamed. They are
+recorded here so the register stays a true account of what is and is not still inherited.
+
+| Identifier | Resolution | Compatibility |
+| --- | --- | --- |
+| CLI invocation token `gentle-ai` → `atomwright` | RESOLVED. `cmd/gentle-ai/` is now `cmd/atomwright/`; the binary, the archive member, and the token a user types are all `atomwright`. | **None.** No `gentle-ai` executable is built, shipped, or installed. There is no wrapper, shim, or alias. |
+| Config directory `~/.gentle-ai/` → `~/.atomwright/` | RESOLVED. `internal/identity` owns both names; `internal/statemigration` copies `state.json` and `telemetry.json` on every install, sync, and upgrade. | Legacy state is **read and copied**, never moved or deleted. `backups/` deliberately stays in the legacy root because each manifest embeds an absolute `root_dir` that restore validates as an anti-tamper containment check. Both roots populated is a reported conflict, never a merge. |
+| `GENTLE_AI_*` environment prefix → `ATOMWRIGHT_*` | RESOLVED. `internal/envcompat` resolves the current prefix first and the legacy prefix second. | The 14 suffixes in `envcompat.AliasedSuffixes` still honour `GENTLE_AI_*`. `ATOMWRIGHT_*` wins when both are set, and a startup warning names both variables and never their values. This alias is permanent, not transitional: the variables live in dotfiles and CI this project cannot edit. |
+| Update registry owner/repo | RESOLVED. Self-update targets `pablogore/atomwright`. | — |
+| Installer constants and banners | RESOLVED. `scripts/install.sh` and `scripts/install.ps1` fetch and install `atomwright` from `pablogore/atomwright`. | — |
+
+**Homebrew support was removed, not renamed.** The release path previously published a formula to
+an upstream tap. No Atomwright-owned tap exists, so continuing to publish there would have shipped a
+formula under someone else's namespace. Homebrew publication was therefore removed from
+`.goreleaser.yaml` and from both installers entirely, and every `brew install` / `brew tap` /
+`brew upgrade` instruction was removed from the documentation. The supported install paths are now
+exactly two: the curl install script and `go install`. Homebrew remains supported only as a *system
+package manager* for prerequisites such as `git`, `curl`, and `node`. Restoring a Homebrew
+distribution channel under an Atomwright-owned tap is a separate future change.
+
+**The only compatibility provided is inbound reading.** Atomwright reads legacy configuration in
+`~/.gentle-ai/` and legacy `GENTLE_AI_*` environment variables. It does not ship, install, alias, or
+support a `gentle-ai` executable in any form.
+
 ## Deliberately unchanged (deferred identifiers)
 
 Renaming any of these is a migration, not a rename. Each is recorded here as future atomic work.
 
 | Identifier | Location | Why deferred |
 | --- | --- | --- |
-| Go module path `github.com/gentleman-programming/gentle-ai/v2` | `go.mod:1` | Import path in 628 Go files; breaks `go install` and every CI cache |
-| CLI invocation token `gentle-ai` | `.goreleaser.yaml:14`, `internal/app/help.go` | Renaming changes installer and release behavior |
-| Config directory `~/.gentle-ai/` | `internal/state/state.go:15` | Orphans existing installs' state and backups without a migration step |
-| `GENTLE_AI_*` environment variables (44 distinct) | `internal/cli/channel.go:15` and others | Documented and scripted; silent breakage in user dotfiles and CI |
-| Update registry owner/repo | `internal/update/registry.go:19-21` | Drives live self-update against the GitHub Releases API |
-| Advisory URL | `internal/update/advisory.go:27` | Fetched at launch; depends on a real upstream release tag |
-| Installer constants and banners | `scripts/install.sh:17-19,534`, `scripts/install.ps1:28-29,54` | Out of scope: this change must not alter installer behavior |
-| Pinned release policy config | `internal/releasepolicy/policy.go:671` | Validated against the real `.goreleaser.yaml`; release-critical |
-| Injected block markers `<!-- gentle-ai:... -->` | `internal/components/sdd/inject.go:1229` | Written into users' config files; renaming orphans installed blocks |
-| Protocol identifiers `gentle-ai.<name>/v<N>` | `contracts/**`, `internal/telemetry/telemetry.go:15` | Negotiated contract names; a rename is a breaking protocol change |
+| Go module path `github.com/gentleman-programming/gentle-ai/v2` | `go.mod:1`, every Go file | Resolved by the Go module proxy, not a brand surface. Renaming breaks every existing import and source install. `internal/identity` keeps it deliberately separate from the release coordinates, so `go install` targets `github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright` — the one place the preserved module path and the new executable name meet |
+| Advisory URL | `internal/update/advisory.go` | Fetched at launch; depends on a real upstream release tag |
+| Pinned release policy config | `internal/releasepolicy/policy.go` | Validated against the real `.goreleaser.yaml`; release-critical |
+| Injected block markers `<!-- gentle-ai:... -->` | `internal/components/sdd/inject.go` | Written into users' `CLAUDE.md`, `AGENTS.md`, and other agent config files; renaming the marker orphans every block already installed on a user's machine, so sync would append a second copy instead of updating the first |
+| Protocol identifiers `gentle-ai.<name>/v<N>` (211 recorded; 208 distinct spellings match outside `docs/` today) | `contracts/**`, `internal/telemetry/telemetry.go`, `internal/reviewtransaction/**` | Negotiated contract names; a rename is a breaking protocol change. One of them is not merely a label: `internal/reviewtransaction/authority_repair.go` feeds the literal `gentle-ai.review-repository-binding/v1` into `sha256.Sum256`, so changing that string changes a persisted binding digest and invalidates existing review authority |
+| `GENTLE_AI_REVIEW_*` reviewer prompt markers | `internal/reviewerprovider/**`, review prompt assembly | Wire format, not configuration. `GENTLE_AI_REVIEW_BINDING ` is the literal first bytes of every reviewer prompt and `GENTLE_AI_FROZEN_CANDIDATE_CONTEXT` names a prohibited transport; neither is an environment variable, so aliasing them would change the protocol |
+| `GENTLE_AI_TELEMETRY` pinned contract enum | `contracts/telemetry/v1/schemas/`, `internal/telemetry/killswitch.go` | The published telemetry contract pins this exact string as the `source` enum value. It is a wire value, deliberately distinct from the `ATOMWRIGHT_TELEMETRY` environment variable that shares its spelling |
+| Review authority store path component `<git-common-dir>/gentle-ai/` | `internal/reviewtransaction/rar_path_safety.go`, `rdd_mode.go`, `store_reset.go` | A security invariant, not a location: `rar_path_safety.go` requires the exact `gentle-ai` path segment when it validates ownership and permissions of the RDD authority tree. Renaming the segment weakens or bypasses that containment check, and orphans every existing repository's authority store |
+| Skill IDs and directories `gentle-ai-*` | `internal/model/types.go`, `skills/` | Installed verbatim into users' `.claude/skills/`; a rename orphans installed skills |
+| Agent-side installed filenames | `~/.kiro/steering/gentle-ai.md`, `~/.cursor/rules/gentle-ai.mdc`, `Code/User/prompts/gentle-ai.instructions.md`, `~/.pi/gentle-ai/`, `~/.config/gentle-ai/`, `.gentle-ai-telemetry-runtime.json` | Already written to users' machines by previous installs; renaming leaves the old files behind and unmanaged |
 | OpenCode agent key `gentle-orchestrator` | `internal/tui/screens/model_picker.go:204` | Persisted as a literal JSON key in users' `opencode.json` |
-| Skill IDs and directories `gentle-ai-*` | `internal/model/types.go:145`, `skills/` | Installed verbatim into users' `.claude/skills/` |
-| Embedded agent assets and golden files | `internal/assets/**`, `testdata/golden/*.golden` | Operational instructions, not brand material; changing them changes runtime output |
-| Telemetry endpoint and systemd units | `internal/telemetry/telemetry.go:28`, `deploy/telemetry/` | Live infrastructure; requires a server-side migration |
+| Embedded agent assets and golden files | `internal/assets/**`, `testdata/golden/*.golden` | Operational instructions, not brand material; changing them changes runtime output and every golden comparison |
+| Telemetry endpoint and schema ids | `internal/telemetry/telemetry.go`, `contracts/telemetry/**`, `deploy/telemetry/` | Live infrastructure and published schema `$id` URLs; requires a server-side migration |
+| Telemetry collector binary `gentle-telemetry` | `cmd/gentle-telemetry/` | Deployed server-side unit, not the product CLI; renaming it is a deployment migration |
 | Sibling projects `engram`, `gentle-pi`, `gentle-engram`, `gga` | `internal/update/registry.go:67`, `internal/agents/pi/adapter.go` | External packages and repositories this project does not own |
 | Private Go identifiers (`GentleAIUpgradeVersion`, …) | `internal/tui/model.go` | No external risk, but out of scope for a branding-only change |
 | Historical `PRD.md`, `PRD-AGENT-BUILDER.md` | repository root | Use the older "Gentleman AI" name; historical artifacts |
@@ -96,10 +122,12 @@ Renaming any of these is a migration, not a rename. Each is recorded here as fut
 
 - The shipped CLI is still the inherited Gentle AI runtime. Atomwright's atomic-delivery workflow is
   not implemented.
-- Because the invocation token is still `gentle-ai`, this fork does not yet satisfy the
-  "Forks and modified distributions" clause of `TRADEMARKS.md` at the CLI-identifier level. The
-  upstream policy covers `gentle-ai` when it is used as a project or CLI identifier, so retaining it
-  is a temporary compatibility measure that must be resolved before any public distribution or
-  release. See `NOTICE.md`.
-- `docs/**` still contains extensive inherited Gentle AI prose. It was left untouched to keep this
-  change atomic and reviewable.
+- The CLI-identifier clause of `TRADEMARKS.md` is now satisfied: the invocation token is
+  `atomwright` and no `gentle-ai` executable is produced. The remaining inherited identifiers listed
+  above are protocol, on-disk, and asset identifiers rather than project or CLI identifiers.
+- Inherited Gentle AI product prose remains throughout `docs/**`. The installation, invocation,
+  state-path, and environment-variable surfaces have been brought up to date; the surrounding
+  product naming has not, and is tracked as separate work.
+- Atomwright has published no releases of its own yet. `go install ...@latest` and the install
+  scripts resolve against the coordinates recorded above; a version pin is the reproducible form
+  until an Atomwright release exists.

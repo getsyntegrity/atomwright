@@ -76,7 +76,7 @@ func hasSDDArchiveComposeHelp(args []string) bool {
 }
 
 func renderSDDArchiveComposeHelp(stdout io.Writer) error {
-	_, _ = fmt.Fprintln(stdout, "Usage: gentle-ai sdd-archive-compose --canonical <path> --delta <path> [--output <path|->]")
+	_, _ = fmt.Fprintln(stdout, "Usage: atomwright sdd-archive-compose --canonical <path> --delta <path> [--output <path|->]")
 	_, _ = fmt.Fprintln(stdout, "Merges an OpenSpec delta spec into a canonical spec ("+sddstatus.OpenSpecComposeSchema+").")
 	_, _ = fmt.Fprintln(stdout, "On an unapplied delta, writes nothing and fails naming the section and requirement.")
 	return nil

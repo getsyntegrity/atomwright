@@ -36,7 +36,7 @@ import (
 // newest-first by CreatedAt timestamp, matching the spec "newest first" ordering.
 func TestListBackupsNewestFirst(t *testing.T) {
 	home := t.TempDir()
-	backupRoot := filepath.Join(home, ".gentle-ai", "backups")
+	backupRoot := filepath.Join(home, ".atomwright", "backups")
 
 	older := backup.Manifest{
 		ID:        "older",
@@ -84,7 +84,7 @@ func TestListBackupsNewestFirst(t *testing.T) {
 // with Source metadata intact, so display labels can use the source field.
 func TestListBackupsWithSourceMetadata(t *testing.T) {
 	home := t.TempDir()
-	backupRoot := filepath.Join(home, ".gentle-ai", "backups")
+	backupRoot := filepath.Join(home, ".atomwright", "backups")
 
 	m := backup.Manifest{
 		ID:          "test-with-source",
@@ -148,7 +148,7 @@ func TestRunArgsRestoreListIsDispatched(t *testing.T) {
 // through app.RunArgs.
 func TestRunArgsRestoreByIDWithYes(t *testing.T) {
 	home := t.TempDir()
-	backupRoot := filepath.Join(home, ".gentle-ai", "backups")
+	backupRoot := filepath.Join(home, ".atomwright", "backups")
 
 	// Create a backup with a real file entry so restore can succeed.
 	sourceFile := filepath.Join(home, "config.md")
@@ -269,7 +269,7 @@ func TestRunArgsInstallHelpPrintsInstallSpecificHelp(t *testing.T) {
 	}
 
 	out := buf.String()
-	for _, want := range []string{"--channel", "beta", "nightly", "GENTLE_AI_CHANNEL"} {
+	for _, want := range []string{"--channel", "beta", "nightly", "ATOMWRIGHT_CHANNEL"} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("install help missing %q; output:\n%s", want, out)
 		}
@@ -314,7 +314,7 @@ func TestRunArgsSDDVerifyValidateHelpIsInputFree(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RunArgs(sdd-verify-validate --help): %v", err)
 	}
-	for _, want := range []string{"Usage: gentle-ai sdd-verify-validate", "Independent test and build execution evidence is required", "maximum report size: 1048576 bytes (1 MiB)"} {
+	for _, want := range []string{"Usage: atomwright sdd-verify-validate", "Independent test and build execution evidence is required", "maximum report size: 1048576 bytes (1 MiB)"} {
 		if !strings.Contains(output.String(), want) {
 			t.Fatalf("sdd-verify-validate help missing %q:\n%s", want, output.String())
 		}
@@ -362,7 +362,7 @@ func TestRunArgsSDDAttemptHelpBypassesPlatformAndRepositoryValidation(t *testing
 	if err != nil {
 		t.Fatalf("RunArgs(sdd-attempt grant --help): %v", err)
 	}
-	for _, want := range []string{"Usage: gentle-ai sdd-attempt grant [flags]", "--root <path>...", "repeatable"} {
+	for _, want := range []string{"Usage: atomwright sdd-attempt grant [flags]", "--root <path>...", "repeatable"} {
 		if !strings.Contains(output.String(), want) {
 			t.Fatalf("sdd-attempt grant help missing %q:\n%s", want, output.String())
 		}
@@ -379,7 +379,7 @@ func TestRunArgsSDDAttemptParentHelpDoesNotSelectChangeValueAsOperation(t *testi
 	if err != nil {
 		t.Fatalf("RunArgs(sdd-attempt --help --cwd /definitely/not/a/repository --change begin): %v", err)
 	}
-	if !strings.Contains(output.String(), "Usage: gentle-ai sdd-attempt <") || strings.Contains(output.String(), "Usage: gentle-ai sdd-attempt begin [flags]") {
+	if !strings.Contains(output.String(), "Usage: atomwright sdd-attempt <") || strings.Contains(output.String(), "Usage: atomwright sdd-attempt begin [flags]") {
 		t.Fatalf("sdd-attempt parent help =\n%s", output.String())
 	}
 }
@@ -439,7 +439,7 @@ func TestRunArgsReviewSubcommandHelpExitsSuccessfully(t *testing.T) {
 			if err := RunArgs([]string{command, "--help"}, &output); err != nil {
 				t.Fatalf("RunArgs(%s --help) error = %v", command, err)
 			}
-			if !strings.Contains(output.String(), "Usage: gentle-ai "+command+" [flags]") {
+			if !strings.Contains(output.String(), "Usage: atomwright "+command+" [flags]") {
 				t.Fatalf("RunArgs(%s --help) output:\n%s", command, output.String())
 			}
 		})
@@ -478,7 +478,7 @@ func TestRunArgsDispatchesReviewModeBeforePlatformValidation(t *testing.T) {
 	if err := RunArgs([]string{"review", "mode", "--help"}, &output); err != nil {
 		t.Fatalf("RunArgs(review mode --help) error = %v", err)
 	}
-	if !strings.Contains(output.String(), "gentle-ai review mode <enable|disable|status>") {
+	if !strings.Contains(output.String(), "atomwright review mode <enable|disable|status>") {
 		t.Fatalf("review mode help missing:\n%s", output.String())
 	}
 
@@ -495,7 +495,7 @@ func TestRunArgsDispatchesReviewModeBeforePlatformValidation(t *testing.T) {
 func TestListBackupsFallsBackGracefullyForOldManifests(t *testing.T) {
 	_ = fmt.Sprintf // Ensure fmt is used.
 	home := t.TempDir()
-	backupRoot := filepath.Join(home, ".gentle-ai", "backups")
+	backupRoot := filepath.Join(home, ".atomwright", "backups")
 
 	// Write a manifest with no Source/Description.
 	m := backup.Manifest{
@@ -830,7 +830,7 @@ func buildAppCandidateBinary(t *testing.T) string {
 	// 30s; the cap only guards against a hung toolchain, not build speed.
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
-	command := exec.CommandContext(ctx, "go", "build", "-o", binary, "../../cmd/gentle-ai")
+	command := exec.CommandContext(ctx, "go", "build", "-o", binary, "../../cmd/atomwright")
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("build candidate binary: %v\n%s", err, output)
 	}
@@ -996,7 +996,7 @@ func TestTuiSyncModelConfigPropagatesAssignmentWriteFailure(t *testing.T) {
 	}
 
 	statePath := state.Path(home)
-	stateTarget := filepath.Join(home, ".gentle-ai", "persisted-state.json")
+	stateTarget := filepath.Join(home, ".atomwright", "persisted-state.json")
 	if err := os.Rename(statePath, stateTarget); err != nil {
 		t.Fatalf("Rename: %v", err)
 	}
@@ -1482,7 +1482,7 @@ func TestPersistAssignmentsNoOpWhenEmpty(t *testing.T) {
 		t.Fatalf("state.Write: %v", err)
 	}
 
-	statePath := filepath.Join(home, ".gentle-ai", "state.json")
+	statePath := filepath.Join(home, ".atomwright", "state.json")
 	infoBefore, _ := os.Stat(statePath)
 
 	selection := model.Selection{} // empty assignments
@@ -1531,7 +1531,7 @@ func TestLoadPersistedAssignmentsWiresEffort(t *testing.T) {
 	}
 }
 
-// TestVersionBeforeSystemGuards verifies that `gentle-ai version` returns the
+// TestVersionBeforeSystemGuards verifies that `atomwright version` returns the
 // version string without going through system detection or platform guards.
 func TestVersionBeforeSystemGuards(t *testing.T) {
 	var buf bytes.Buffer
@@ -1539,8 +1539,8 @@ func TestVersionBeforeSystemGuards(t *testing.T) {
 	if err != nil {
 		t.Fatalf("version should not fail: %v", err)
 	}
-	if !strings.Contains(buf.String(), "gentle-ai") {
-		t.Error("version output should contain 'gentle-ai'")
+	if !strings.Contains(buf.String(), "atomwright") {
+		t.Error("version output should contain 'atomwright'")
 	}
 }
 
@@ -1565,15 +1565,15 @@ func TestHelpCommand(t *testing.T) {
 }
 
 // TestUnknownCommandSuggestsHelp verifies that an unrecognised command returns
-// an error whose message suggests running 'gentle-ai help'.
+// an error whose message suggests running 'atomwright help'.
 func TestUnknownCommandSuggestsHelp(t *testing.T) {
 	var buf bytes.Buffer
 	err := RunArgs([]string{"notacommand"}, &buf)
 	if err == nil {
 		t.Fatal("unknown command should return error")
 	}
-	if !strings.Contains(err.Error(), "gentle-ai help") {
-		t.Error("unknown command error should suggest 'gentle-ai help'")
+	if !strings.Contains(err.Error(), "atomwright help") {
+		t.Error("unknown command error should suggest 'atomwright help'")
 	}
 }
 
@@ -1837,7 +1837,7 @@ func TestTUIExecuteReturnsStatePersistenceFailure(t *testing.T) {
 		t.Fatalf("pre-install config read error = %v, want absent", err)
 	}
 	statePath := state.Path(home)
-	target := filepath.Join(home, ".gentle-ai", "persisted-state.json")
+	target := filepath.Join(home, ".atomwright", "persisted-state.json")
 	if err := os.Rename(statePath, target); err != nil {
 		t.Fatal(err)
 	}
@@ -1856,7 +1856,7 @@ func TestTUIExecuteReturnsStatePersistenceFailure(t *testing.T) {
 	if _, readErr := os.ReadFile(configPath); !os.IsNotExist(readErr) {
 		t.Fatalf("config after failed TUI install read error = %v, want absent", readErr)
 	}
-	if _, readErr := os.Stat(filepath.Join(home, ".gentle-ai", "bin", "opencode")); !os.IsNotExist(readErr) {
+	if _, readErr := os.Stat(filepath.Join(home, ".atomwright", "bin", "opencode")); !os.IsNotExist(readErr) {
 		t.Fatalf("launcher after failed TUI install stat error = %v, want absent", readErr)
 	}
 	finalState, readErr := os.ReadFile(target)
@@ -1890,7 +1890,7 @@ func TestTUIExecuteRollsBackOnMalformedState(t *testing.T) {
 		t.Fatalf("tuiExecute() error = %v, want state read failure", result.Err)
 	}
 
-	if _, err := os.Stat(filepath.Join(home, ".gentle-ai", "bin", "opencode")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(home, ".atomwright", "bin", "opencode")); !os.IsNotExist(err) {
 		t.Fatalf("launcher after failed TUI install stat error = %v, want absent", err)
 	}
 	if _, err := os.Stat(filepath.Join(home, ".config", "opencode", "opencode.json")); !os.IsNotExist(err) {
@@ -2416,7 +2416,7 @@ func TestRunArgs_PendingSync_ClearWriteFailureIsLogged(t *testing.T) {
 
 	// Keep state readable through a symlink while making atomic replacement refuse it.
 	stateFilePath := state.Path(home)
-	stateTargetPath := filepath.Join(home, ".gentle-ai", "persisted-state.json")
+	stateTargetPath := filepath.Join(home, ".atomwright", "persisted-state.json")
 	if err := os.Rename(stateFilePath, stateTargetPath); err != nil {
 		t.Fatalf("Rename: %v", err)
 	}
@@ -2824,4 +2824,70 @@ func writeFakeOpenCodeRuntime(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return binDir
+}
+
+// TestMigrationRunsBeforeCommandDispatch pins the ordering bug found by running
+// the real binary: migrateLegacyState used to sit AFTER the platform-independent
+// dispatch switch, so every command that returns from that switch — review,
+// sdd-status, telemetry, uninstall — skipped the migration entirely and then
+// read state from the legacy root that was never migrated.
+func TestMigrationRunsBeforeCommandDispatch(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+
+	legacyRoot := filepath.Join(home, ".gentle-ai")
+	if err := os.MkdirAll(legacyRoot, 0o755); err != nil {
+		t.Fatalf("MkdirAll: %v", err)
+	}
+	const want = `{"persona":"gentleman"}`
+	if err := os.WriteFile(filepath.Join(legacyRoot, "state.json"), []byte(want), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	// `telemetry` returns from the dispatch switch, so it only ever sees
+	// migrated state if the migration ran before that switch.
+	var buf bytes.Buffer
+	_ = RunArgs([]string{"telemetry", "status"}, &buf)
+
+	migrated := filepath.Join(home, ".atomwright", "state.json")
+	got, err := os.ReadFile(migrated)
+	if err != nil {
+		t.Fatalf("state was not migrated before command dispatch: %v", err)
+	}
+	if string(got) != want {
+		t.Errorf("migrated state.json = %q, want %q", got, want)
+	}
+	if _, err := os.Stat(filepath.Join(legacyRoot, "state.json")); err != nil {
+		t.Errorf("legacy state.json must survive the migration: %v", err)
+	}
+}
+
+// TestInformationalCommandsDoNotMigrate keeps `version` and `help` side-effect
+// free: they read no state, so asking for a version string must not trigger a
+// filesystem migration.
+func TestInformationalCommandsDoNotMigrate(t *testing.T) {
+	for _, command := range []string{"version", "help"} {
+		t.Run(command, func(t *testing.T) {
+			home := t.TempDir()
+			t.Setenv("HOME", home)
+			t.Setenv("USERPROFILE", home)
+
+			legacyRoot := filepath.Join(home, ".gentle-ai")
+			if err := os.MkdirAll(legacyRoot, 0o755); err != nil {
+				t.Fatalf("MkdirAll: %v", err)
+			}
+			if err := os.WriteFile(filepath.Join(legacyRoot, "state.json"), []byte(`{}`), 0o600); err != nil {
+				t.Fatalf("WriteFile: %v", err)
+			}
+
+			var buf bytes.Buffer
+			if err := RunArgs([]string{command}, &buf); err != nil {
+				t.Fatalf("RunArgs(%q): %v", command, err)
+			}
+			if _, err := os.Stat(filepath.Join(home, ".atomwright")); !os.IsNotExist(err) {
+				t.Errorf("%s created the state root; informational commands must not migrate", command)
+			}
+		})
+	}
 }

@@ -14,6 +14,7 @@ import (
 
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 )
 
 // reviewStopHookSchema identifies the reminder envelope this hook prints to
@@ -21,7 +22,7 @@ import (
 const reviewStopHookSchema = "gentle-ai.review-stop-hook/v1"
 
 // reviewStopHookReminderSchema identifies the small per-session record kept
-// under ~/.gentle-ai/review-stop-hook/v1. The schema name is unchanged from
+// under <state root>/review-stop-hook/v1. The schema name is unchanged from
 // its first shape; it now optionally carries baseline_target_identity
 // alongside target_identity (see reviewStopHookReminderRecord).
 const reviewStopHookReminderSchema = "gentle-ai.review-stop-hook-reminder/v1"
@@ -276,7 +277,7 @@ func reviewStopHookReasonText(targetIdentity, root, runtimeAgent, startCommand s
 
 // reviewStopHookRecordPath is the per-session state file path for sessionID.
 func reviewStopHookRecordPath(home, sessionID string) string {
-	return filepath.Join(home, ".gentle-ai", "review-stop-hook", "v1", sessionID+".json")
+	return filepath.Join(state.Root(home), "review-stop-hook", "v1", sessionID+".json")
 }
 
 // readReviewStopHookRecord reads sessionID's existing record, if any. A

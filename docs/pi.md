@@ -10,7 +10,7 @@ Pi support installs the Gentleman harness as Pi packages, then lets Pi own its o
 2. Install the Pi support stack from Gentle AI™:
 
 ```bash
-gentle-ai install --agent pi
+atomwright install --agent pi
 ```
 
 3. Start Pi in your project:
@@ -19,7 +19,7 @@ gentle-ai install --agent pi
 pi
 ```
 
-Gentle AI detects the `pi` binary first. If Pi is the only selected agent, the installer still provisions the real Engram™ component, but skips persona, ecosystem component selection, and Strict TDD prompts because `gentle-pi` owns those choices inside Pi. Gentle AI writes nothing into the Pi system prompt because `gentle-pi` owns it, so the review execution contract ships as `orchestration/pi.md` in the published provider contract bundle, which `gentle-pi` mirrors and injects at session start. Because `gentle-pi` owns that file, `install` and `sync` also remove any gentle-ai managed blocks an older build left in `~/.pi/agent/APPEND_SYSTEM.md`, including the routing guidance block; routing guidance is delivered to every other agent's system prompt, but Pi is skipped for that step too.
+Gentle AI detects the `pi` binary first. If Pi is the only selected agent, the installer still provisions the real Engram™ component, but skips persona, ecosystem component selection, and Strict TDD prompts because `gentle-pi` owns those choices inside Pi. Gentle AI writes nothing into the Pi system prompt because `gentle-pi` owns it, so the review execution contract ships as `orchestration/pi.md` in the published provider contract bundle, which `gentle-pi` mirrors and injects at session start. Because `gentle-pi` owns that file, `install` and `sync` also remove any atomwright managed blocks an older build left in `~/.pi/agent/APPEND_SYSTEM.md`, including the routing guidance block; routing guidance is delivered to every other agent's system prompt, but Pi is skipped for that step too.
 
 ## Installed Packages
 
@@ -95,7 +95,7 @@ Select CodeGraph during Gentle AI installation to add its read-only MCP server t
 | Children | Discovers effective user and project Pi child definitions. Compatible children (`bash` plus explicit tools) receive `mcp`; every readable child receives lazy-init guidance. |
 | Intelligence | Prefers `codegraph_explore`; when MCP is unavailable, guidance uses the upstream CLI's read-only intelligence commands directly rather than routing them through Gentle AI. |
 | Indexes | Guidance resolves a safe project root, initializes a missing `.codegraph/` once, relies on watcher auto-sync after edits, and uses `codegraph sync` only for stale/disabled-watcher recovery. Full rebuild and destructive/admin commands are excluded from routine agent use. |
-| Sync | `gentle-ai sync` reconciles the owned manifest after Pi assets refresh, restoring missing overlays without duplicates. This configuration sync is separate from upstream index freshness. |
+| Sync | `atomwright sync` reconciles the owned manifest after Pi assets refresh, restoring missing overlays without duplicates. This configuration sync is separate from upstream index freshness. |
 | Removal | Uninstall removes only manifest-owned MCP and child blocks. Drifted child files are preserved and reported for manual review. |
 
 Package-owned child files are never edited. Gentle AI creates a same-name overlay in Pi's agent directory when needed. A parent `APPEND_SYSTEM.md` CodeGraph marker is not considered proof that any child has CodeGraph tools or guidance.
@@ -192,8 +192,8 @@ If you start Pi with `pi -ns`, Pi skips startup skill loading/hooks. That mode i
 | SDD agents are missing in Pi                           | Start Pi normally in the project so `gentle-pi` can run `session_start`, or run `/gentle-ai:install-sdd`. If you used `pi -ns`, startup hooks were skipped.          |
 | Persona did not change immediately                     | Run `/reload` or start a new Pi session.                                                                                                                             |
 | Model override should be removed                       | Open `/gentleman:models` and choose `Inherit active/default model`.                                                                                                  |
-| Memory tools or `/mcp` are missing                     | Re-run `gentle-ai install --agent pi` to refresh `.pi/agent/settings.json`, `.pi/npm/package.json`, and the `pi-engram init` wiring, then check `/gentle-ai:status`. |
-| `gentle-engram` is installed but Engram is unavailable | Re-run `gentle-ai install --agent pi` so the real Engram component is provisioned.                                                                                   |
+| Memory tools or `/mcp` are missing                     | Re-run `atomwright install --agent pi` to refresh `.pi/agent/settings.json`, `.pi/npm/package.json`, and the `pi-engram init` wiring, then check `/gentle-ai:status`. |
+| `gentle-engram` is installed but Engram is unavailable | Re-run `atomwright install --agent pi` so the real Engram component is provisioned.                                                                                   |
 
 ## Next Steps
 

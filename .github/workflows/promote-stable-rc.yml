@@ -63,7 +63,7 @@ jobs:
         working-directory: source
         run: |
           set -euo pipefail
-          marker="$RUNNER_TEMP/gentle-ai-release-policy-snapshot-start"
+          marker="$RUNNER_TEMP/atomwright-release-policy-snapshot-start"
           umask 077
           printf '%s:%s:%s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_JOB" >"$marker"
           printf 'RELEASE_POLICY_SNAPSHOT_MARKER=%s\n' "$marker" >>"$GITHUB_ENV"
@@ -132,7 +132,7 @@ jobs:
             const stableTag = process.env.STABLE_TAG;
             const recovery = process.env.RECOVERY_STATE;
             const contractSemver = process.env.PROVIDER_CONTRACT_SEMVER;
-            const expectedAssets = [`gentle-ai_${stableTag.slice(1)}_darwin_amd64.tar.gz`, `gentle-ai_${stableTag.slice(1)}_darwin_arm64.tar.gz`, `gentle-ai_${stableTag.slice(1)}_linux_amd64.tar.gz`, `gentle-ai_${stableTag.slice(1)}_linux_arm64.tar.gz`, `gentle-ai-review-provider-contract-${contractSemver}.tar.gz`, 'checksums.txt', 'checksums.txt.minisig'].sort().join('\n');
+            const expectedAssets = [`atomwright_${stableTag.slice(1)}_darwin_amd64.tar.gz`, `atomwright_${stableTag.slice(1)}_darwin_arm64.tar.gz`, `atomwright_${stableTag.slice(1)}_linux_amd64.tar.gz`, `atomwright_${stableTag.slice(1)}_linux_arm64.tar.gz`, `gentle-ai-review-provider-contract-${contractSemver}.tar.gz`, 'checksums.txt', 'checksums.txt.minisig'].sort().join('\n');
             const optional = async (request) => {
               try { return await request(); } catch (error) {
                 if (error.status === 404) return null;
@@ -201,7 +201,7 @@ jobs:
           canonical=$(./scripts/canonicalize-release-public-keys.sh)
           printf 'canonical=%s\n' "$canonical" >>"$GITHUB_OUTPUT"
       - name: Configure ephemeral signing paths
-        run: printf 'MINISIGN_SECRET_KEY_FILE=%s/gentle-ai-release.key\n' "$RUNNER_TEMP" >>"$GITHUB_ENV"; printf 'MINISIGN_SIGNING_PUBLIC_KEY_FILE=%s/gentle-ai-release-signing.pub\n' "$RUNNER_TEMP" >>"$GITHUB_ENV"
+        run: printf 'MINISIGN_SECRET_KEY_FILE=%s/atomwright-release.key\n' "$RUNNER_TEMP" >>"$GITHUB_ENV"; printf 'MINISIGN_SIGNING_PUBLIC_KEY_FILE=%s/atomwright-release-signing.pub\n' "$RUNNER_TEMP" >>"$GITHUB_ENV"
       - name: Install Minisign
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y minisign
       - name: Materialize signing key
@@ -235,7 +235,6 @@ jobs:
           SOURCE_SHA: ${{ needs.preflight.outputs.source_sha }}
           STABLE_TAG: ${{ inputs.stable_tag }}
           PROVIDER_CONTRACT_SEMVER: ${{ needs.preflight.outputs.provider_contract_semver }}
-          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           MINISIGN_SECRET_KEY_FILE: ${{ env.MINISIGN_SECRET_KEY_FILE }}
           MINISIGN_PUBLIC_KEYS_CANONICAL: ${{ steps.trust-anchors.outputs.canonical }}
         run: |

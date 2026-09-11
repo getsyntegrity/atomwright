@@ -27,6 +27,7 @@ import (
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/opencodeplugin"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/sdd"
 	componentuninstall "github.com/gentleman-programming/gentle-ai/v2/internal/components/uninstall"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/opencode"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/pipeline"
@@ -209,10 +210,11 @@ func containsString(values []string, target string) bool {
 // TickMsg drives the spinner animation on the installing screen.
 type TickMsg time.Time
 
-const noAnimationEnv = "GENTLE_AI_NO_ANIMATION"
+const noAnimationEnvSuffix = "NO_ANIMATION"
 
 func tuiAnimationsDisabled() bool {
-	return os.Getenv(noAnimationEnv) == "1"
+	value, _, _ := envcompat.Lookup(noAnimationEnvSuffix)
+	return value == "1"
 }
 
 // CodexModelsDiscoveredMsg delivers one Custom picker catalog discovery result.

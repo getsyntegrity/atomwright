@@ -61,7 +61,7 @@ func TestRunSDDVerifyValidateHelpIsSuccessfulAndInputFree(t *testing.T) {
 	if stdin.reads != 0 {
 		t.Fatalf("help read stdin %d times", stdin.reads)
 	}
-	for _, want := range []string{"Usage: gentle-ai sdd-verify-validate", "--input <path|->", "--requirements <n>", "--scenarios <n>"} {
+	for _, want := range []string{"Usage: atomwright sdd-verify-validate", "--input <path|->", "--requirements <n>", "--scenarios <n>"} {
 		if !strings.Contains(output.String(), want) {
 			t.Fatalf("help missing %q:\n%s", want, output.String())
 		}
@@ -153,7 +153,7 @@ func TestRunSDDVerifyValidateHelpRespectsFlagValueArity(t *testing.T) {
 			var output bytes.Buffer
 			err := runSDDVerifyValidate(tt.args, &sddVerifyValidateReadSpy{}, &output)
 			if tt.wantHelp {
-				if err != nil || !strings.Contains(output.String(), "Usage: gentle-ai sdd-verify-validate") {
+				if err != nil || !strings.Contains(output.String(), "Usage: atomwright sdd-verify-validate") {
 					t.Fatalf("runSDDVerifyValidate(%v) = output %q, err %v", tt.args, output.String(), err)
 				}
 				return

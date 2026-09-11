@@ -37,10 +37,18 @@ func TestRunArgs_UpgradeDryRun(t *testing.T) {
 	out := buf.String()
 
 	// Must mention it is dry-run or no-op.
+	//
+	// "check(s) failed" counts as a no-op outcome. This path performs a LIVE
+	// update check against the release repository, so the result depends on the
+	// network and on that repository having published releases. Atomwright has
+	// none yet, so the check legitimately reports HTTP 404 and no upgrade is
+	// performed — which is exactly what this test cares about. Treating that as
+	// a failure would assert on release availability, not on dry-run behavior.
 	if !strings.Contains(out, "dry") && !strings.Contains(out, "Dry") &&
 		!strings.Contains(out, "no upgrade") && !strings.Contains(out, "No upgrade") &&
 		!strings.Contains(out, "up to date") && !strings.Contains(out, "Up to date") &&
 		!strings.Contains(out, "Update check incomplete") &&
+		!strings.Contains(out, "check(s) failed") &&
 		!strings.Contains(out, "0 upgrade") {
 		t.Logf("upgrade --dry-run output:\n%s", out)
 		t.Errorf("output should mention dry-run or no upgrades available")

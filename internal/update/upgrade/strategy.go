@@ -17,6 +17,7 @@ import (
 
 	"github.com/gentleman-programming/gentle-ai/v2/internal/cli"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/engram"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/update"
 )
@@ -110,8 +111,8 @@ func runStrategy(ctx context.Context, r update.UpdateResult, profile system.Plat
 		return false, err
 	default:
 		return false, &ManualFallbackError{
-			Hint: fmt.Sprintf("upgrade %q: unsupported install method %q — please update manually. See: https://github.com/Gentleman-Programming/%s",
-				r.Tool.Name, method, r.Tool.Repo),
+			Hint: fmt.Sprintf("upgrade %q: unsupported install method %q — please update manually. See: https://github.com/%s/%s",
+				r.Tool.Name, method, r.Tool.Owner, r.Tool.Repo),
 		}
 	}
 }
@@ -567,7 +568,7 @@ func goInstallUpgrade(ctx context.Context, r update.UpdateResult, profile system
 }
 
 func preflightWindowsGentleAIGoInstall(r update.UpdateResult, profile system.PlatformProfile) (string, error) {
-	if profile.OS != "windows" || r.Tool.Name != "gentle-ai" {
+	if profile.OS != "windows" || r.Tool.Name != identity.Executable() {
 		return "", nil
 	}
 	destDir, destErr := goInstallDestinationDir()
@@ -585,7 +586,7 @@ func firstString(values []string) string {
 }
 
 func preflightWindowsGentleAIGoInstallWithDestination(r update.UpdateResult, profile system.PlatformProfile, destDir string, destErr error) error {
-	if profile.OS != "windows" || r.Tool.Name != "gentle-ai" {
+	if profile.OS != "windows" || r.Tool.Name != identity.Executable() {
 		return nil
 	}
 	if destErr != nil {
@@ -608,9 +609,9 @@ func gentleAIWindowsGoInstallProvenanceHint(r update.UpdateResult, destination, 
 	details := "could not determine the Go installation destination"
 	switch {
 	case destination != "" && active == "":
-		details = fmt.Sprintf("could not resolve the active gentle-ai executable before Go would write to %s", destination)
+		details = fmt.Sprintf("could not resolve the active %s executable before Go would write to %s", identity.Executable(), destination)
 	case destination != "" && active != "":
-		details = fmt.Sprintf("resolves gentle-ai to %s, but Go would write to %s", active, destination)
+		details = fmt.Sprintf("resolves %s to %s, but Go would write to %s", identity.Executable(), active, destination)
 	}
 
 	hint := fmt.Sprintf("Windows self-upgrade %s. No files were changed. ", details)
@@ -621,15 +622,15 @@ func gentleAIWindowsGoInstallProvenanceHint(r update.UpdateResult, destination, 
 	}
 	hint += update.GentleAISourceInstallCommand(r.LatestVersion)
 	if destination != "" {
-		hint += fmt.Sprintf("\nAfter a successful migration, ensure only %s resolves for gentle-ai on PATH.", destination)
+		hint += fmt.Sprintf("\nAfter a successful migration, ensure only %s resolves for %s on PATH.", destination, identity.Executable())
 	}
 	return hint
 }
 
 func isBetaGentleAIUpgrade(r update.UpdateResult) bool {
-	return r.Tool.Name == "gentle-ai" &&
-		strings.EqualFold(r.Tool.Owner, "Gentleman-Programming") &&
-		r.Tool.Repo == "gentle-ai" &&
+	return r.Tool.Name == identity.Executable() &&
+		strings.EqualFold(r.Tool.Owner, identity.ReleaseOwner()) &&
+		r.Tool.Repo == identity.ReleaseRepo() &&
 		strings.HasPrefix(strings.TrimSpace(r.LatestVersion), "main@")
 }
 
@@ -642,7 +643,7 @@ func goInstallMainUpgrade(tool update.ToolInfo) error {
 
 	destDir, destErr := goInstallDestinationDir()
 
-	target := module + "/cmd/gentle-ai@main"
+	target := identity.GoInstallPackage() + "@main"
 	cmd := execCommand("go", "install", target)
 	cmd.Stdin = nil
 	cmd.Env = goProxyBypassEnv(cmd.Env, module)
@@ -654,16 +655,13 @@ func goInstallMainUpgrade(tool update.ToolInfo) error {
 	return nil
 }
 
-func gentleAIModulePath(tool update.ToolInfo) string {
-	repository := strings.ToLower(fmt.Sprintf("github.com/%s/%s", strings.TrimSpace(tool.Owner), strings.TrimSpace(tool.Repo)))
-	if repository == "github.com//" {
-		repository = "github.com/gentleman-programming/gentle-ai"
-	}
-	// Go derives the module path from the repository plus the major-version
-	// suffix: for major 2 and above the module path must end in /vN or the
-	// toolchain refuses every resolution of that repository, including the
-	// branch pseudo-versions this beta path installs.
-	return repository + "/v2"
+// gentleAIModulePath is the module the beta `@main` install resolves. It is the
+// preserved source module path, NOT a value derived from the release
+// coordinates: release ownership moved, the module the Go proxy resolves did
+// not, so deriving it from Owner/Repo would ask the toolchain for a module that
+// was never published.
+func gentleAIModulePath(update.ToolInfo) string {
+	return identity.SourceModulePath()
 }
 
 func goProxyBypassEnv(base []string, module string) []string {
@@ -721,7 +719,7 @@ func prependGoPattern(existing, pattern string) string {
 // works on all platforms including Windows. Other Windows binary upgrades return
 // ManualFallbackError so the executor surfaces them as UpgradeSkipped.
 func binaryUpgrade(ctx context.Context, r update.UpdateResult, profile system.PlatformProfile) error {
-	if profile.OS == "windows" && r.Tool.Name == "gentle-ai" {
+	if profile.OS == "windows" && r.Tool.Name == identity.Executable() {
 		return &ManualFallbackError{Hint: gentleAIWindowsSourceInstallHint(r)}
 	}
 
@@ -737,7 +735,7 @@ func binaryUpgrade(ctx context.Context, r update.UpdateResult, profile system.Pl
 		// with an actionable hint — NOT as UpgradeFailed.
 		hint := r.UpdateHint
 		if hint == "" {
-			hint = fmt.Sprintf("Download manually from https://github.com/Gentleman-Programming/%s/releases", r.Tool.Repo)
+			hint = fmt.Sprintf("Download manually from https://github.com/%s/%s/releases", r.Tool.Owner, r.Tool.Repo)
 		}
 		return &ManualFallbackError{
 			Hint: fmt.Sprintf("upgrade %q on Windows requires manual update: %s", r.Tool.Name, hint),

@@ -2,7 +2,8 @@ package telemetry
 
 import (
 	"os"
-	"path/filepath"
+
+	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 )
 
 func lockFilePath(homeDir string) string {
@@ -14,7 +15,7 @@ func lockFilePath(homeDir string) string {
 // so same-process callers correctly block on each other too. The returned
 // func releases the lock; call it exactly once.
 func lockState(homeDir string) (func(), error) {
-	dir := filepath.Join(homeDir, stateDir)
+	dir := state.Root(homeDir)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, err
 	}

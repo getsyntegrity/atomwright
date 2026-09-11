@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# e2e_test.sh — End-to-end tests for gentle-ai installer
+# e2e_test.sh — End-to-end tests for the atomwright installer
 #
 # Test tiers (controlled by environment variables):
 #   (default)            Tier 1: binary existence + dry-run tests (fast, no side-effects)
@@ -22,7 +22,7 @@ source "$SCRIPT_DIR/lib.sh"
 # ---------------------------------------------------------------------------
 BINARY="$(resolve_binary)"
 if [ -z "$BINARY" ]; then
-    echo "ERROR: gentle-ai binary not found. Build it first."
+    echo "ERROR: atomwright binary not found. Build it first."
     exit 1
 fi
 log_info "Using binary: $BINARY"
@@ -69,7 +69,7 @@ test_version_command() {
 
     output=$($BINARY version 2>&1) || true
 
-    if echo "$output" | grep -q "gentle-ai"; then
+    if echo "$output" | grep -q "atomwright"; then
         log_pass "Version command returns binary name"
     else
         log_fail "Version command failed: $output"
@@ -2108,7 +2108,7 @@ test_backup_created_on_install() {
 
     if $BINARY install --agent opencode --component permissions --persona neutral 2>&1; then
         local backup_count
-        backup_count=$(find "$HOME/.gentle-ai/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+        backup_count=$(find "$HOME/.atomwright/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
         if [ "$backup_count" -gt 0 ]; then
             log_pass "Backup directory created ($backup_count snapshots)"
         else
@@ -2126,7 +2126,7 @@ test_backup_contains_original_files() {
 
     if $BINARY install --agent opencode --component permissions --persona neutral 2>&1; then
         local latest_backup
-        latest_backup=$(find "$HOME/.gentle-ai/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1)
+        latest_backup=$(find "$HOME/.atomwright/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1)
         if [ -n "$latest_backup" ]; then
             local file_count
             file_count=$(find "$latest_backup" -type f 2>/dev/null | wc -l | tr -d ' ')
@@ -2150,7 +2150,7 @@ test_backup_manifest_exists() {
 
     if $BINARY install --agent opencode --component permissions --persona neutral 2>&1; then
         local latest_backup
-        latest_backup=$(find "$HOME/.gentle-ai/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1)
+        latest_backup=$(find "$HOME/.atomwright/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1)
         if [ -n "$latest_backup" ]; then
             if [ -f "$latest_backup/manifest.json" ]; then
                 assert_valid_json "$latest_backup/manifest.json" "Backup manifest is valid JSON"
@@ -2194,7 +2194,7 @@ test_backup_multiple_snapshots() {
     $BINARY install --agent opencode --component theme --persona neutral 2>&1 || true
 
     local backup_count
-    backup_count=$(find "$HOME/.gentle-ai/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+    backup_count=$(find "$HOME/.atomwright/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
     if [ "$backup_count" -ge 2 ]; then
         log_pass "Multiple backup snapshots created ($backup_count)"
     else
@@ -2209,7 +2209,7 @@ test_backup_claude_code_files() {
 
     if $BINARY install --agent claude-code --component permissions --persona neutral 2>&1; then
         local latest_backup
-        latest_backup=$(find "$HOME/.gentle-ai/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1)
+        latest_backup=$(find "$HOME/.atomwright/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1)
         if [ -n "$latest_backup" ] && [ -f "$latest_backup/manifest.json" ]; then
             log_pass "Claude Code backup snapshot with manifest created"
         else

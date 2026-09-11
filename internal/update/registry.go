@@ -16,20 +16,23 @@ import (
 // the fallback strategy.
 var Tools = []ToolInfo{
 	{
-		Name:          "gentle-ai",
-		Owner:         "Gentleman-Programming",
-		Repo:          "gentle-ai",
+		Name:          "atomwright",
+		Owner:         "pablogore",
+		Repo:          "atomwright",
 		DetectCmd:     nil, // version comes from build-time ldflags (app.Version)
 		VersionPrefix: "v",
-		// gentle-ai: Homebrew when the package is brew-owned, authenticated binary
+		// atomwright: Homebrew when the package is brew-owned, authenticated binary
 		// release download on Linux/macOS, and `go install` on Windows, where no
 		// official signed binary is published.
 		InstallMethod: InstallBinary,
 		// GoImportPath is what makes the Windows self-upgrade possible. It is
 		// deliberately NOT a general opt-in to go-install: effectiveMethod routes
-		// gentle-ai on Linux/macOS to InstallBinary regardless of this field, so
-		// those platforms keep the minisign-verified release download.
-		GoImportPath: "github.com/gentleman-programming/gentle-ai/v2/cmd/gentle-ai",
+		// atomwright on Linux/macOS to InstallBinary regardless of this field, so
+		// those platforms keep the minisign-verified release download. It is the
+		// preserved module path, not the release coordinates above: the module is
+		// resolved by the Go proxy and never moved when ownership moved, so this
+		// path keeps the inherited module prefix and only the command renamed.
+		GoImportPath: "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright",
 	},
 	{
 		Name:              "engram",

@@ -8,7 +8,7 @@ Gentle-AI sync refreshes managed agent configuration. Engram sync exports/import
 
 | Flow | Command surface | Owner | What changes |
 |---|---|---|---|
-| Gentle-AI config sync | `gentle-ai sync` | `internal/cli/sync.go`, components, adapters | Agent prompts, skills, MCP configs, SDD profiles, GGA assets, persona assets, and configured community tool guidance. |
+| Gentle-AI config sync | `atomwright sync` | `internal/cli/sync.go`, components, adapters | Agent prompts, skills, MCP configs, SDD profiles, GGA assets, persona assets, and configured community tool guidance. |
 | Engram git-friendly sync | `engram sync`, `engram sync --import` | External Engram runtime | `.engram/` memory export/import for team sharing. |
 | Cloud sync | Not present in Gentle-AI source | External or future Engram capability | Do not document implementation here without source. |
 | Autosync | Not present in Gentle-AI source | External or future Engram capability | Do not imply background sync exists in this repo. |
@@ -16,9 +16,9 @@ Gentle-AI sync refreshes managed agent configuration. Engram sync exports/import
 ## Gentle-AI sync path
 
 ```text
-gentle-ai sync
+atomwright sync
   -> parse sync flags
-  -> discover installed agents from ~/.gentle-ai/state.json or explicit flags
+  -> discover installed agents from ~/.atomwright/state.json or explicit flags
   -> build managed selection
   -> run component injectors
   -> verify readiness
@@ -28,7 +28,7 @@ gentle-ai sync
 Important behavior from `internal/cli/sync.go`:
 
 - Default sync scope includes SDD, Engram, Context7, GGA, skills, and persona.
-- Persona sync resolves the persisted persona from `~/.gentle-ai/state.json` when the selection does not set one explicitly; the safe fallback is neutral.
+- Persona sync resolves the persisted persona from `~/.atomwright/state.json` when the selection does not set one explicitly; the safe fallback is neutral.
 - Permissions and theme are user-adjacent and not included by default.
 - OpenCode SDD profile flags preserve and update profile model assignments.
 - Community tool guidance/config, such as CodeGraph guidance, belongs to the managed config sync path when the tool is configured or legacy guidance needs cleanup.
@@ -36,7 +36,7 @@ Important behavior from `internal/cli/sync.go`:
 
 ## Git-friendly memory sync
 
-Engram team sharing is documented in [Engram Commands](../engram.md). The important maintainer distinction: `engram sync` exports memory to `.engram/`; `gentle-ai sync` refreshes agent configuration.
+Engram team sharing is documented in [Engram Commands](../engram.md). The important maintainer distinction: `engram sync` exports memory to `.engram/`; `atomwright sync` refreshes agent configuration.
 
 ## Remote transport boundary
 
@@ -48,7 +48,7 @@ This repository does not contain cloud server or cloud store packages. If future
 
 ## Contributor checklist
 
-- [ ] Use `gentle-ai sync` for managed config, not memory export/import.
+- [ ] Use `atomwright sync` for managed config, not memory export/import.
 - [ ] Use `engram sync` docs for memory sharing behavior.
 - [ ] Keep sync changes idempotent and test `FilesChanged` expectations.
 - [ ] Check persona behavior against persisted state and neutral fallback rules.

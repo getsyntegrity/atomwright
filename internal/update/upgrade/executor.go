@@ -28,6 +28,7 @@ import (
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/sdd"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/skills"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/theme"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
@@ -475,7 +476,7 @@ func ExecuteWithOptions(ctx context.Context, results []update.UpdateResult, prof
 	backupWarning := ""
 	if !dryRun && len(executable) > 0 && !options.SkipBackup {
 		sp := NewSpinner(pw, "Creating pre-upgrade backup")
-		snapshotDir := filepath.Join(homeDir, ".gentle-ai", "backups",
+		snapshotDir := filepath.Join(homeDir, identity.StateDirName(), "backups",
 			fmt.Sprintf("upgrade-%s", time.Now().UTC().Format("20060102T150405Z")))
 		manifest, err := snapshotCreator(snapshotDir, configPathsForBackup(homeDir, options.BackupDiagnostics))
 		if err != nil {
@@ -501,7 +502,7 @@ func ExecuteWithOptions(ctx context.Context, results []update.UpdateResult, prof
 		// snapshot fails due to disk pressure caused by prior accumulated
 		// backups, pruning is the recovery path. Non-fatal: a prune failure
 		// must not prevent the upgrade from completing.
-		backupRoot := filepath.Join(homeDir, ".gentle-ai", "backups")
+		backupRoot := filepath.Join(homeDir, identity.StateDirName(), "backups")
 		if _, pruneErr := backup.Prune(backupRoot, backup.DefaultRetentionCount); pruneErr != nil {
 			log.Printf("backup: prune: %v", pruneErr)
 		}
@@ -518,7 +519,7 @@ func ExecuteWithOptions(ctx context.Context, results []update.UpdateResult, prof
 			NewVersion: r.LatestVersion,
 			Method:     effectiveMethod(r.Tool, profile),
 			Status:     UpgradeSkipped,
-			ManualHint: fmt.Sprintf("source build — upgrade manually or install a release binary from https://github.com/Gentleman-Programming/%s/releases", r.Tool.Repo),
+			ManualHint: fmt.Sprintf("source build — upgrade manually or install a release binary from https://github.com/%s/%s/releases", r.Tool.Owner, r.Tool.Repo),
 		})
 	}
 
@@ -589,7 +590,7 @@ func preflightWindowsGentleAIUpgrades(executable []executableUpdate, profile sys
 	skipped := make([]ToolUpgradeResult, 0)
 	for _, candidate := range executable {
 		r := candidate.result
-		if profile.OS != "windows" || r.Tool.Name != "gentle-ai" || effectiveMethod(r.Tool, profile) != update.InstallGoInstall {
+		if profile.OS != "windows" || r.Tool.Name != identity.Executable() || effectiveMethod(r.Tool, profile) != update.InstallGoInstall {
 			remaining = append(remaining, candidate)
 			continue
 		}
@@ -664,14 +665,18 @@ func executeOne(ctx context.Context, r update.UpdateResult, profile system.Platf
 }
 
 // effectiveMethod resolves the actual upgrade strategy for a tool on a given platform.
-// Priority order: plugin → brew-owned package → gentle-ai self-upgrade policy →
-// go-install → declared method.
+// Priority order: plugin → this product's self-upgrade policy → brew-owned
+// package → go-install → declared method.
 //
 //  1. OpenCode plugins are always handled by their own method — never overridden.
-//  2. Homebrew is used only when Homebrew confirms it owns this specific tool.
-//  3. gentle-ai's own upgrade never falls through to the generic rules below; it
-//     is resolved entirely by gentleAISelfUpgradeMethod, which is what keeps
-//     Linux and macOS on the signed release download.
+//  2. This product's own upgrade never falls through to any rule below; it is
+//     resolved entirely by gentleAISelfUpgradeMethod, which is what keeps Linux
+//     and macOS on the signed release download. It is checked before Homebrew
+//     because this product publishes no formula or cask: a brew package that
+//     happens to share the executable name is somebody else's, and upgrading it
+//     would replace the user's binary with an unrelated project's build.
+//  3. For third-party tools, Homebrew is used only when Homebrew confirms it
+//     owns that specific tool.
 //  4. For every other tool: when Go is available on PATH and the tool declares a
 //     GoImportPath, go-install is preferred over a direct binary download.
 //  5. Otherwise the tool's declared InstallMethod is used as-is.
@@ -679,11 +684,11 @@ func effectiveMethod(tool update.ToolInfo, profile system.PlatformProfile) updat
 	if tool.InstallMethod == update.InstallOpenCodePlugin {
 		return update.InstallOpenCodePlugin
 	}
+	if tool.Name == identity.Executable() {
+		return gentleAISelfUpgradeMethod(tool, profile)
+	}
 	if profile.PackageManager == "brew" && homebrewPackageInstalled(tool.Name) {
 		return update.InstallBrew
-	}
-	if tool.Name == "gentle-ai" {
-		return gentleAISelfUpgradeMethod(tool, profile)
 	}
 	if profile.GoAvailable && tool.GoImportPath != "" {
 		return update.InstallGoInstall

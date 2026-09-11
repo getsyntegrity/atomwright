@@ -15,6 +15,7 @@ import (
 
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/engram"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/doctor"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/storage"
 )
@@ -29,11 +30,11 @@ const (
 	CheckStatusFail = doctor.StatusFail
 )
 
-// coreTools are ecosystem-level binaries that gentle-ai always requires
+// coreTools are ecosystem-level binaries that this tool always requires
 // regardless of which agents the user installed. Agent-specific binaries are
 // derived from state.json's InstalledAgents field (see #709) so the doctor
 // only reports missing agents the user actually selected.
-var coreTools = []string{"gentle-ai", "gga", "engram"}
+var coreTools = []string{identity.Executable(), "gga", "engram"}
 
 // agentToolBinaries maps an agent ID from state.json's InstalledAgents to the
 // CLI binary name exec.LookPath should resolve. An empty string means "no CLI
@@ -176,9 +177,9 @@ func checkOneTool(tool string, pathDirs []string) CheckResult {
 		// PATH lookup succeeding). doctorInvokedGentleAIClause("") names it
 		// without fabricating a comparison that has nothing to compare
 		// against (organic-dx recovery: the clause must render on every
-		// derivable gentle-ai branch, not only the healthy one).
+		// derivable branch, not only the healthy one).
 		detail := tool + " not found in PATH"
-		if tool == "gentle-ai" {
+		if tool == identity.Executable() {
 			detail += doctorInvokedGentleAIClause(resolved)
 		}
 		return CheckResult{
@@ -195,7 +196,7 @@ func checkOneTool(tool string, pathDirs []string) CheckResult {
 		// is running is guaranteed, so this is the branch that most needs
 		// the invoked-executable clause -- it must not be dropped here.
 		detail := fmt.Sprintf("%s resolved to %s but %d copies found in PATH: %s", tool, resolved, len(copies), strings.Join(copies, ", "))
-		if tool == "gentle-ai" {
+		if tool == identity.Executable() {
 			detail += doctorInvokedGentleAIClause(resolved)
 		}
 		return CheckResult{
@@ -210,7 +211,7 @@ func checkOneTool(tool string, pathDirs []string) CheckResult {
 	if shim != "" {
 		detail += " (" + shim + ")"
 	}
-	if tool == "gentle-ai" {
+	if tool == identity.Executable() {
 		detail += doctorInvokedGentleAIClause(resolved)
 	}
 	return CheckResult{
@@ -299,7 +300,7 @@ func doctorToolCopies(tool string, pathDirs []string) []string {
 
 // executableExtensions returns the filename suffixes to probe when scanning a
 // PATH directory for a tool binary. On Windows it mirrors exec.LookPath, which
-// resolves a bare name like "gentle-ai" to "gentle-ai.exe"/".cmd" via PATHEXT;
+// resolves a bare name like "atomwright" to "atomwright.exe"/".cmd" via PATHEXT;
 // on other platforms the bare name is used as-is. Without this, the duplicate
 // scan never matches real Windows binaries and PATH shadowing goes unreported.
 func executableExtensions() []string {
@@ -332,7 +333,7 @@ func executableExtensionsFor(goos, pathext string) []string {
 // exec.LookPath (used for the resolved path). On non-Windows platforms the
 // candidate must also have at least one execute bit set — files without the
 // execute bit (or directories whose name happens to match a tool, e.g. a
-// PATH entry named "gentle-ai") are not counted as binaries (#709).
+// PATH entry named "atomwright") are not counted as binaries (#709).
 //
 // Windows executable resolution (#177, PATHEXT gaps) is intentionally out of
 // scope here; an extension match is treated as sufficient on Windows because
@@ -373,7 +374,7 @@ func appendUniqueExt(exts []string, ext string) []string {
 	return append(exts, ext)
 }
 
-// checkStateJSON validates ~/.gentle-ai/state.json and agent config dirs.
+// checkStateJSON validates the install state file and agent config dirs.
 func checkStateJSON(homeDir string) CheckResult {
 	const id = doctor.CheckStateJSON
 	statePath := state.Path(homeDir)
@@ -634,10 +635,10 @@ func checkEngramHTTP(id doctor.CheckID, baseURL string) CheckResult {
 	}
 }
 
-// checkDiskSpace reports free space on the ~/.gentle-ai filesystem.
+// checkDiskSpace reports free space on the state directory's filesystem.
 func checkDiskSpace(homeDir string) CheckResult {
 	const id = doctor.CheckDiskSpace
-	dir := filepath.Join(homeDir, ".gentle-ai")
+	dir := state.Root(homeDir)
 
 	free, err := availableBytesFn(dir)
 	if err != nil {

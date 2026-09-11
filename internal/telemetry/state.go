@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 )
 
-// stateDir matches internal/state's own stateDir: telemetry state lives next
-// to the rest of Gentle AI's uncommitted user state, under the same home
-// directory resolution so tests can point both at one temp dir.
-const stateDir = ".gentle-ai"
+// Telemetry state lives next to the rest of Atomwright's uncommitted user
+// state, so it resolves the same root through state.Root rather than naming the
+// directory a second time.
 const stateFile = "telemetry.json"
 
 // Counters counts activity since the previous successful send. They are
@@ -81,7 +81,7 @@ func (s *State) UnmarshalJSON(data []byte) error {
 // Path returns the absolute path to the telemetry state file for the given
 // home directory.
 func Path(homeDir string) string {
-	return filepath.Join(homeDir, stateDir, stateFile)
+	return filepath.Join(state.Root(homeDir), stateFile)
 }
 
 // NewState returns a fresh, enabled state with a newly generated install_id.
@@ -191,7 +191,7 @@ func EnsureState(homeDir string) (State, error) {
 // Save persists the telemetry state file atomically, creating the
 // containing directory if needed.
 func Save(homeDir string, s State) error {
-	dir := filepath.Join(homeDir, stateDir)
+	dir := state.Root(homeDir)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}

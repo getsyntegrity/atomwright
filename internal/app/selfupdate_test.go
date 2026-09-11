@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/update"
@@ -723,7 +724,7 @@ func TestSelfUpdate_NoClobberOnCorruptStateFile(t *testing.T) {
 	selfUpdateHomeDirFn = func() (string, error) { return tmpHome, nil }
 
 	// Write a corrupt (non-missing) state file so state.Read returns a non-ErrNotExist error.
-	stateDir := filepath.Join(tmpHome, ".gentle-ai")
+	stateDir := filepath.Join(tmpHome, ".atomwright")
 	if err := os.MkdirAll(stateDir, 0o755); err != nil {
 		t.Fatalf("MkdirAll: %v", err)
 	}
@@ -1045,7 +1046,10 @@ func TestSelfUpdate_YesEnvVar_AutoAccepts(t *testing.T) {
 	// Restore the real selfUpdateYesFn so it reads the env var for real.
 	origYes := selfUpdateYesFn
 	t.Cleanup(func() { selfUpdateYesFn = origYes })
-	selfUpdateYesFn = func() bool { return os.Getenv(envYesUpdate) == "1" }
+	selfUpdateYesFn = func() bool {
+		value, _, _ := envcompat.Lookup(envYesUpdateSuffix)
+		return value == "1"
+	}
 
 	// A promptFn that declines — it must NOT be called when GENTLE_AI_YES=1.
 	origPrompt := promptFn

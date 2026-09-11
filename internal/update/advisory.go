@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 )
 
 // advisoryMaxBytes is the maximum number of bytes read from an advisory
@@ -24,7 +26,7 @@ const advisoryMaxBytes = 64 * 1024
 // (fail-open). No launch latency is added regardless.
 //
 // Package-level var so tests can substitute an httptest server URL.
-var advisoryURL = "https://github.com/Gentleman-Programming/gentle-ai/releases/download/advisory/advisory.json"
+var advisoryURL = "https://github.com/" + identity.ReleaseOwner() + "/" + identity.ReleaseRepo() + "/releases/download/advisory/advisory.json"
 
 // advisoryHTTPClient is the HTTP client used exclusively for advisory fetches.
 // Timeout is 2s — intentionally shorter than the general GitHub client (5s)

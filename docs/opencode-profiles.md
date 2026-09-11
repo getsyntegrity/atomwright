@@ -23,20 +23,20 @@ OpenCode SDD uses native OpenCode subagents through the `task` permission. Gentl
 Gentle AI controls the preference with `auto`, `on`, or `off`. The same control is available to both install and sync:
 
 ```bash
-gentle-ai install --agent opencode --component sdd --opencode-background-subagents=on
-gentle-ai sync --opencode-background-subagents=off
+atomwright install --agent opencode --component sdd --opencode-background-subagents=on
+atomwright sync --opencode-background-subagents=off
 ```
 
-The environment equivalent is `GENTLE_AI_OPENCODE_BACKGROUND_SUBAGENTS=auto|on|off`. Resolution precedence is:
+The environment equivalent is `ATOMWRIGHT_OPENCODE_BACKGROUND_SUBAGENTS=auto|on|off`. Resolution precedence is:
 
 1. CLI flag.
-2. Non-empty `GENTLE_AI_OPENCODE_BACKGROUND_SUBAGENTS`.
+2. Non-empty `ATOMWRIGHT_OPENCODE_BACKGROUND_SUBAGENTS`.
 3. The prior managed choice in Gentle AI state.
 4. `auto`.
 
 In the interactive installer, OpenCode + SDD with no prior, CLI, or environment decision shows a real choice between **Enable managed background subagents** and **Keep foreground**. Prior `on` or `off` choices skip that prompt. The choice is committed only after the install succeeds; going back or cancelling leaves state unchanged.
 
-When managed activation is enabled, Gentle AI owns launchers under `~/.gentle-ai/bin/` (`opencode` on POSIX, `opencode.cmd` and `opencode.ps1` on Windows). The launcher sets `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true` only when the variable is absent, so an explicit `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=false` remains foreground. Restart OpenCode, and restart the shell if PATH has not refreshed, after activation.
+When managed activation is enabled, Gentle AI owns launchers under `~/.atomwright/bin/` (`opencode` on POSIX, `opencode.cmd` and `opencode.ps1` on Windows). The launcher sets `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true` only when the variable is absent, so an explicit `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=false` remains foreground. Restart OpenCode, and restart the shell if PATH has not refreshed, after activation.
 
 Sessions started through `opencode serve`, `opencode attach`, or OpenCode Desktop may not inherit the managed launcher environment. Those entry points deliberately fall back to foreground execution; Gentle AI does not rewrite server, attach, or Desktop session configuration.
 
@@ -44,7 +44,7 @@ Background jobs are process-local and non-durable: restarting OpenCode loses the
 
 ## Quick Start (TUI)
 
-1. Launch the installer: `gentle-ai` (or `go run ./cmd/gentle-ai`).
+1. Launch the installer: `atomwright` (or `go run ./cmd/atomwright`).
 2. Select **"OpenCode SDD Profiles"** from the welcome screen.
 3. Select **"Create new profile"** (or press `n`).
 4. Enter a profile name in slug format (lowercase, hyphens ok). Example: `cheap`.
@@ -58,13 +58,13 @@ Open OpenCode and press **Tab** -- your new orchestrator appears alongside `gent
 
 For models that expose reasoning effort variants (e.g. OpenAI `gpt-5` with `low`/`medium`/`high`/`xhigh`), the picker shows an extra **Select reasoning effort level** step right after you choose the model. Pick `default` to use the provider's default, or pick a specific level to lock the assignment to that effort.
 
-The effort options are populated from a cache file written by the bundled `model-variants` OpenCode plugin at `~/.gentle-ai/cache/model-variants.json`. The plugin runs the first time OpenCode starts after `gentle-ai sync` and refreshes the cache on every subsequent start.
+The effort options are populated from a cache file written by the bundled `model-variants` OpenCode plugin at `~/.atomwright/cache/model-variants.json`. The plugin runs the first time OpenCode starts after `atomwright sync` and refreshes the cache on every subsequent start.
 
 **First-run order matters:**
 
-1. Run `gentle-ai` (installs the plugin into `~/.config/opencode/plugins/`).
-2. Run `opencode` once -- on startup the plugin queries the provider list and writes `~/.gentle-ai/cache/model-variants.json`.
-3. Re-run `gentle-ai` and open the model picker. Reasoning models now show the effort selector.
+1. Run `atomwright` (installs the plugin into `~/.config/opencode/plugins/`).
+2. Run `opencode` once -- on startup the plugin queries the provider list and writes `~/.atomwright/cache/model-variants.json`.
+3. Re-run `atomwright` and open the model picker. Reasoning models now show the effort selector.
 
 If the JSON does not exist yet (plugin has not run, no providers expose variants, or the request failed silently), reasoning models still work -- the picker simply skips the effort step and saves the assignment with the provider default. You will not see the `[effort]` annotation next to those rows in the phase list.
 
@@ -85,13 +85,13 @@ Use this table when reviewing configs or debugging profile sync:
 Create a profile during sync with `--profile name:provider/model`:
 
 ```bash
-gentle-ai sync --profile cheap:anthropic/claude-haiku-3.5-20241022
+atomwright sync --profile cheap:anthropic/claude-haiku-3.5-20241022
 ```
 
 Multiple profiles in one command:
 
 ```bash
-gentle-ai sync \
+atomwright sync \
   --profile cheap:anthropic/claude-haiku-3.5-20241022 \
   --profile premium:anthropic/claude-opus-4-20250514
 ```
@@ -99,7 +99,7 @@ gentle-ai sync \
 Override a specific phase with `--profile-phase name:phase:provider/model`:
 
 ```bash
-gentle-ai sync \
+atomwright sync \
   --profile cheap:anthropic/claude-haiku-3.5-20241022 \
   --profile-phase cheap:sdd-apply:anthropic/claude-sonnet-4-20250514
 ```
@@ -112,7 +112,7 @@ If you're using a community tool that stores profiles under `~/.config/opencode/
 
 ### Auto-detection
 
-On `gentle-ai sync`, if OpenCode profile files exist under:
+On `atomwright sync`, if OpenCode profile files exist under:
 
 ```text
 ~/.config/opencode/profiles/*.json
@@ -125,13 +125,13 @@ Gentle AI automatically switches to **`external-single-active`** strategy for Op
 You can also force the strategy explicitly:
 
 ```bash
-gentle-ai sync --agent opencode --sdd-profile-strategy external-single-active
+atomwright sync --agent opencode --sdd-profile-strategy external-single-active
 ```
 
 Or force the classic generated overlay behavior:
 
 ```bash
-gentle-ai sync --agent opencode --sdd-profile-strategy generated-multi
+atomwright sync --agent opencode --sdd-profile-strategy generated-multi
 ```
 
 ### What compatibility mode does

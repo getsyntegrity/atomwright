@@ -9,11 +9,26 @@ import (
 	"time"
 
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
 )
 
-const stateDir = ".gentle-ai"
 const stateFile = "state.json"
+
+// Root is the one place the state directory is joined onto a home directory.
+// Every caller that needs Atomwright's own on-disk state goes through it, so
+// the directory name is decided by identity alone and a rename cannot leave a
+// stray literal behind pointing at the abandoned root.
+func Root(homeDir string) string {
+	return filepath.Join(homeDir, identity.StateDirName())
+}
+
+// LegacyRoot is the inherited state directory. It exists for the startup
+// migration and for code that must keep decoding data written before the
+// rename; nothing new is ever written there.
+func LegacyRoot(homeDir string) string {
+	return filepath.Join(homeDir, identity.LegacyStateDirName())
+}
 
 // ModelAssignmentState is the JSON-serialisable form of a provider+model pair
 // used by OpenCode-style model assignments. It mirrors model.ModelAssignment
@@ -166,7 +181,7 @@ func (s *InstallState) UnmarshalJSON(data []byte) error {
 
 // Path returns the absolute path to the state file for the given home directory.
 func Path(homeDir string) string {
-	return filepath.Join(homeDir, stateDir, stateFile)
+	return filepath.Join(Root(homeDir), stateFile)
 }
 
 // Read reads and unmarshals the state file from the given home directory.
@@ -258,9 +273,9 @@ func MergeAgents(existing InstallState, newAgents []string) InstallState {
 }
 
 // Write persists the full install state to disk under the given home directory.
-// It creates the .gentle-ai directory if it does not already exist.
+// It creates the state directory if it does not already exist.
 func Write(homeDir string, s InstallState) error {
-	dir := filepath.Join(homeDir, stateDir)
+	dir := Root(homeDir)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}

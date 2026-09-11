@@ -140,7 +140,7 @@ func registerSDDVerifyValidateIntFlag(flags *flag.FlagSet, name string, defaultV
 
 func renderSDDVerifyValidateHelp(stdout io.Writer) error {
 	contract := sddstatus.VerifyReportValidationContract()
-	_, _ = fmt.Fprintln(stdout, "Usage: gentle-ai sdd-verify-validate --input <path|-> --requirements <n> --scenarios <n>")
+	_, _ = fmt.Fprintln(stdout, "Usage: atomwright sdd-verify-validate --input <path|-> --requirements <n> --scenarios <n>")
 	_, _ = fmt.Fprintln(stdout, "\nRequired flags:")
 	for _, definition := range sddVerifyValidateFlagDefinitions {
 		_, _ = fmt.Fprintf(stdout, "  --%-21s %s\n", definition.name+" "+definition.value, definition.usage)

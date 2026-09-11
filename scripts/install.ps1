@@ -1,10 +1,10 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Gentle-AI source installer for Windows.
+    Atomwright source installer for Windows.
 
 .DESCRIPTION
-    Installs Gentle AI from source with Go. Official Windows binary distribution
+    Installs Atomwright from source with Go. Official Windows binary distribution
     and Scoop are temporarily unavailable until public-trust Authenticode signing
     is enforced. Accepted channels: stable (default), beta, nightly.
 
@@ -25,11 +25,14 @@ $ErrorActionPreference = "Stop"
 $null = & chcp 65001 2>$null
 try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 
-$GITHUB_OWNER = "Gentleman-Programming"
-$GITHUB_REPO = "gentle-ai"
-$BINARY_NAME = "gentle-ai"
+$GITHUB_OWNER = "pablogore"
+$GITHUB_REPO = "atomwright"
+$BINARY_NAME = "atomwright"
 $WINDOWS_DISTRIBUTION_HOLD = "Windows binary distribution and Scoop are temporarily unavailable until publicly trusted Authenticode signing is enforced."
-$STABLE_SOURCE_COMMAND = "go install github.com/gentleman-programming/gentle-ai/v2/cmd/gentle-ai@latest"
+# The module path is spelled out literally and is never composed from
+# $GITHUB_OWNER/$GITHUB_REPO: the published artifacts moved to
+# pablogore/atomwright, the Go module path did not.
+$STABLE_SOURCE_COMMAND = "go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@latest"
 
 function Write-Info    { param([string]$Message) Write-Host "[info]    $Message" -ForegroundColor Blue }
 function Write-Success { param([string]$Message) Write-Host "[ok]      $Message" -ForegroundColor Green }
@@ -45,13 +48,14 @@ function Stop-WithError {
 
 function Show-Banner {
     Write-Host ""
-    Write-Host "   ____            _   _              _    ___ " -ForegroundColor Cyan
-    Write-Host "  / ___| ___ _ __ | |_| | ___        / \  |_ _|" -ForegroundColor Cyan
-    Write-Host " | |  _ / _ \ '_ \| __| |/ _ \_____ / _ \  | | " -ForegroundColor Cyan
-    Write-Host " | |_| |  __/ | | | |_| |  __/_____/ ___ \ | | " -ForegroundColor Cyan
-    Write-Host "  \____|\___|_| |_|\__|_|\___|    /_/   \_\___|" -ForegroundColor Cyan
+    Write-Host '    _     _                                      _         _      _   ' -ForegroundColor Cyan
+    Write-Host '   / \   | |_   ___   _ __ ___  __      __ _ __ (_)  __ _ | |__  | |_ ' -ForegroundColor Cyan
+    Write-Host '  / _ \  | __| / _ \ | ''_ ` _ \ \ \ /\ / /| ''__|| | / _` || ''_ \ | __|' -ForegroundColor Cyan
+    Write-Host ' / ___ \ | |_ | (_) || | | | | | \ V  V / | |   | || (_| || | | || |_ ' -ForegroundColor Cyan
+    Write-Host '/_/   \_\ \__| \___/ |_| |_| |_|  \_/\_/  |_|   |_| \__, ||_| |_| \__|' -ForegroundColor Cyan
+    Write-Host '                                                    |___/             ' -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "  Gentle-AI - Ecosystem, Frameworks, Workflows" -ForegroundColor DarkGray
+    Write-Host "  Atomwright - Ecosystem, Frameworks, Workflows" -ForegroundColor DarkGray
     Write-Host ""
 }
 
@@ -91,10 +95,11 @@ function Install-ViaGo {
 
     Write-Step "Installing via go install"
     $version = if ($Channel -eq "beta") { "main" } else { "latest" }
-    # /v2 is part of the module path, not decoration: Go refuses to resolve a
-    # module whose tags are v2.x unless the import path carries the major
-    # version suffix.
-    $goPackage = "github.com/$($GITHUB_OWNER.ToLower())/$GITHUB_REPO/v2/cmd/$BINARY_NAME@$version"
+    # Spelled out literally, never composed from the release coordinates: the
+    # artifacts moved, the Go module path did not. /v2 is part of that path, not
+    # decoration - Go refuses to resolve a module whose tags are v2.x unless the
+    # import path carries the major version suffix.
+    $goPackage = "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@$version"
     Write-Info "Running: go install $goPackage"
 
     if ($Channel -eq "beta") {
@@ -150,8 +155,13 @@ function Test-Installation {
         return
     }
 
+    # Both names are set: ATOMWRIGHT_ is the current one, GENTLE_AI_ stays a
+    # deprecated alias so a binary from before the rename still suppresses its
+    # self-update during this probe.
+    $env:ATOMWRIGHT_NO_SELF_UPDATE = "1"
     $env:GENTLE_AI_NO_SELF_UPDATE = "1"
     $versionOutput = & $binaryPath --version 2>&1
+    Remove-Item Env:ATOMWRIGHT_NO_SELF_UPDATE -ErrorAction SilentlyContinue
     Remove-Item Env:GENTLE_AI_NO_SELF_UPDATE -ErrorAction SilentlyContinue
     Write-Success "$BINARY_NAME installed at $binaryPath`: $versionOutput"
 }
@@ -163,7 +173,7 @@ function Show-NextSteps {
     Write-Host "Installation complete!" -ForegroundColor Green
     Write-Host ""
     if ($Channel -eq "beta") {
-        Write-Host ('  Run ''$env:GENTLE_AI_CHANNEL = "beta"; {0} install'' to keep using the beta channel' -f $BINARY_NAME) -ForegroundColor Cyan
+        Write-Host ('  Run ''$env:ATOMWRIGHT_CHANNEL = "beta"; {0} install'' to keep using the beta channel' -f $BINARY_NAME) -ForegroundColor Cyan
     } else {
         Write-Host "  Run '$BINARY_NAME' to start the TUI installer" -ForegroundColor Cyan
     }
@@ -178,7 +188,10 @@ function Main {
         [string]$Method = "auto",
 
         [ValidateSet("stable", "beta", "nightly")]
-        [string]$Channel = $(if ($env:GENTLE_AI_CHANNEL) { $env:GENTLE_AI_CHANNEL } else { "stable" }),
+        # ATOMWRIGHT_CHANNEL is the current name; GENTLE_AI_CHANNEL stays readable
+        # as a deprecated alias so an existing pinned-beta user is not silently
+        # moved back to stable by the rename. ATOMWRIGHT_ wins when both are set.
+        [string]$Channel = $(if ($env:ATOMWRIGHT_CHANNEL) { $env:ATOMWRIGHT_CHANNEL } elseif ($env:GENTLE_AI_CHANNEL) { $env:GENTLE_AI_CHANNEL } else { "stable" }),
 
         [string]$InstallDir = "",
 

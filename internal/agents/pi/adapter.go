@@ -14,6 +14,7 @@ import (
 	"github.com/gentleman-programming/gentle-ai/v2/internal/agents/capabilitymanifest"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
 )
 
@@ -95,7 +96,7 @@ func CodeGraphPaths(homeDir string) CodeGraphPathSet {
 	return CodeGraphPathSet{
 		AgentDir:  agentDir,
 		MCPConfig: filepath.Join(agentDir, piEngramMCPConfigFile),
-		Manifest:  filepath.Join(homeDir, ".gentle-ai", "pi-codegraph.json"),
+		Manifest:  filepath.Join(state.Root(homeDir), "pi-codegraph.json"),
 	}
 }
 

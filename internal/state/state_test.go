@@ -24,7 +24,7 @@ func TestWriteReconciledAcceptsDesiredStateVisibleAfterWriteError(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	target := filepath.Join(home, ".gentle-ai", "persisted-state.json")
+	target := filepath.Join(home, ".atomwright", "persisted-state.json")
 	if err := os.Rename(statePath, target); err != nil {
 		t.Fatal(err)
 	}
@@ -349,8 +349,8 @@ func TestWriteCreatesStateDir(t *testing.T) {
 		t.Fatalf("Write() error = %v", err)
 	}
 
-	if _, err := os.Stat(filepath.Join(home, stateDir)); err != nil {
-		t.Errorf("Write() did not create %q: %v", stateDir, err)
+	if _, err := os.Stat(Root(home)); err != nil {
+		t.Errorf("Write() did not create %q: %v", Root(home), err)
 	}
 }
 
@@ -358,7 +358,7 @@ func TestWriteCreatesStateDir(t *testing.T) {
 func TestWriteStateFilePath(t *testing.T) {
 	home := t.TempDir()
 	got := Path(home)
-	want := filepath.Join(home, ".gentle-ai", "state.json")
+	want := filepath.Join(home, ".atomwright", "state.json")
 	if got != want {
 		t.Errorf("Path() = %q, want %q", got, want)
 	}
@@ -384,7 +384,7 @@ func TestReadCorrupt(t *testing.T) {
 	home := t.TempDir()
 
 	// Create the directory and write garbage JSON.
-	if err := os.MkdirAll(filepath.Join(home, stateDir), 0o755); err != nil {
+	if err := os.MkdirAll(Root(home), 0o755); err != nil {
 		t.Fatalf("MkdirAll() error = %v", err)
 	}
 	if err := os.WriteFile(Path(home), []byte("not valid json {{{{"), 0o644); err != nil {
@@ -428,7 +428,7 @@ func TestWriteFailurePreservesExistingState(t *testing.T) {
 	}
 
 	statePath := Path(home)
-	stateTarget := filepath.Join(home, stateDir, "persisted-state.json")
+	stateTarget := filepath.Join(Root(home), "persisted-state.json")
 	if err := os.Rename(statePath, stateTarget); err != nil {
 		t.Fatal(err)
 	}
@@ -566,7 +566,7 @@ func TestModelAssignmentStateEffortRoundTrip(t *testing.T) {
 func TestModelAssignmentStateEffortLegacyMissing(t *testing.T) {
 	home := t.TempDir()
 
-	if err := os.MkdirAll(filepath.Join(home, stateDir), 0o755); err != nil {
+	if err := os.MkdirAll(Root(home), 0o755); err != nil {
 		t.Fatalf("MkdirAll() error = %v", err)
 	}
 	// Legacy format: no effort field
@@ -592,7 +592,7 @@ func TestBackwardCompatNoAssignments(t *testing.T) {
 	home := t.TempDir()
 
 	// Simulate a legacy state file with only installed_agents.
-	if err := os.MkdirAll(filepath.Join(home, stateDir), 0o755); err != nil {
+	if err := os.MkdirAll(Root(home), 0o755); err != nil {
 		t.Fatalf("MkdirAll() error = %v", err)
 	}
 	legacy := []byte(`{"installed_agents":["claude-code"]}` + "\n")
@@ -671,7 +671,7 @@ func TestInstallStateCodexOmitEmpty(t *testing.T) {
 func TestInstallStateCodexMissingKeyReadback(t *testing.T) {
 	home := t.TempDir()
 
-	if err := os.MkdirAll(filepath.Join(home, stateDir), 0o755); err != nil {
+	if err := os.MkdirAll(Root(home), 0o755); err != nil {
 		t.Fatalf("MkdirAll() error = %v", err)
 	}
 	legacy := []byte(`{"installed_agents":["codex"]}` + "\n")
@@ -733,7 +733,7 @@ func TestCodexCarrilModelAssignments_RoundTrip(t *testing.T) {
 // without the new key still reads cleanly (field is nil or empty).
 func TestCodexCarrilModelAssignments_BackwardCompat(t *testing.T) {
 	home := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(home, stateDir), 0o755); err != nil {
+	if err := os.MkdirAll(Root(home), 0o755); err != nil {
 		t.Fatalf("MkdirAll() error = %v", err)
 	}
 	// Legacy blob has codexModelAssignments but no codexCarrilModelAssignments.
@@ -850,7 +850,7 @@ func TestCodexPhaseModelAssignments_OmitEmpty(t *testing.T) {
 // without the key read back with nil CodexPhaseModelAssignments.
 func TestCodexPhaseModelAssignments_LegacyAbsent(t *testing.T) {
 	home := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(home, stateDir), 0o755); err != nil {
+	if err := os.MkdirAll(Root(home), 0o755); err != nil {
 		t.Fatalf("MkdirAll() error = %v", err)
 	}
 	legacy := `{"installed_agents":["codex"],"codexModelAssignments":{"sdd-apply":"high"}}` + "\n"
@@ -942,7 +942,7 @@ func TestLastUpdateCheck_OmitWhenZero(t *testing.T) {
 // nil LastUpdateCheck (never checked = always-check behavior).
 func TestLastUpdateCheck_BackwardCompat(t *testing.T) {
 	home := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(home, stateDir), 0o755); err != nil {
+	if err := os.MkdirAll(Root(home), 0o755); err != nil {
 		t.Fatalf("MkdirAll() error = %v", err)
 	}
 	legacy := `{"installed_agents":["claude-code"]}` + "\n"
@@ -1032,7 +1032,7 @@ func TestPendingSync_OmitWhenFalse(t *testing.T) {
 // no deferred sync pending).
 func TestPendingSync_BackwardCompat(t *testing.T) {
 	home := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(home, stateDir), 0o755); err != nil {
+	if err := os.MkdirAll(Root(home), 0o755); err != nil {
 		t.Fatalf("MkdirAll() error = %v", err)
 	}
 	legacy := `{"installed_agents":["claude-code"]}` + "\n"
@@ -1098,7 +1098,7 @@ func TestRDDMode_RoundTrip(t *testing.T) {
 // switch existed still read cleanly with an unconfigured mode.
 func TestRDDMode_BackwardCompat(t *testing.T) {
 	home := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(home, stateDir), 0o755); err != nil {
+	if err := os.MkdirAll(Root(home), 0o755); err != nil {
 		t.Fatalf("MkdirAll() error = %v", err)
 	}
 	legacy := `{"installed_agents":["claude-code"]}` + "\n"

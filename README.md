@@ -5,7 +5,12 @@
 > **Status: pre-alpha.** Atomwright has been forked from [Gentle AI](https://github.com/Gentleman-Programming/gentle-ai)
 > at the upstream baseline recorded in [`docs/atomwright/upstream-baseline.md`](docs/atomwright/upstream-baseline.md).
 > The atomic-delivery workflow described below is the intended product and is **not** implemented yet.
-> The CLI currently shipped in this repository is still the inherited Gentle AI runtime, invoked as `gentle-ai`.
+> The CLI shipped in this repository is still the inherited Gentle AI runtime. It is invoked as
+> `atomwright`, stores its state in `~/.atomwright/`, and reads `ATOMWRIGHT_*` environment
+> variables. No `gentle-ai` executable is shipped; the only compatibility provided is that legacy
+> configuration in `~/.gentle-ai/` is migrated on startup and `GENTLE_AI_*` variables are still read
+> as deprecated aliases. Install with the curl script or `go install` — see
+> [`docs/quickstart.md`](docs/quickstart.md#install).
 
 ## Why Atomwright?
 
@@ -197,12 +202,20 @@ fork statement is in [`NOTICE.md`](NOTICE.md).
 The upstream trademark policy is reproduced unchanged in [`TRADEMARKS.md`](TRADEMARKS.md) and governs
 the marks it describes.
 
-Some technical identifiers inherited from Gentle AI — the Go module path, the `gentle-ai` command,
-the `~/.gentle-ai/` configuration directory, `GENTLE_AI_*` environment variables, and injected
-configuration markers — remain temporarily for compatibility, because renaming them requires a
-migration rather than a rename. They must be migrated before Atomwright is publicly distributed.
-See [`NOTICE.md`](NOTICE.md) and
-[`docs/atomwright/upstream-baseline.md`](docs/atomwright/upstream-baseline.md).
+The public CLI identifiers have been renamed: the command is `atomwright`, state lives in
+`~/.atomwright/`, and environment variables use the `ATOMWRIGHT_` prefix (with `GENTLE_AI_*` kept
+as a deprecated, still-read alias).
+
+Other technical identifiers inherited from Gentle AI remain unchanged on purpose, because renaming
+each is a migration rather than a rename: the Go module path
+`github.com/gentleman-programming/gentle-ai/v2`, the `gentle-ai.<name>/vN` protocol identifiers, the
+`<!-- gentle-ai:... -->` markers injected into agent configuration files, the `GENTLE_AI_REVIEW_*`
+reviewer prompt markers, the `GENTLE_AI_TELEMETRY` value pinned in the published telemetry contract,
+the `<git-common-dir>/gentle-ai/` review authority store path, the `gentle-ai-*` skill IDs, the
+agent-side installed filenames, the embedded assets and golden files, the telemetry endpoint and
+schema ids, and the `gentle-telemetry` collector binary. See [`NOTICE.md`](NOTICE.md) and
+[`docs/atomwright/upstream-baseline.md`](docs/atomwright/upstream-baseline.md) for the full
+register and the reason each one is deferred.
 
 ## License
 

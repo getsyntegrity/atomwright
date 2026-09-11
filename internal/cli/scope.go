@@ -2,7 +2,8 @@ package cli
 
 import (
 	"fmt"
-	"os"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"strings"
 )
 
@@ -17,9 +18,14 @@ const (
 	// ScopeWorkspace writes to the current workspace config root for each selected agent.
 	ScopeWorkspace InstallScope = "workspace"
 
-	// scopeEnvVar is the environment variable that controls install scope.
-	scopeEnvVar = "GENTLE_AI_INSTALL_SCOPE"
+	// scopeEnvSuffix is the unprefixed variable that controls install scope;
+	// envcompat decides which prefix answers.
+	scopeEnvSuffix = "INSTALL_SCOPE"
 )
+
+// scopeEnvVar is the current, fully prefixed variable name, used where the name
+// is shown to a user or set by a test.
+var scopeEnvVar = identity.EnvPrefix() + scopeEnvSuffix
 
 // ResolveInstallScope resolves the install scope from the flag value and env var.
 // Priority: explicit flag > env var > default (global).
@@ -27,7 +33,8 @@ const (
 func ResolveInstallScope(flagValue string) (InstallScope, error) {
 	raw := strings.TrimSpace(flagValue)
 	if raw == "" {
-		raw = strings.TrimSpace(os.Getenv(scopeEnvVar))
+		value, _, _ := envcompat.Lookup(scopeEnvSuffix)
+		raw = strings.TrimSpace(value)
 	}
 	if raw == "" {
 		return ScopeGlobal, nil

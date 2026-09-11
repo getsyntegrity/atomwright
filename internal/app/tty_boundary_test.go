@@ -103,7 +103,7 @@ func TestRunArgsNoArgumentRequiresInteractiveStdinAndStdout(t *testing.T) {
 			if err == nil {
 				t.Fatalf("RunArgs(nil) error = nil, want non-nil terminal guidance")
 			}
-			for _, want := range []string{"--version", "gentle-ai update", "--help"} {
+			for _, want := range []string{"--version", "atomwright update", "--help"} {
 				if !strings.Contains(err.Error(), want) {
 					t.Fatalf("RunArgs(nil) error = %q, want actionable guidance containing %q", err, want)
 				}
@@ -235,10 +235,10 @@ func TestBuiltBinaryClosedStdinRefusesBeforeBubbleTea(t *testing.T) {
 	}
 	repoRoot := filepath.Join(filepath.Dir(sourceFile), "..", "..")
 	binaryPath := filepath.Join(t.TempDir(), "gentle-ai")
-	build := exec.Command("go", "build", "-o", binaryPath, "./cmd/gentle-ai")
+	build := exec.Command("go", "build", "-o", binaryPath, "./cmd/atomwright")
 	build.Dir = repoRoot
 	if output, err := build.CombinedOutput(); err != nil {
-		t.Fatalf("go build ./cmd/gentle-ai: %v\n%s", err, output)
+		t.Fatalf("go build ./cmd/atomwright: %v\n%s", err, output)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -262,7 +262,7 @@ func TestBuiltBinaryClosedStdinRefusesBeforeBubbleTea(t *testing.T) {
 	}
 
 	combined := stdout.String() + stderr.String()
-	for _, want := range []string{"--version", "gentle-ai update", "--help"} {
+	for _, want := range []string{"--version", "atomwright update", "--help"} {
 		if !strings.Contains(combined, want) {
 			t.Fatalf("built binary output = %q, want actionable guidance containing %q", combined, want)
 		}

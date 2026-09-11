@@ -15,6 +15,7 @@ import (
 	"github.com/gentleman-programming/gentle-ai/v2/internal/cli"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/opencodeplugin"
 	componentuninstall "github.com/gentleman-programming/gentle-ai/v2/internal/components/uninstall"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/pipeline"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/planner"
@@ -22,6 +23,7 @@ import (
 	"github.com/gentleman-programming/gentle-ai/v2/internal/skillregistry"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/statecoord"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/statemigration"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/tui"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/update"
@@ -62,7 +64,7 @@ func Run() error {
 	return RunArgs(os.Args[1:], os.Stdout)
 }
 
-const nonInteractiveTUIError = "gentle-ai requires both stdin and stdout to be terminals (TTYs); use --version, gentle-ai update, or --help for non-interactive use"
+const nonInteractiveTUIError = "atomwright requires both stdin and stdout to be terminals (TTYs); use --version, atomwright update, or --help for non-interactive use"
 
 func RunArgs(args []string, stdout io.Writer) error {
 	if len(args) == 0 && (!isattyFn(os.Stdin.Fd()) || !isattyFn(os.Stdout.Fd())) {
@@ -70,19 +72,33 @@ func RunArgs(args []string, stdout io.Writer) error {
 	}
 
 	// Propagate the build-time version to the CLI and upgrade layers so backup
-	// manifests record which version of gentle-ai created them.
+	// manifests record which version of atomwright created them.
 	cli.AppVersion = Version
 	upgrade.AppVersion = Version
 
 	// --yes as a global CLI flag for self-update is handled via GENTLE_AI_YES=1.
 	// Per-subcommand --yes flags (e.g. restore --yes) are parsed by each subcommand.
 
+	// State migration runs before command dispatch, not after it.
+	//
+	// Most commands return from the platform-independent switch below, so a
+	// migration placed after it would never run for `review`, `sdd-status`,
+	// `telemetry` or `uninstall` — exactly the commands that read state. They
+	// would silently read the legacy root while the migrated one sat unused.
+	//
+	// Purely informational commands are exempt: they read no state, and a user
+	// asking for a version string should not trigger a filesystem migration.
+	if !isInformationalCommand(args) {
+		migrateLegacyState(stdout)
+		warnDeprecatedEnvironment(stdout)
+	}
+
 	// Platform-independent commands: no system detection, self-update, or
 	// platform validation.
 	if len(args) > 0 {
 		switch args[0] {
 		case "version", "--version", "-v":
-			_, _ = fmt.Fprintf(stdout, "gentle-ai %s\n", Version)
+			_, _ = fmt.Fprintf(stdout, "atomwright %s\n", Version)
 			return nil
 		case "help", "--help", "-h":
 			printHelp(stdout, Version)
@@ -312,7 +328,7 @@ func RunArgs(args []string, stdout io.Writer) error {
 	case "doctor":
 		return cli.RunDoctor(context.Background(), stdout)
 	default:
-		return fmt.Errorf("unknown command %q — run 'gentle-ai help' for available commands", args[0])
+		return fmt.Errorf("unknown command %q — run 'atomwright help' for available commands", args[0])
 	}
 }
 
@@ -350,7 +366,7 @@ func gentleAIUpgradeVersionFromTUI(finalModel tea.Model) (string, bool) {
 
 func runSkillRegistry(args []string, stdout io.Writer) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: gentle-ai skill-registry <refresh|list> [flags]")
+		return fmt.Errorf("usage: atomwright skill-registry <refresh|list> [flags]")
 	}
 	switch args[0] {
 	case "refresh":
@@ -1092,7 +1108,7 @@ func ListBackups() []backup.Manifest {
 		return nil
 	}
 
-	backupRoot := filepath.Join(homeDir, ".gentle-ai", "backups")
+	backupRoot := filepath.Join(state.Root(homeDir), "backups")
 	entries, err := os.ReadDir(backupRoot)
 	if err != nil {
 		return nil
@@ -1171,4 +1187,98 @@ func tuiReviewStoreReset() (reviewtransaction.StoreResetReport, error) {
 		return reviewtransaction.StoreResetReport{}, err
 	}
 	return reviewtransaction.ResetReviewStore(context.Background(), cwd, reviewtransaction.StoreResetRequest{})
+}
+
+// migrateLegacyState copies an existing install's state out of the inherited
+// state directory into the Atomwright one, and reports what it did.
+//
+// Nothing here is fatal. State migration is a convenience for an install that
+// already worked; failing the command because the old directory could not be
+// classified would take the tool away from the very users it is meant to carry
+// forward. A conflict in particular is reported and left alone: only the user
+// knows which of the two directories is current, so guessing would destroy the
+// other one.
+// isInformationalCommand reports whether args only ask atomwright to describe
+// itself. These commands read no state, so they must stay side-effect free.
+func isInformationalCommand(args []string) bool {
+	if len(args) == 0 {
+		return false
+	}
+	switch args[0] {
+	case "version", "--version", "-v", "help", "--help", "-h":
+		return true
+	default:
+		return false
+	}
+}
+
+// warnDeprecatedEnvironment reports every variable still set under the legacy
+// prefix.
+//
+// The variables keep working, so this is the only signal a user gets that their
+// dotfiles and CI configuration name a deprecated spelling. It prints names
+// only: these carry tokens, and the notice is captured verbatim in CI logs.
+func warnDeprecatedEnvironment(stdout io.Writer) {
+	for _, warning := range envcompat.Warnings() {
+		_, _ = fmt.Fprintf(stdout, "Warning: %s\n", warning)
+	}
+}
+
+func migrateLegacyState(stdout io.Writer) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return
+	}
+	legacyRoot := state.LegacyRoot(homeDir)
+	newRoot := state.Root(homeDir)
+
+	plan, err := statemigration.Plan(legacyRoot, newRoot)
+	if err != nil {
+		_, _ = fmt.Fprintf(stdout, "Warning: could not inspect %s for migration: %v\n", legacyRoot, err)
+		return
+	}
+
+	switch plan.Outcome {
+	case statemigration.OutcomeConflict:
+		_, _ = fmt.Fprintf(stdout,
+			"Warning: state exists in both %s and %s, so Atomwright cannot tell which one is current.\n"+
+				"Nothing was copied, merged, or removed. Keep the directory you want, move or remove the other, then run this again.\n",
+			legacyRoot, newRoot)
+	case statemigration.OutcomeMigrate:
+		result, err := statemigration.Apply(plan)
+		if err != nil {
+			_, _ = fmt.Fprintf(stdout, "Warning: could not migrate state from %s to %s: %v\n", legacyRoot, newRoot, err)
+			return
+		}
+		if len(result.Migrated) > 0 {
+			_, _ = fmt.Fprintf(stdout,
+				"Migrated %s to %s (%s). The old directory was left untouched.\n",
+				legacyRoot, newRoot, strings.Join(result.Migrated, ", "))
+		}
+	}
+
+	warnLegacyBinOnPATH(stdout, legacyRoot, newRoot)
+}
+
+// warnLegacyBinOnPATH tells the user to repoint their shell profile at the new
+// launcher directory.
+//
+// This is the one message in the rename that a user cannot recover from on
+// their own. Atomwright never edits shell profiles, so the PATH entry added for
+// the legacy bin directory survives the rename while the launchers it points at
+// are now written under the new root. Without this notice OpenCode simply stops
+// launching, with a stale binary or nothing at all and no explanation.
+//
+// It is printed on every run while the legacy directory is still there, not
+// once at migration time: the breakage lasts until the user edits the profile,
+// and a one-shot notice scrolls away unread.
+func warnLegacyBinOnPATH(stdout io.Writer, legacyRoot, newRoot string) {
+	legacyBin := filepath.Join(legacyRoot, "bin")
+	if info, err := os.Stat(legacyBin); err != nil || !info.IsDir() {
+		return
+	}
+	_, _ = fmt.Fprintf(stdout,
+		"Action required: %s is on your PATH via your shell profile, but the launchers now live in %s.\n"+
+			"Atomwright never edits shell profiles, so update that PATH entry to %s yourself; until you do, OpenCode will not launch.\n",
+		legacyBin, filepath.Join(newRoot, "bin"), filepath.Join(newRoot, "bin"))
 }

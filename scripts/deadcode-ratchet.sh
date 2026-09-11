@@ -30,7 +30,7 @@ export LC_ALL=C
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 baseline="${repo_root}/.deadcode-baseline.txt"
-target="${DEADCODE_TARGET:-./cmd/gentle-ai}"
+target="${DEADCODE_TARGET:-./cmd/atomwright}"
 tool="golang.org/x/tools/cmd/deadcode@v0.30.0"
 
 cd "${repo_root}"
@@ -38,8 +38,22 @@ cd "${repo_root}"
 # Normalize to "<file>\t<symbol>". Line and column are deliberately dropped:
 # pinning them would turn every unrelated edit above a dead function into a
 # spurious failure, and a guard that cries wolf gets disabled.
-current="$(go run "${tool}" "${target}" 2>/dev/null \
-  | sed -E 's/^(.+):[0-9]+:[0-9]+: unreachable func: (.+)$/\1\t\2/' \
+# The analyzer's stderr is captured rather than discarded: a missing or stale
+# target makes deadcode fail, and swallowing that turns the empty result into a
+# baseline where every entry looks "now reachable or gone" and the guard passes
+# while analyzing nothing. Fail loudly and name the target instead.
+raw="$(mktemp)"
+err="$(mktemp)"
+trap 'rm -f "${raw}" "${err}"' EXIT
+
+if ! go run "${tool}" "${target}" >"${raw}" 2>"${err}"; then
+  printf 'deadcode analysis failed for target %s\n' "${target}" >&2
+  printf 'Check that the package exists and builds; set DEADCODE_TARGET to override.\n\n' >&2
+  cat "${err}" >&2
+  exit 1
+fi
+
+current="$(sed -E 's/^(.+):[0-9]+:[0-9]+: unreachable func: (.+)$/\1\t\2/' "${raw}" \
   | sort -u)"
 
 if [[ "${1:-}" == "--update" ]]; then

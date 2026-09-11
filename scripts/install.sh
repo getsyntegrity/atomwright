@@ -2,23 +2,21 @@
 set -euo pipefail
 
 # ============================================================================
-# Gentle-AI — Install Script
+# Atomwright — Install Script
 # Ecosystem, Frameworks, Workflows for AI coding agents.
 #
 # Usage:
-#   curl -sL https://raw.githubusercontent.com/Gentleman-Programming/gentle-ai/main/scripts/install.sh | bash
+#   curl -sL https://raw.githubusercontent.com/pablogore/atomwright/main/scripts/install.sh | bash
 #
 # Or download and run:
-#   curl -sLO https://raw.githubusercontent.com/Gentleman-Programming/gentle-ai/main/scripts/install.sh
+#   curl -sLO https://raw.githubusercontent.com/pablogore/atomwright/main/scripts/install.sh
 #   chmod +x install.sh
 #   ./install.sh
 # ============================================================================
 
-GITHUB_OWNER="Gentleman-Programming"
-GITHUB_REPO="gentle-ai"
-BINARY_NAME="gentle-ai"
-BREW_TAP="Gentleman-Programming/homebrew-tap"
-BREW_FORMULA_REF="gentleman-programming/tap/${BINARY_NAME}"
+GITHUB_OWNER="pablogore"
+GITHUB_REPO="atomwright"
+BINARY_NAME="atomwright"
 
 # ============================================================================
 # Color support
@@ -50,59 +48,27 @@ error()   { echo -e "${RED}[error]${NC}   $*" >&2; }
 fatal()   { error "$@"; exit 1; }
 step()    { echo -e "\n${CYAN}${BOLD}==>${NC} ${BOLD}$*${NC}"; }
 
-homebrew_trust_gentle_ai_formula() {
-    if brew help trust &>/dev/null; then
-        info "Trusting ${BREW_FORMULA_REF} for Homebrew tap-trust enforcement"
-        brew trust --formula "$BREW_FORMULA_REF" &>/dev/null || true
-    fi
-}
-
-print_homebrew_failure_help() {
-    local output="$1"
-    local lower
-    lower="$(printf '%s' "$output" | tr '[:upper:]' '[:lower:]')"
-
-    if [[ "$lower" == *"untrusted tap"* || "$lower" == *"tap trust is required"* || "$lower" == *"homebrew_require_tap_trust"* ]]; then
-        warn "Homebrew requires explicit trust for external taps."
-        echo "Trust only the Gentle AI formula, then retry:" >&2
-        echo "  brew trust --formula ${BREW_FORMULA_REF}" >&2
-        echo "  brew upgrade ${BINARY_NAME}" >&2
-    fi
-
-    if [[ "$lower" == *"bubblewrap is installed but cannot create a rootless sandbox"* || "$lower" == *"rootless sandbox"* || "$lower" == *"homebrew_no_sandbox_linux"* ]]; then
-        warn "Homebrew on Linux could not create its Bubblewrap rootless sandbox."
-        echo "This requires an explicit admin/security decision: enabling unprivileged user namespaces lets Homebrew use its sandbox but changes host kernel/AppArmor policy." >&2
-        echo "If acceptable, run:" >&2
-        echo "  sudo sysctl -w kernel.unprivileged_userns_clone=1" >&2
-        echo "  sudo sysctl -w user.max_user_namespaces=28633" >&2
-        echo "  sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true" >&2
-        echo >&2
-        echo "Final workaround if your distro policy forbids this sandbox:" >&2
-        echo "  HOMEBREW_NO_SANDBOX_LINUX=1 brew upgrade ${BINARY_NAME}" >&2
-    fi
-}
-
 # ============================================================================
 # Help
 # ============================================================================
 
 show_help() {
     cat <<EOF
-${BOLD}Gentle-AI installer${NC}
+${BOLD}Atomwright installer${NC}
 
 Usage: install.sh [OPTIONS]
 
 Options:
-  --method METHOD   Force install method: brew, go, binary (default: auto-detect)
-  --channel CHANNEL Gentle AI channel: stable (default), beta, or nightly (env: GENTLE_AI_CHANNEL)
+  --method METHOD   Force install method: go, binary (default: auto-detect)
+  --channel CHANNEL Atomwright channel: stable (default), beta, or nightly
+                    (env: ATOMWRIGHT_CHANNEL, deprecated alias: GENTLE_AI_CHANNEL)
   --dir DIR         Custom install directory for binary method
   --insecure        Skip checksum verification (not recommended)
   -h, --help        Show this help
 
 Install methods (auto-detected in priority order):
-  1. brew    — Homebrew tap (recommended)
+  1. binary  — Pre-built binary from GitHub Releases (recommended)
   2. go      — go install from source
-  3. binary  — Pre-built binary from GitHub Releases
 
 Examples:
   curl -sL https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/scripts/install.sh | bash
@@ -148,8 +114,8 @@ detect_platform() {
 # GoReleaser v2 {{ .Os }} produces GOOS values (lowercase: darwin, linux)
 # GoReleaser {{ .Arch }} produces GOARCH values (amd64, arm64)
 # Examples:
-#   gentle-ai_1.0.0_darwin_arm64.tar.gz
-#   gentle-ai_1.0.0_linux_amd64.tar.gz
+#   atomwright_1.0.0_darwin_arm64.tar.gz
+#   atomwright_1.0.0_linux_amd64.tar.gz
 # ============================================================================
 
 get_archive_name() {
@@ -188,7 +154,7 @@ check_prerequisites() {
 detect_install_method() {
     if [ "${CHANNEL}" = "beta" ]; then
         if [ -n "${FORCE_METHOD:-}" ] && [ "${FORCE_METHOD}" != "go" ]; then
-            fatal "--channel beta installs Gentle AI from main and only supports --method go"
+            fatal "--channel beta installs Atomwright from main and only supports --method go"
         fi
         INSTALL_METHOD="go"
         info "Using beta channel — will install ${BINARY_NAME} from main via go install"
@@ -197,8 +163,8 @@ detect_install_method() {
 
     if [ -n "${FORCE_METHOD:-}" ]; then
         case "$FORCE_METHOD" in
-            brew|go|binary) INSTALL_METHOD="$FORCE_METHOD" ;;
-            *) fatal "Unknown install method: $FORCE_METHOD. Use: brew, go, or binary" ;;
+            go|binary) INSTALL_METHOD="$FORCE_METHOD" ;;
+            *) fatal "Unknown install method: $FORCE_METHOD. Use: go or binary" ;;
         esac
         info "Using forced method: $INSTALL_METHOD"
         return
@@ -206,60 +172,13 @@ detect_install_method() {
 
     step "Detecting best install method"
 
-    # Priority: brew > binary > go
-    # Brew handles upgrades natively and is instant.
+    # Priority: binary > go
     # Binary download from GitHub Releases is always up-to-date.
     # go install is last resort because the Go module proxy can lag
     # behind new tags for up to 30 minutes, causing @latest to install
     # a stale version.
-    if command -v brew &>/dev/null; then
-        INSTALL_METHOD="brew"
-        success "Homebrew found — will install via brew tap"
-    else
-        INSTALL_METHOD="binary"
-        info "Will download pre-built binary from GitHub Releases"
-    fi
-}
-
-# ============================================================================
-# Install via Homebrew
-# ============================================================================
-
-install_brew() {
-    step "Installing via Homebrew"
-
-    # Always refresh the tap to pick up new releases
-    info "Refreshing ${BREW_TAP}..."
-    brew untap "$BREW_TAP" 2>/dev/null || true
-    if ! brew tap "$BREW_TAP"; then
-        fatal "Failed to tap $BREW_TAP"
-    fi
-
-    homebrew_trust_gentle_ai_formula
-
-    if brew list "$BINARY_NAME" &>/dev/null; then
-        info "Already installed, upgrading ${BINARY_NAME}..."
-        local output
-        if output="$(brew upgrade "$BINARY_NAME" 2>&1)"; then
-            success "Upgraded ${BINARY_NAME} via Homebrew"
-        elif printf '%s' "$output" | grep -Eiq 'already.*(up-to-date|installed)|not outdated'; then
-            success "${BINARY_NAME} is already at the latest version"
-        else
-            printf '%s\n' "$output" >&2
-            print_homebrew_failure_help "$output"
-            fatal "Failed to upgrade ${BINARY_NAME} via Homebrew"
-        fi
-    else
-        info "Installing ${BINARY_NAME}..."
-        local output
-        if output="$(brew install "$BINARY_NAME" 2>&1)"; then
-            success "Installed ${BINARY_NAME} via Homebrew"
-        else
-            printf '%s\n' "$output" >&2
-            print_homebrew_failure_help "$output"
-            fatal "Failed to install ${BINARY_NAME} via Homebrew"
-        fi
-    fi
+    INSTALL_METHOD="binary"
+    info "Will download pre-built binary from GitHub Releases"
 }
 
 # ============================================================================
@@ -273,14 +192,13 @@ install_go() {
     if [ "${CHANNEL}" = "beta" ]; then
         version="main"
     fi
-    # Lowercase the owner portably: ${var,,} needs bash 4+, but macOS ships
-    # bash 3.2, so piping `| bash` would fail with "bad substitution".
-    local owner_lc
-    owner_lc="$(printf '%s' "$GITHUB_OWNER" | tr '[:upper:]' '[:lower:]')"
-    # /v2 is part of the module path, not decoration: Go refuses to resolve a
+    # Spelled out literally on purpose, never composed from GITHUB_OWNER and
+    # GITHUB_REPO: the published artifacts moved to pablogore/atomwright, the Go
+    # module path did not, and composing it would name a module that does not
+    # exist. /v2 is part of that path, not decoration — Go refuses to resolve a
     # module whose tags are v2.x unless the import path carries the major
     # version suffix.
-    local go_package="github.com/${owner_lc}/${GITHUB_REPO}/v2/cmd/${BINARY_NAME}@${version}"
+    local go_package="github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@${version}"
 
     info "Running: go install ${go_package}"
     if [ "${CHANNEL}" = "beta" ]; then
@@ -344,7 +262,7 @@ get_latest_version() {
     body="$(echo "$response" | sed '$d')"
 
     if [ "$http_code" != "200" ]; then
-        fatal "GitHub API returned HTTP $http_code. Rate limited? Try again later or use --method brew/go"
+        fatal "GitHub API returned HTTP $http_code. Rate limited? Try again later or use --method go"
     fi
 
     # Extract tag_name — works without jq
@@ -525,13 +443,18 @@ verify_installation() {
 print_banner() {
     echo ""
     echo -e "${CYAN}${BOLD}"
-    echo "   ____            _   _              _    ___ "
-    echo "  / ___| ___ _ __ | |_| | ___        / \  |_ _|"
-    echo " | |  _ / _ \ '_ \| __| |/ _ \_____ / _ \  | | "
-    echo " | |_| |  __/ | | | |_| |  __/_____/ ___ \ | | "
-    echo "  \____|\___|_| |_|\__|_|\___|    /_/   \_\___|"
+    # A quoted heredoc: the art contains backticks and apostrophes that double
+    # quotes would turn into command substitution.
+    cat <<'BANNER'
+    _     _                                      _         _      _   
+   / \   | |_   ___   _ __ ___  __      __ _ __ (_)  __ _ | |__  | |_ 
+  / _ \  | __| / _ \ | '_ ` _ \ \ \ /\ / /| '__|| | / _` || '_ \ | __|
+ / ___ \ | |_ | (_) || | | | | | \ V  V / | |   | || (_| || | | || |_ 
+/_/   \_\ \__| \___/ |_| |_| |_|  \_/\_/  |_|   |_| \__, ||_| |_| \__|
+                                                    |___/             
+BANNER
     echo -e "${NC}"
-    echo -e "  ${DIM}Gentle-AI — Ecosystem, Frameworks, Workflows${NC}"
+    echo -e "  ${DIM}Atomwright — Ecosystem, Frameworks, Workflows${NC}"
     echo ""
 }
 
@@ -541,7 +464,7 @@ print_next_steps() {
     echo ""
     echo -e "${BOLD}Next steps:${NC}"
     if [ "${CHANNEL}" = "beta" ]; then
-        echo -e "  ${CYAN}1.${NC} Run ${BOLD}GENTLE_AI_CHANNEL=beta ${BINARY_NAME} install${NC} to keep using the beta channel"
+        echo -e "  ${CYAN}1.${NC} Run ${BOLD}ATOMWRIGHT_CHANNEL=beta ${BINARY_NAME} install${NC} to keep using the beta channel"
     else
         echo -e "  ${CYAN}1.${NC} Run ${BOLD}${BINARY_NAME}${NC} to start the TUI installer"
     fi
@@ -564,7 +487,10 @@ main() {
     FORCE_METHOD=""
     INSTALL_DIR=""
     INSECURE="false"
-    CHANNEL="${GENTLE_AI_CHANNEL:-stable}"
+    # ATOMWRIGHT_CHANNEL is the current name; GENTLE_AI_CHANNEL stays readable as
+    # a deprecated alias so an existing pinned-beta user is not silently moved
+    # back to stable by the rename. ATOMWRIGHT_ wins when both are set.
+    CHANNEL="${ATOMWRIGHT_CHANNEL:-${GENTLE_AI_CHANNEL:-stable}}"
 
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -611,7 +537,6 @@ main() {
     detect_install_method
 
     case "$INSTALL_METHOD" in
-        brew)   install_brew ;;
         go)     install_go ;;
         binary) install_binary ;;
     esac

@@ -2,7 +2,8 @@ package cli
 
 import (
 	"fmt"
-	"os"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"strings"
 )
 
@@ -12,13 +13,20 @@ const (
 	ChannelStable InstallChannel = "stable"
 	ChannelBeta   InstallChannel = "beta"
 
-	channelEnvVar = "GENTLE_AI_CHANNEL"
+	// channelEnvSuffix is the unprefixed variable name; envcompat decides which
+	// prefix answers so the inherited GENTLE_AI_ one keeps working.
+	channelEnvSuffix = "CHANNEL"
 )
+
+// channelEnvVar is the current, fully prefixed variable name, used where the
+// name is shown to a user or set by a test.
+var channelEnvVar = identity.EnvPrefix() + channelEnvSuffix
 
 func ResolveInstallChannel(flagValue string) (InstallChannel, error) {
 	raw := strings.TrimSpace(flagValue)
 	if raw == "" {
-		raw = strings.TrimSpace(os.Getenv(channelEnvVar))
+		value, _, _ := envcompat.Lookup(channelEnvSuffix)
+		raw = strings.TrimSpace(value)
 	}
 	if raw == "" {
 		return ChannelStable, nil

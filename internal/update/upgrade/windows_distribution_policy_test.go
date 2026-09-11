@@ -29,9 +29,9 @@ func TestGentleAIWindowsUpgradeFailsClosedToSourceInstall(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			r := update.UpdateResult{
 				Tool: update.ToolInfo{
-					Name:          "gentle-ai",
-					Owner:         "Gentleman-Programming",
-					Repo:          "gentle-ai",
+					Name:          "atomwright",
+					Owner:         "pablogore",
+					Repo:          "atomwright",
 					InstallMethod: update.InstallBinary,
 				},
 				LatestVersion: tc.latestVersion,
@@ -49,7 +49,7 @@ func TestGentleAIWindowsUpgradeFailsClosedToSourceInstall(t *testing.T) {
 			}
 			for _, required := range []string{
 				"Windows binary distribution and Scoop are temporarily unavailable",
-				"go install github.com/gentleman-programming/gentle-ai/v2/cmd/gentle-ai" + tc.wantTarget,
+				"go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright" + tc.wantTarget,
 			} {
 				if !strings.Contains(hint, required) {
 					t.Errorf("manual hint is missing %q: %s", required, hint)
@@ -78,7 +78,7 @@ func TestWindowsBetaGentleAIUpgradeUsesShippedRegistryGoTarget(t *testing.T) {
 
 	var tool update.ToolInfo
 	for _, candidate := range update.Tools {
-		if candidate.Name == "gentle-ai" {
+		if candidate.Name == "atomwright" {
 			tool = candidate
 			break
 		}
@@ -88,7 +88,7 @@ func TestWindowsBetaGentleAIUpgradeUsesShippedRegistryGoTarget(t *testing.T) {
 	}
 
 	gobin := t.TempDir()
-	destination := writeFakeBinary(t, gobin, "gentle-ai.exe")
+	destination := writeFakeBinary(t, gobin, "atomwright.exe")
 	originalLookPath := lookPathFn
 	t.Cleanup(func() { lookPathFn = originalLookPath })
 	lookPathFn = func(string) (string, error) { return destination, nil }

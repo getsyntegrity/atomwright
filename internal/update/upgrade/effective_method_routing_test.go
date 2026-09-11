@@ -34,21 +34,31 @@ func TestEffectiveMethodWindowsPrecedenceIsUnchanged(t *testing.T) {
 			want:          update.InstallOpenCodePlugin,
 		},
 		{
-			name:          "brew-owned package wins over go-install on Windows",
-			tool:          update.ToolInfo{Name: "gentle-ai", InstallMethod: update.InstallBinary, GoImportPath: "github.com/gentleman-programming/gentle-ai/v2/cmd/gentle-ai"},
+			// This product publishes no formula or cask, so a brew package that
+			// happens to share the executable name is somebody else's. Its own
+			// self-upgrade policy is checked before Homebrew and decides alone.
+			name:          "self-upgrade policy wins over a same-named brew package on Windows",
+			tool:          update.ToolInfo{Name: "atomwright", InstallMethod: update.InstallBinary, GoImportPath: "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright"},
+			profile:       system.PlatformProfile{OS: "windows", PackageManager: "brew", GoAvailable: true},
+			brewInstalled: true,
+			want:          update.InstallGoInstall,
+		},
+		{
+			name:          "brew-owned third-party package wins over go-install on Windows",
+			tool:          update.ToolInfo{Name: "gga", InstallMethod: update.InstallScript, GoImportPath: "github.com/example/gga/cmd/gga"},
 			profile:       system.PlatformProfile{OS: "windows", PackageManager: "brew", GoAvailable: true},
 			brewInstalled: true,
 			want:          update.InstallBrew,
 		},
 		{
 			name:    "no Go on Windows keeps the declared method",
-			tool:    update.ToolInfo{Name: "gentle-ai", InstallMethod: update.InstallBinary, GoImportPath: "github.com/gentleman-programming/gentle-ai/v2/cmd/gentle-ai"},
+			tool:    update.ToolInfo{Name: "atomwright", InstallMethod: update.InstallBinary, GoImportPath: "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright"},
 			profile: system.PlatformProfile{OS: "windows", PackageManager: "winget", GoAvailable: false},
 			want:    update.InstallBinary,
 		},
 		{
 			name:    "no import path on Windows keeps the declared method",
-			tool:    update.ToolInfo{Name: "gentle-ai", InstallMethod: update.InstallBinary},
+			tool:    update.ToolInfo{Name: "atomwright", InstallMethod: update.InstallBinary},
 			profile: system.PlatformProfile{OS: "windows", PackageManager: "winget", GoAvailable: true},
 			want:    update.InstallBinary,
 		},
@@ -67,7 +77,7 @@ func TestEffectiveMethodWindowsPrecedenceIsUnchanged(t *testing.T) {
 // gentleAIImportPath is the module path gentle-ai publishes its command under.
 // It is asserted against the registry below so the tests and the shipped
 // declaration cannot drift apart.
-const gentleAIImportPath = "github.com/gentleman-programming/gentle-ai/v2/cmd/gentle-ai"
+const gentleAIImportPath = "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright"
 
 // registryGentleAI returns the shipped gentle-ai registry entry. Routing tests
 // use the real declaration rather than a hand-built ToolInfo so a regression in
@@ -75,7 +85,7 @@ const gentleAIImportPath = "github.com/gentleman-programming/gentle-ai/v2/cmd/ge
 func registryGentleAI(t *testing.T) update.ToolInfo {
 	t.Helper()
 	for _, tool := range update.Tools {
-		if tool.Name == "gentle-ai" {
+		if tool.Name == "atomwright" {
 			return tool
 		}
 	}
@@ -164,9 +174,9 @@ func TestGentleAILegacyScriptDeclarationNeverReachesScriptUpgradeOnWindows(t *te
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			tool := update.ToolInfo{
-				Name:          "gentle-ai",
-				Owner:         "Gentleman-Programming",
-				Repo:          "gentle-ai",
+				Name:          "atomwright",
+				Owner:         "pablogore",
+				Repo:          "atomwright",
 				InstallMethod: update.InstallScript,
 				GoImportPath:  tc.goImportPath,
 			}
@@ -197,10 +207,10 @@ func TestGentleAIUpgradeWindowsPreservesResolvedAppDataDestination(t *testing.T)
 	t.Cleanup(func() { detectOS = origDetectOS })
 	detectOS = func() string { return "windows" }
 
-	appDataBin := filepath.Join(t.TempDir(), "AppData", "Local", "gentle-ai", "bin")
-	active := writeFakeBinary(t, appDataBin, "gentle-ai.exe")
+	appDataBin := filepath.Join(t.TempDir(), "AppData", "Local", "atomwright", "bin")
+	active := writeFakeBinary(t, appDataBin, "atomwright.exe")
 	goPath := t.TempDir()
-	destination := filepath.Join(goPath, "bin", "gentle-ai.exe")
+	destination := filepath.Join(goPath, "bin", "atomwright.exe")
 
 	var goInstallCalls int
 	origExecCommand := execCommand
@@ -255,7 +265,7 @@ func TestGentleAIUpgradeWindowsPreservesResolvedAppDataDestination(t *testing.T)
 	if report.BackupID != "" || report.BackupWarning != "" {
 		t.Errorf("manual fallback created a backup result: %#v", report)
 	}
-	backupRoot := filepath.Join(homeDir, ".gentle-ai", "backups")
+	backupRoot := filepath.Join(homeDir, ".atomwright", "backups")
 	if _, err := os.Stat(backupRoot); !os.IsNotExist(err) {
 		t.Errorf("manual fallback created or pruned backup tree %s: %v", backupRoot, err)
 	}
@@ -276,7 +286,7 @@ func TestGentleAIUpgradeWindowsAllowsResolvedGoDestination(t *testing.T) {
 	detectOS = func() string { return "windows" }
 
 	goPath := t.TempDir()
-	destination := writeFakeBinary(t, filepath.Join(goPath, "bin"), "gentle-ai.exe")
+	destination := writeFakeBinary(t, filepath.Join(goPath, "bin"), "atomwright.exe")
 	var goInstallCalls int
 	goEnvCalls := map[string]int{}
 	origExecCommand := execCommand
@@ -333,7 +343,7 @@ func TestGentleAIUpgradeWindowsRefusesUnresolvedGoProvenance(t *testing.T) {
 		wantHint      string
 	}{
 		{name: "Go destination", goEnvFails: true, wantHint: "could not determine the Go installation destination"},
-		{name: "active executable", lookPathFails: true, wantHint: "could not resolve the active gentle-ai executable"},
+		{name: "active executable", lookPathFails: true, wantHint: "could not resolve the active atomwright executable"},
 	}
 
 	for _, tt := range tests {
@@ -375,7 +385,7 @@ func TestGentleAIUpgradeWindowsRefusesUnresolvedGoProvenance(t *testing.T) {
 				if tt.lookPathFails {
 					return "", exec.ErrNotFound
 				}
-				return filepath.Join(t.TempDir(), "gentle-ai.exe"), nil
+				return filepath.Join(t.TempDir(), "atomwright.exe"), nil
 			}
 
 			homeDir := t.TempDir()
@@ -400,7 +410,7 @@ func TestGentleAIUpgradeWindowsRefusesUnresolvedGoProvenance(t *testing.T) {
 			if report.BackupID != "" || report.BackupWarning != "" {
 				t.Errorf("manual fallback created a backup result: %#v", report)
 			}
-			backupRoot := filepath.Join(homeDir, ".gentle-ai", "backups")
+			backupRoot := filepath.Join(homeDir, ".atomwright", "backups")
 			if _, err := os.Stat(backupRoot); !os.IsNotExist(err) {
 				t.Errorf("manual fallback created or pruned backup tree %s: %v", backupRoot, err)
 			}
@@ -427,11 +437,11 @@ func TestGentleAIWindowsWithoutGoNamesRunnableSourceInstall(t *testing.T) {
 
 	r := update.UpdateResult{
 		Tool: update.ToolInfo{
-			Name:          "gentle-ai",
-			Owner:         "Gentleman-Programming",
-			Repo:          "gentle-ai",
+			Name:          "atomwright",
+			Owner:         "pablogore",
+			Repo:          "atomwright",
 			InstallMethod: update.InstallBinary,
-			GoImportPath:  "github.com/gentleman-programming/gentle-ai/v2/cmd/gentle-ai",
+			GoImportPath:  "github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright",
 		},
 		LatestVersion: "2.2.0",
 		Status:        update.UpdateAvailable,
@@ -448,7 +458,7 @@ func TestGentleAIWindowsWithoutGoNamesRunnableSourceInstall(t *testing.T) {
 	}
 	for _, required := range []string{
 		"Windows binary distribution and Scoop are temporarily unavailable",
-		"go install github.com/gentleman-programming/gentle-ai/v2/cmd/gentle-ai@v2.2.0",
+		"go install github.com/gentleman-programming/gentle-ai/v2/cmd/atomwright@v2.2.0",
 	} {
 		if !strings.Contains(result.ManualHint, required) {
 			t.Errorf("manual hint is missing %q: %s", required, result.ManualHint)

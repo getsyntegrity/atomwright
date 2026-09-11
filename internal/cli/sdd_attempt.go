@@ -543,7 +543,7 @@ func sddAttemptKnownHelpFlag(argument string) (hasInlineValue, known bool) {
 
 func renderSDDAttemptHelp(operation string, stdout io.Writer) error {
 	if operation == "" {
-		_, _ = fmt.Fprintf(stdout, "Usage: gentle-ai sdd-attempt <%s> [flags]\n", strings.Join(sddAttemptOperationNames(), "|"))
+		_, _ = fmt.Fprintf(stdout, "Usage: atomwright sdd-attempt <%s> [flags]\n", strings.Join(sddAttemptOperationNames(), "|"))
 		_, _ = fmt.Fprintln(stdout, "\nOperations:")
 		for _, definition := range sddAttemptOperationDefinitions {
 			_, _ = fmt.Fprintf(stdout, "  %-7s %s\n", definition.name, definition.purpose)
@@ -552,7 +552,7 @@ func renderSDDAttemptHelp(operation string, stdout io.Writer) error {
 		return nil
 	}
 	definition, _ := sddAttemptOperationDefinition(operation)
-	_, _ = fmt.Fprintf(stdout, "Usage: gentle-ai sdd-attempt %s [flags]\n\n%s.\n\nFlags:\n", operation, definition.purpose)
+	_, _ = fmt.Fprintf(stdout, "Usage: atomwright sdd-attempt %s [flags]\n\n%s.\n\nFlags:\n", operation, definition.purpose)
 	for _, flagDefinition := range definition.flags {
 		value := "<value>"
 		if flagDefinition.kind == sddAttemptIntFlag {

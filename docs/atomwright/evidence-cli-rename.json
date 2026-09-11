@@ -1,0 +1,918 @@
+{
+  "schema": "atomwright.evidence/v1",
+  "change": "rename-cli-with-safe-migration",
+  "issue": "https://github.com/pablogore/atomwright/issues/4",
+  "pull_request": null,
+  "outcome": "The public CLI installs, invokes, updates and uninstalls as `atomwright`, existing local state migrates without destruction, and no public executable or release asset is named gentle-ai.",
+  "repository": {
+    "origin": "https://github.com/pablogore/atomwright",
+    "upstream": "https://github.com/Gentleman-Programming/gentle-ai",
+    "upstream_access": "fetch-only"
+  },
+  "commits": {
+    "base": "76afba15633fc476471263833b342d8ad91dbda4",
+    "branch": "refactor/cli-rename-atomwright",
+    "final": null,
+    "note": "`final` is filled in by the commit that adds this file; a commit cannot record its own hash. See the PR head."
+  },
+  "canonical_identifiers": {
+    "executable": "atomwright",
+    "state_root": "~/.atomwright/",
+    "env_prefix": "ATOMWRIGHT_",
+    "release_repository": "pablogore/atomwright",
+    "source_module_path": "github.com/gentleman-programming/gentle-ai/v2",
+    "source_module_path_note": "Deliberately unchanged. It is resolved by the Go module proxy, not a branding surface. internal/identity asserts it is never derived from the release coordinates."
+  },
+  "diff_composition": {
+    "files_changed": 145,
+    "insertions": 3657,
+    "deletions": 1130,
+    "total_changed_lines": 4787,
+    "tests": 2400,
+    "docs": 764,
+    "packaging_and_ci": 322,
+    "production_code": 1301,
+    "size_exception_justification": "The repository review budget is 400 changed lines. 50% of this diff is tests and 16% is documentation; the production change is 1301 lines across one indivisible outcome. Splitting it would leave main in a fail-closed release state between merges, because the five release-identity strings (goreleaser project_name/binary, update registry Name/Owner/Repo, tar member, checksum filename, minisign trusted comment) are verified against each other and must move atomically."
+  },
+  "changed_files": [
+    {
+      "status": "M",
+      "path": ".github/workflows/ci.yml"
+    },
+    {
+      "status": "M",
+      "path": ".github/workflows/promote-stable-rc.yml"
+    },
+    {
+      "status": "M",
+      "path": ".github/workflows/release.yml"
+    },
+    {
+      "status": "M",
+      "path": ".github/workflows/windows-full-suite.yml"
+    },
+    {
+      "status": "M",
+      "path": ".gitignore"
+    },
+    {
+      "status": "M",
+      "path": ".goreleaser.yaml"
+    },
+    {
+      "status": "M",
+      "path": "README.md"
+    },
+    {
+      "status": "R100",
+      "path": "cmd/atomwright/main.go"
+    },
+    {
+      "status": "M",
+      "path": "docs/agents.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/atomwright/upstream-baseline.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/codebase/interfaces.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/codebase/memory-core.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/codebase/mental-model.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/codebase/reference-map.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/codebase/repository-map.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/codebase/sync-and-cloud.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/non-interactive.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/opencode-profiles.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/pi.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/platforms.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/quickstart.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/review-integration.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/rollback.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/telemetry.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/usage.md"
+    },
+    {
+      "status": "M",
+      "path": "e2e/Dockerfile.arch"
+    },
+    {
+      "status": "M",
+      "path": "e2e/Dockerfile.claude-network-none"
+    },
+    {
+      "status": "M",
+      "path": "e2e/Dockerfile.fedora"
+    },
+    {
+      "status": "M",
+      "path": "e2e/Dockerfile.ubuntu"
+    },
+    {
+      "status": "M",
+      "path": "e2e/e2e_test.sh"
+    },
+    {
+      "status": "M",
+      "path": "e2e/lib.sh"
+    },
+    {
+      "status": "M",
+      "path": "e2e/organicruntime/organic_runtime_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/agents/pi/adapter.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/agents/pi/adapter_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/app.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/app_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/bench_model_picker_fixture.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/help.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/help_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/selfupdate.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/selfupdate_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/tty_boundary_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/upgrade_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/assets/opencode/plugins/model-variants.ts"
+    },
+    {
+      "status": "M",
+      "path": "internal/backup/manifest.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/backup_metadata_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/channel.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/compatibility_skills_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/compatibility_transaction_windows_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/dedup_prune_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/doctor.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/doctor_invoked_binary_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/doctor_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/install.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/opencode_background.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/opencode_background_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/pi_background.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/pi_background_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/restore.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/restore_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review_asset_provenance_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review_facade.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review_inspect_authority_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review_integration_contract_guard_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review_mode.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review_narration.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review_operation_contract.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review_schema.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review_status_rdd_mode_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review_stop_hook.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/review_stop_hook_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/run.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/run_community_tool_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/run_integration_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/scope.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/sdd_archive_compose.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/sdd_attempt.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/sdd_attempt_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/sdd_verify_validate.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/sdd_verify_validate_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/sync.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/cli/sync_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/components/communitytool/pi_codegraph_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/components/communitytool/tool_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/components/engram/setup.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/components/uninstall/service.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/components/uninstall/service_test.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/envcompat/envcompat.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/envcompat/envcompat_test.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/identity/identity.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/identity/identity_test.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/identity/installer_test.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/identity/invocation_test.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/identity/ratchet_test.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/identity/release_config_test.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/identity/updater_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/opencode/background.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/releasepolicy/policy.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/releaseprovenance/provenance.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/releaseprovenance/provenance_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/releaseprovenancecmd/main.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/releaseprovenancecmd/main_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/reviewerprovider/codex_adapter.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/sddstatus/status.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/state/state.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/state/state_test.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/statemigration/migration.go"
+    },
+    {
+      "status": "A",
+      "path": "internal/statemigration/migration_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/telemetry/killswitch.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/telemetry/runtime_send_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/telemetry/state.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/telemetry/state_lock.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/telemetry/state_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/telemetry/telemetry.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/telemetry/telemetry_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/tui/model.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/tui/model_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/advisory.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/check.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/check_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/cooldown_concurrency_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/instructions.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/registry.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/release_security_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/upgrade/download.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/upgrade/download_auth_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/upgrade/download_durability_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/upgrade/download_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/upgrade/effective_method_routing_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/upgrade/executor.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/upgrade/executor_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/upgrade/go_install_destination_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/upgrade/strategy.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/upgrade/strategy_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/upgrade/windows_distribution_policy_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/update/windows_distribution_policy_test.go"
+    },
+    {
+      "status": "M",
+      "path": "scripts/deadcode-ratchet.sh"
+    },
+    {
+      "status": "M",
+      "path": "scripts/install.ps1"
+    },
+    {
+      "status": "M",
+      "path": "scripts/install.sh"
+    },
+    {
+      "status": "M",
+      "path": "scripts/promote-stable-preflight.sh"
+    },
+    {
+      "status": "M",
+      "path": "scripts/release-preflight.sh"
+    },
+    {
+      "status": "M",
+      "path": "scripts/release-signing-preflight.sh"
+    },
+    {
+      "status": "M",
+      "path": "scripts/test-review-capabilities.sh"
+    },
+    {
+      "status": "M",
+      "path": "scripts/verify-release-assets.sh"
+    }
+  ],
+  "occurrence_classification": {
+    "method": "Four parallel grounding passes over the checkout (build/packaging, self-update, local state and environment, user-facing and preserve-list). No global search-and-replace was performed.",
+    "baseline_occurrences": "1418 files matched gentle[-_ ]?ai at the base commit.",
+    "RENAME_NOW": [
+      "cmd/gentle-ai -> cmd/atomwright (git mv); .goreleaser.yaml project_name/main/binary; minisign trusted and untrusted comments; provenance archive name",
+      "internal/releasepolicy embedded expected copies of .goreleaser.yaml and release.yml, and its artifact identity validation",
+      "scripts/install.sh and install.ps1 release coordinates and binary name; release preflight and asset-verification scripts; .github workflows; .gitignore",
+      "internal/update registry Name/Owner/Repo/GoImportPath, the self-identity guard in check.go, advisory URL, remediation hints, upgrade strategy and executor coordinates",
+      "internal/releaseprovenance repository constant and artifact names",
+      "state root ~/.gentle-ai -> ~/.atomwright across ~20 sites, routed through a new state.Root helper",
+      "user-facing invocation token in internal/app/help.go, app.go, internal/cli Usage lines, doctor coreTools, uninstall manual action, telemetry NoticeLine",
+      "15 genuine runtime environment variables, routed through internal/envcompat with ATOMWRIGHT_ precedence"
+    ],
+    "COMPATIBILITY_READ": [
+      "GENTLE_AI_* spellings of the 15 runtime variables remain readable via envcompat.AliasedSuffixes, with a startup deprecation warning naming variables and never values",
+      "~/.gentle-ai/ is read for migration and never written to or deleted",
+      "internal/reviewtransaction/repository_locator.go continues resolving archived legacy review-context handles"
+    ],
+    "PRESERVE": [
+      {
+        "item": "Go module path github.com/gentleman-programming/gentle-ai/v2",
+        "reason": "Resolved by the module proxy; renaming breaks every import and source install. Asserted decoupled from release coordinates by internal/identity tests."
+      },
+      {
+        "item": "gentle-ai.<name>/vN protocol identifiers (~208-213 spellings, count is regex-dependent)",
+        "reason": "Negotiated wire contracts. internal/reviewtransaction/authority_repair.go feeds one into sha256, so renaming changes every persisted binding digest."
+      },
+      {
+        "item": "next_transition command string 'gentle-ai review ...'",
+        "reason": "Pinned by contracts/review-integration/v2/schemas/transition-execution.schema.json (pattern) and consent.schema.json (const). Changing it is a contract version bump, not a rename. Documented as a known limitation."
+      },
+      {
+        "item": "<!-- gentle-ai:... --> injected block markers",
+        "reason": "Already written into users' CLAUDE.md and AGENTS.md; renaming orphans installed blocks so uninstall can no longer find them."
+      },
+      {
+        "item": "GENTLE_AI_REVIEW_* and GENTLE_AI_FROZEN_CANDIDATE_CONTEXT",
+        "reason": "Reviewer prompt markers matched by agent definitions installed by older binaries, not environment variables."
+      },
+      {
+        "item": "GENTLE_AI_TELEMETRY as an enum value in contracts/telemetry/v1/schemas/",
+        "reason": "Pinned wire enum. The Go env read is aliased; the contract value is not."
+      },
+      {
+        "item": "<git-common-dir>/gentle-ai/ review authority store path component",
+        "reason": "Pattern-matched as a security invariant in rar_path_safety.go and store_lock.go."
+      },
+      {
+        "item": "gentle-ai-review-provider-contract-<semver>.tar.gz release asset",
+        "reason": "Published integration-contract bundle resolved by name by third-party review providers. Not an executable."
+      },
+      {
+        "item": "gentle-ai-* skill IDs, agent-side installed filenames, embedded assets and golden files",
+        "reason": "Installed on disk under those names in users' environments."
+      },
+      {
+        "item": "~/.gentle-ai/backups/ contents",
+        "reason": "Each manifest embeds an absolute root_dir that internal/backup/manifest.go validates as an anti-tamper containment check; a relocated manifest is rejected at restore time."
+      },
+      {
+        "item": "Historical attribution and archived material: NOTICE.md, TRADEMARKS.md, CONTRIBUTORS.md, openspec/, bench/, PRD.md, docs/audits/",
+        "reason": "Upstream attribution and dated records."
+      }
+    ],
+    "DEFER": [
+      "Telemetry endpoint and gentle-ai.telemetry-* schema identifiers",
+      "gentle-telemetry collector binary, deploy/telemetry systemd units and dashboards",
+      "Local CI docker image tags (gentle-ai-e2e-*, gentle-ai-claude-network-none)",
+      "Homebrew publishing, removed here and tracked as a separate change",
+      "User-agent strings in update check and advisory requests"
+    ],
+    "UNKNOWN": [
+      "bench/runner.go writes a project .gitignore entry for .gentle-ai/, implying a repo-local state directory not otherwise found in production code. Left untouched; not reached by any changed path."
+    ]
+  },
+  "acceptance_criteria": [
+    {
+      "criterion": "Release/build output produces atomwright",
+      "test": "internal/identity: TestGoreleaserPublishesAtomwright, TestCommandDirectoryIsAtomwright",
+      "also": "Inspected GoReleaser snapshot artifacts"
+    },
+    {
+      "criterion": "Installer installs atomwright",
+      "test": "internal/identity: TestPosixInstallerUsesAtomwrightIdentity, TestWindowsInstallerUsesAtomwrightIdentity"
+    },
+    {
+      "criterion": "Uninstaller targets Atomwright-owned paths only",
+      "test": "internal/identity: TestUninstallManualActionNamesAtomwrightExecutable; internal/components/uninstall service tests"
+    },
+    {
+      "criterion": "Help and docs use atomwright as the invocation token",
+      "test": "internal/identity: TestHelpUsageInvokesAtomwright; internal/cli contract guard TestEveryDocumentedReviewCommandIsReal"
+    },
+    {
+      "criterion": "Self-update resolves Atomwright repository and asset names",
+      "test": "internal/identity: TestUpdateRegistryPrimaryToolIsAtomwright; internal/update/upgrade download tests"
+    },
+    {
+      "criterion": "Fresh startup uses ~/.atomwright/",
+      "test": "internal/statemigration: TestPlanOutcomeStateTable (absent/absent)"
+    },
+    {
+      "criterion": "Legacy-only state follows the approved migration behavior",
+      "test": "internal/statemigration: TestApplyMigratesStateAndTelemetry; internal/app: TestMigrationRunsBeforeCommandDispatch"
+    },
+    {
+      "criterion": "Existing Atomwright state is never overwritten",
+      "test": "internal/statemigration: TestMigrationNeverOverwritesExistingAtomwrightState"
+    },
+    {
+      "criterion": "Dual-directory conflict is safe and explicit",
+      "test": "internal/statemigration: TestApplyRefusesConflictAndExplainsBothPaths, TestDivergentNewRootIsAConflictNotAResume, TestUnexpectedEntryInNewRootIsAConflict"
+    },
+    {
+      "criterion": "Re-running migration is idempotent",
+      "test": "internal/statemigration: TestMigrationIsIdempotent"
+    },
+    {
+      "criterion": "Deprecated environment aliases follow deterministic precedence",
+      "test": "internal/envcompat: TestLookupResolvesPrefixedVariables, TestLookupIsDeterministic"
+    },
+    {
+      "criterion": "No public release configuration emits a gentle-ai executable or asset",
+      "test": "internal/identity: TestNoPublicReleaseArtifactNamedGentleAI, TestGoreleaserHasNoHomebrewPublishing",
+      "also": "Inspected snapshot artifacts and checksums.txt"
+    }
+  ],
+  "safety_properties": [
+    {
+      "property": "Migration cannot delete legacy data",
+      "test": "TestMigrationNeverDeletesLegacyData",
+      "also": "Verified with the real binary: legacy root intact after migration"
+    },
+    {
+      "property": "Migration cannot escape either configuration root",
+      "test": "TestMigrationCannotEscapeRoots, TestMigrationDoesNotFollowUnsafeSymlinks"
+    },
+    {
+      "property": "An interruption cannot leave Atomwright believing migration completed",
+      "test": "TestInterruptedMigrationIsNotRecordedAsComplete; recovery proven by TestInterruptedMigrationResumes"
+    },
+    {
+      "property": "Uninstall cannot remove the legacy installation unless explicitly targeted",
+      "test": "internal/components/uninstall service tests; uninstall removes managed config under the Atomwright root and never the executable"
+    },
+    {
+      "property": "Atomwright's updater cannot fetch releases from the upstream repository",
+      "test": "TestUpdaterNeverTargetsUpstreamRepository (scans internal/update non-test sources)"
+    },
+    {
+      "property": "Sensitive environment values do not appear in output",
+      "test": "TestDeprecationWarningNeverLeaksValues, TestWarningsReportsEveryDeprecatedVariableOnce"
+    },
+    {
+      "property": "Repeated setup, migration and update planning are deterministic",
+      "test": "TestPlanIsDeterministic, TestLookupIsDeterministic, TestMigrationIsIdempotent"
+    }
+  ],
+  "red_green_evidence": {
+    "baseline_verified_green_at_76afba15": {
+      "gofmtcheck": 0,
+      "build": 0,
+      "vet": 0,
+      "test": 0
+    },
+    "red": {
+      "method": "Test files were authored first, with no production code. internal/identity was then implemented so the file-scanning assertions could execute and fail on real file content rather than on a build error.",
+      "failing_tests": 26,
+      "samples": [
+        ".goreleaser.yaml:3 declares a release artifact named gentle-ai: \"project_name: gentle-ai\"",
+        ".goreleaser.yaml:129 declares a release artifact named gentle-ai: \"name: gentle-ai\"",
+        "internal/update/advisory.go:27 targets the upstream repository",
+        "internal/update/check.go:175 pairs the upstream owner with this product",
+        "scripts/install.sh:283 composes a Go module path from the release coordinates",
+        "internal/app/help.go USAGE block does not show \"atomwright <command> [flags]\"",
+        "scripts/deadcode-ratchet.sh failed without naming the bad target in its diagnostic"
+      ]
+    },
+    "green": {
+      "gofmtcheck": 0,
+      "build": 0,
+      "vet": 0,
+      "test": 0,
+      "packages_ok": 82,
+      "deadcode_ratchet": 0,
+      "bench_module": {
+        "build": 0,
+        "vet": 0,
+        "test": 0
+      }
+    }
+  },
+  "migration_scenarios_verified_with_real_binary": [
+    {
+      "legacy": "absent",
+      "atomwright": "absent",
+      "result": "fresh setup, no directories created by a version query"
+    },
+    {
+      "legacy": "present",
+      "atomwright": "absent",
+      "result": "state.json and telemetry.json copied; mode 0600 preserved; legacy root intact; backups/ NOT relocated; PATH action-required message printed"
+    },
+    {
+      "legacy": "absent",
+      "atomwright": "present",
+      "result": "normal startup, migration is a no-op"
+    },
+    {
+      "legacy": "present",
+      "atomwright": "present (divergent)",
+      "result": "conflict reported naming both absolute paths; neither directory modified"
+    },
+    {
+      "scenario": "re-run after a successful migration",
+      "result": "idempotent, silent"
+    },
+    {
+      "scenario": "interrupted run (file published, marker missing, bytes identical)",
+      "result": "resumes and publishes the missing file"
+    },
+    {
+      "scenario": "ATOMWRIGHT_CHANNEL=stable with GENTLE_AI_CHANNEL=beta",
+      "result": "ATOMWRIGHT_ wins; warning names both variables; the value 'beta' never appears in output"
+    }
+  ],
+  "packaging_artifact_inspection": {
+    "tool": "goreleaser release --snapshot --clean --skip=publish,sign,announce",
+    "config_check": "goreleaser check: 1 configuration file validated",
+    "archives": [
+      "atomwright_2.7.0-SNAPSHOT-76afba15_darwin_amd64.tar.gz",
+      "atomwright_2.7.0-SNAPSHOT-76afba15_darwin_arm64.tar.gz",
+      "atomwright_2.7.0-SNAPSHOT-76afba15_linux_amd64.tar.gz",
+      "atomwright_2.7.0-SNAPSHOT-76afba15_linux_arm64.tar.gz",
+      "atomwright-release-provenance-v1.tar.gz",
+      "gentle-ai-review-provider-contract-1.2.0.tar.gz"
+    ],
+    "tar_member_in_each_platform_archive": "atomwright",
+    "binary_identity": "`atomwright version` prints `atomwright 2.7.0-SNAPSHOT-76afba15`; help USAGE shows `atomwright <command> [flags]`",
+    "executable_named_gentle_ai": "none produced",
+    "only_asset_retaining_the_legacy_name": "gentle-ai-review-provider-contract-1.2.0.tar.gz, a published integration-contract bundle resolved by name by third-party providers; not an executable and deliberately preserved",
+    "homebrew": "no brews configuration, no formula artifact, no HOMEBREW_TAP_TOKEN reference"
+  },
+  "verification_commands": [
+    {
+      "command": "go run ./internal/gofmtcheck",
+      "exit": 0
+    },
+    {
+      "command": "go build ./...",
+      "exit": 0
+    },
+    {
+      "command": "go vet ./...",
+      "exit": 0
+    },
+    {
+      "command": "go test ./...",
+      "exit": 0,
+      "note": "82 packages ok"
+    },
+    {
+      "command": "./scripts/deadcode-ratchet.sh",
+      "exit": 0,
+      "note": "no new unreachable functions"
+    },
+    {
+      "command": "cd bench && go build ./... && go vet ./... && go test ./...",
+      "exit": 0
+    },
+    {
+      "command": "goreleaser check",
+      "exit": 0
+    },
+    {
+      "command": "goreleaser release --snapshot --clean --skip=publish,sign,announce",
+      "exit": 0
+    }
+  ],
+  "explicit_proofs": {
+    "no_public_executable_or_release_asset_named_gentle_ai": "TestNoPublicReleaseArtifactNamedGentleAI scans .goreleaser.yaml, release.yml, promote-stable-rc.yml, verify-release-assets.sh and promote-stable-preflight.sh. Confirmed independently by inspecting the snapshot dist/ output and checksums.txt: every platform archive and its tar member is named atomwright. The sole remaining gentle-ai-named asset is the provider-contract bundle, which is a protocol identifier and not an executable.",
+    "updater_does_not_target_upstream": "TestUpdaterNeverTargetsUpstreamRepository scans every non-test file under internal/update and fails on any pairing of the upstream owner with this product, including the previously hardcoded advisory URL. The update registry now names pablogore/atomwright.",
+    "legacy_state_is_not_deleted_or_overwritten": "TestMigrationNeverDeletesLegacyData and TestMigrationNeverOverwritesExistingAtomwrightState, plus real-binary runs confirming the legacy root survives migration and that a divergent target root is refused without modification."
+  },
+  "known_limitations": [
+    "next_transition.execute.command still renders the 'gentle-ai review ...' spelling because the published v2 schemas pin it. Callers should route from operation and arguments. Resolving this requires a review-integration contract version bump.",
+    "Homebrew is not a supported install path. Restoring it requires an Atomwright-owned tap and a token.",
+    "Windows binary distribution remains on the inherited hold pending Authenticode signing; go install is the supported Windows path.",
+    "internal/app TestRunArgs_UpgradeDryRun performs a live update check, so it depends on network availability. Its assertion now accepts a failed check as a legitimate no-upgrade outcome.",
+    "Documentation files not in the installation or migration path still carry inherited invocation examples (docs/telemetry-collector.md, docs/components.md, docs/kiro.md and others). Listed in upstream-baseline.md as deferred.",
+    "The GoReleaser snapshot was produced with signing skipped and a placeholder public-key ldflag; signature identity binding is asserted by tests, not by a signed local artifact."
+  ],
+  "follow_up_work": [
+    "Bump review-integration to a contract version that renders the atomwright invocation token in next_transition command strings",
+    "Restore Homebrew publishing through an Atomwright-owned tap",
+    "Migrate the telemetry endpoint, schema identifiers and the gentle-telemetry collector",
+    "Sweep the remaining inherited invocation examples in secondary documentation",
+    "Rename injected configuration block markers, which requires an in-place migration of users' CLAUDE.md and AGENTS.md"
+  ]
+}

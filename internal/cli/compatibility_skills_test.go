@@ -128,7 +128,7 @@ func TestRunSyncDryRunMatchesZeroAgentCompatibilityRefresh(t *testing.T) {
 	if err != nil || dryRun.NoOp || !slices.ContainsFunc(dryRun.Plan.Apply, func(step pipeline.Step) bool { return step.ID() == "sync:compatibility-skills-refresh" }) {
 		t.Fatalf("compatibility refresh plan missing without agents: no-op=%t, err=%v", dryRun.NoOp, err)
 	}
-	backupRoot := filepath.Join(home, ".gentle-ai", "backups")
+	backupRoot := filepath.Join(home, ".atomwright", "backups")
 	if _, statErr := os.Stat(backupRoot); !os.IsNotExist(statErr) {
 		t.Fatalf("agentless compatibility dry-run created backup root %q: %v", backupRoot, statErr)
 	}

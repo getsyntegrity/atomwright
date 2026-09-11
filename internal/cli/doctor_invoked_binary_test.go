@@ -22,13 +22,13 @@ func TestCheckOneTool_GentleAINamesTheInvokedExecutable(t *testing.T) {
 	origExec := osExecutableDoctor
 	defer func() { lookPathFn = origLook; osExecutableDoctor = origExec }()
 
-	pathCopy := filepath.Join(t.TempDir(), "gentle-ai")
-	invokedCopy := filepath.Join(t.TempDir(), "gentle-ai")
+	pathCopy := filepath.Join(t.TempDir(), "atomwright")
+	invokedCopy := filepath.Join(t.TempDir(), "atomwright")
 
 	lookPathFn = func(string) (string, error) { return pathCopy, nil }
 	osExecutableDoctor = func() (string, error) { return invokedCopy, nil }
 
-	got := checkOneTool("gentle-ai", nil)
+	got := checkOneTool("atomwright", nil)
 
 	if got.Status != CheckStatusPass {
 		t.Fatalf("expected pass, got %s: %s", got.Status, got.Detail)
@@ -51,13 +51,13 @@ func TestCheckOneTool_GentleAIFlagsWhenInvokedDiffersFromPath(t *testing.T) {
 	defer func() { lookPathFn = origLook; osExecutableDoctor = origExec }()
 
 	dir := t.TempDir()
-	pathCopy := filepath.Join(dir, "system-install", "gentle-ai")
-	invokedCopy := filepath.Join(dir, "rc-build", "gentle-ai")
+	pathCopy := filepath.Join(dir, "system-install", "atomwright")
+	invokedCopy := filepath.Join(dir, "rc-build", "atomwright")
 
 	lookPathFn = func(string) (string, error) { return pathCopy, nil }
 	osExecutableDoctor = func() (string, error) { return invokedCopy, nil }
 
-	got := checkOneTool("gentle-ai", nil)
+	got := checkOneTool("atomwright", nil)
 
 	if !strings.Contains(got.Detail, "differs") {
 		t.Fatalf("Detail does not flag that the invoked build differs from the PATH copy: %q", got.Detail)
@@ -72,11 +72,11 @@ func TestCheckOneTool_GentleAISameExecutableAsPathIsNotFlagged(t *testing.T) {
 	origExec := osExecutableDoctor
 	defer func() { lookPathFn = origLook; osExecutableDoctor = origExec }()
 
-	same := filepath.Join(t.TempDir(), "gentle-ai")
+	same := filepath.Join(t.TempDir(), "atomwright")
 	lookPathFn = func(string) (string, error) { return same, nil }
 	osExecutableDoctor = func() (string, error) { return same, nil }
 
-	got := checkOneTool("gentle-ai", nil)
+	got := checkOneTool("atomwright", nil)
 
 	if strings.Contains(got.Detail, "differs") {
 		t.Fatalf("Detail spuriously flags a mismatch when invoked == PATH-resolved: %q", got.Detail)
@@ -131,17 +131,17 @@ func TestCheckOneTool_GentleAIDuplicatesStillNameInvokedExecutable(t *testing.T)
 	dir1 := t.TempDir()
 	dir2 := t.TempDir()
 	for _, dir := range []string{dir1, dir2} {
-		p := filepath.Join(dir, "gentle-ai")
+		p := filepath.Join(dir, "atomwright")
 		if err := os.WriteFile(p, []byte("fake"), 0o755); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	invokedCopy := filepath.Join(t.TempDir(), "gentle-ai")
-	lookPathFn = func(string) (string, error) { return filepath.Join(dir1, "gentle-ai"), nil }
+	invokedCopy := filepath.Join(t.TempDir(), "atomwright")
+	lookPathFn = func(string) (string, error) { return filepath.Join(dir1, "atomwright"), nil }
 	osExecutableDoctor = func() (string, error) { return invokedCopy, nil }
 
-	got := checkOneTool("gentle-ai", []string{dir1, dir2})
+	got := checkOneTool("atomwright", []string{dir1, dir2})
 
 	if got.Status != CheckStatusWarn {
 		t.Fatalf("expected warn for duplicate copies, got %s: %s", got.Status, got.Detail)
@@ -169,11 +169,11 @@ func TestCheckOneTool_GentleAINotFoundNamesInvokedExecutableWithoutComparison(t 
 	origExec := osExecutableDoctor
 	defer func() { lookPathFn = origLook; osExecutableDoctor = origExec }()
 
-	invokedCopy := filepath.Join(t.TempDir(), "gentle-ai")
+	invokedCopy := filepath.Join(t.TempDir(), "atomwright")
 	lookPathFn = func(string) (string, error) { return "", errors.New("not found") }
 	osExecutableDoctor = func() (string, error) { return invokedCopy, nil }
 
-	got := checkOneTool("gentle-ai", nil)
+	got := checkOneTool("atomwright", nil)
 
 	if got.Status != CheckStatusFail {
 		t.Fatalf("expected fail, got %s: %s", got.Status, got.Detail)
@@ -208,16 +208,16 @@ func TestCheckOneTool_GentleAIExecutableUnresolvable(t *testing.T) {
 	dir1 := t.TempDir()
 	dir2 := t.TempDir()
 	for _, dir := range []string{dir1, dir2} {
-		p := filepath.Join(dir, "gentle-ai")
+		p := filepath.Join(dir, "atomwright")
 		if err := os.WriteFile(p, []byte("fake"), 0o755); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	lookPathFn = func(string) (string, error) { return filepath.Join(dir1, "gentle-ai"), nil }
+	lookPathFn = func(string) (string, error) { return filepath.Join(dir1, "atomwright"), nil }
 	osExecutableDoctor = func() (string, error) { return "", errors.New("cannot resolve") }
 
-	got := checkOneTool("gentle-ai", []string{dir1, dir2})
+	got := checkOneTool("atomwright", []string{dir1, dir2})
 
 	if strings.Contains(got.Detail, "invoked executable") {
 		t.Fatalf("Detail fabricated an invoked-executable clause despite resolution failure: %q", got.Detail)

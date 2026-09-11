@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 )
@@ -17,7 +19,11 @@ import (
 // background-subagent preference. It mirrors the OpenCode contract; there is
 // no launcher or activation plumbing behind it because the primitive is the
 // already-installed pi-subagents extension reading a projected policy file.
-const PiBackgroundSubagentsEnv = "GENTLE_AI_PI_BACKGROUND_SUBAGENTS"
+const piBackgroundSubagentsEnvSuffix = "PI_BACKGROUND_SUBAGENTS"
+
+// PiBackgroundSubagentsEnv is the current, fully prefixed variable name, used
+// where the name is shown to a user.
+var PiBackgroundSubagentsEnv = identity.EnvPrefix() + piBackgroundSubagentsEnvSuffix
 
 // PiConfigHomeEnv overrides gentle-pi's config base directory (default
 // ~/.pi), matching gentle-pi's own configuration precedent.
@@ -123,7 +129,7 @@ func parsePiBackgroundIntent(source, raw string, present bool) (model.PiBackgrou
 }
 
 func resolvePiBackgroundCLI(set bool, raw string, persisted state.InstallState) (PiBackgroundResolution, error) {
-	envValue, envSet := os.LookupEnv(PiBackgroundSubagentsEnv)
+	envValue, envSet, _ := envcompat.Lookup(piBackgroundSubagentsEnvSuffix)
 	return ResolvePiBackground(PiBackgroundResolveInput{
 		CLISet:       set,
 		CLIValue:     model.PiBackgroundIntent(raw),
@@ -139,7 +145,7 @@ func resolvePiBackgroundCLI(set bool, raw string, persisted state.InstallState) 
 // flow, so a missing prior and missing environment decision is the only case
 // that requests the TUI choice screen.
 func ResolvePiBackgroundInteractive(prior model.PiBackgroundIntent) (PiBackgroundResolution, error) {
-	envValue, envSet := os.LookupEnv(PiBackgroundSubagentsEnv)
+	envValue, envSet, _ := envcompat.Lookup(piBackgroundSubagentsEnvSuffix)
 	return ResolvePiBackground(PiBackgroundResolveInput{
 		EnvSet:       envSet,
 		EnvValue:     envValue,

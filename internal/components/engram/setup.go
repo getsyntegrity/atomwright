@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
 )
 
@@ -75,8 +76,10 @@ func ProbeProtocolFlagCommand(ctx context.Context, command string) (string, erro
 }
 
 const (
-	SetupModeEnvVar   = "GENTLE_AI_ENGRAM_SETUP_MODE"
-	SetupStrictEnvVar = "GENTLE_AI_ENGRAM_SETUP_STRICT"
+	// The suffixes are unprefixed on purpose: envcompat decides which prefix
+	// answers, so the inherited GENTLE_AI_ names keep working.
+	SetupModeEnvSuffix   = "ENGRAM_SETUP_MODE"
+	SetupStrictEnvSuffix = "ENGRAM_SETUP_STRICT"
 )
 
 type SetupMode string
@@ -159,3 +162,10 @@ func ShouldAttemptSetup(mode SetupMode, agent model.AgentID) bool {
 		return slug == "opencode"
 	}
 }
+
+// SetupModeEnvVar and SetupStrictEnvVar are the current, fully prefixed
+// variable names, used where the name is shown to a user or set directly.
+var (
+	SetupModeEnvVar   = identity.EnvPrefix() + SetupModeEnvSuffix
+	SetupStrictEnvVar = identity.EnvPrefix() + SetupStrictEnvSuffix
+)

@@ -21,6 +21,7 @@ import (
 	minisign "github.com/jedisct1/go-minisign"
 
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/update"
 )
@@ -132,7 +133,7 @@ func Download(ctx context.Context, r update.UpdateResult, profile system.Platfor
 	}
 
 	// Download only after the signed manifest has been authenticated.
-	tmpDir, err := os.MkdirTemp("", "gentle-ai-upgrade-*")
+	tmpDir, err := os.MkdirTemp("", identity.Executable()+"-upgrade-*")
 	if err != nil {
 		return fmt.Errorf("create temp dir: %w", err)
 	}

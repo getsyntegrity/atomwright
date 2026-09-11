@@ -14,6 +14,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 )
 
 const runtimeAck = `{"schema":"gentle-ai.telemetry-runtime-delivery/v1","decision":"stored"}`
@@ -90,7 +92,7 @@ func TestRuntimeSendOneAttemptNoDisk(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			home := runtimeHome(t)
 			for _, name := range []string{"telemetry-runtime-pending-v1.json", "telemetry-runtime-outbox-v1.json", "telemetry-runtime-kick-v1.json", "telemetry-runtime.lock"} {
-				if err := os.WriteFile(filepath.Join(home, stateDir, name), []byte("STALE_PRIVATE_METRICS"), 0600); err != nil {
+				if err := os.WriteFile(filepath.Join(state.Root(home), name), []byte("STALE_PRIVATE_METRICS"), 0600); err != nil {
 					t.Fatal(err)
 				}
 			}

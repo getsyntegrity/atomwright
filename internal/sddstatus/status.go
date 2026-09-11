@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/pathquote"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/reviewtransaction"
 )
@@ -1038,7 +1039,7 @@ func shouldTryEngram(workspaceRoot string) bool {
 	if declared, ok := declaredArtifactStore(workspaceRoot); ok {
 		return declared == ArtifactStoreEngram || declared == ArtifactStoreHybrid
 	}
-	if os.Getenv("GENTLE_AI_SDD_STATUS_ENGRAM") != "" {
+	if value, _, _ := envcompat.Lookup("SDD_STATUS_ENGRAM"); value != "" {
 		return true
 	}
 	if _, err := os.Stat(filepath.Join(workspaceRoot, ".engram")); err == nil {

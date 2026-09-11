@@ -58,7 +58,7 @@ jobs:
         run: |
           set -euo pipefail
           run_id="${GITHUB_RUN_ID}:${GITHUB_RUN_ATTEMPT}:${GITHUB_JOB}"
-          marker="$RUNNER_TEMP/gentle-ai-release-policy-snapshot-start"
+          marker="$RUNNER_TEMP/atomwright-release-policy-snapshot-start"
           rm -f -- "$marker"
           umask 077
           printf '%s\n' "$run_id" >"$marker"
@@ -139,8 +139,8 @@ jobs:
 
       - name: Configure ephemeral signing paths
         run: |
-          printf 'MINISIGN_SECRET_KEY_FILE=%s/gentle-ai-release.key\n' "$RUNNER_TEMP" >>"$GITHUB_ENV"
-          printf 'MINISIGN_SIGNING_PUBLIC_KEY_FILE=%s/gentle-ai-release-signing.pub\n' "$RUNNER_TEMP" >>"$GITHUB_ENV"
+          printf 'MINISIGN_SECRET_KEY_FILE=%s/atomwright-release.key\n' "$RUNNER_TEMP" >>"$GITHUB_ENV"
+          printf 'MINISIGN_SIGNING_PUBLIC_KEY_FILE=%s/atomwright-release-signing.pub\n' "$RUNNER_TEMP" >>"$GITHUB_ENV"
           PROVIDER_CONTRACT_SEMVER=$(tr -d '\n' < contracts/review-provider-contract/CONTRACT_SEMVER)
           [[ "$PROVIDER_CONTRACT_SEMVER" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
           printf 'PROVIDER_CONTRACT_SEMVER=%s\n' "$PROVIDER_CONTRACT_SEMVER" >>"$GITHUB_ENV"
@@ -174,7 +174,6 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           MINISIGN_SECRET_KEY_FILE: ${{ env.MINISIGN_SECRET_KEY_FILE }}
           MINISIGN_PUBLIC_KEYS_CANONICAL: ${{ steps.trust-anchors.outputs.canonical }}
 

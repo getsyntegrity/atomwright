@@ -19,7 +19,7 @@ const (
 	// trigger release.yml, so building one by hand is the documented path, and a
 	// local checkout knows no tag, run or workflow it could honestly name.
 	localSchema         = "gentle-ai.release-provenance/local-build"
-	repository          = "Gentleman-Programming/gentle-ai"
+	repository          = "pablogore/atomwright"
 	goReleaserVersion   = "v2.15.2"
 	providerArchiveKind = "provider-contract"
 )
@@ -102,7 +102,7 @@ func Build(config []byte, input Input) ([]byte, error) {
 	artifacts := make([]any, 0, len(platforms)+1)
 	for _, platform := range platforms {
 		artifacts = append(artifacts, binaryArtifact{
-			Name: "gentle-ai_" + version + "_" + platform[0] + "_" + platform[1] + ".tar.gz", Kind: "binary",
+			Name: "atomwright_" + version + "_" + platform[0] + "_" + platform[1] + ".tar.gz", Kind: "binary",
 			GOOS: platform[0], GOARCH: platform[1], CGOEnabled: "0", Trimpath: true,
 		})
 	}

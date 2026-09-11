@@ -10,9 +10,9 @@
 | --------- | ----------- | --------------------------------------------------------------------------------- |
 | Gentleman | `gentleman` | Teaching-oriented mentor persona — pushes back on bad practices, explains the why |
 | Neutral   | `neutral`   | Same teacher, same philosophy, no regional language — warm and professional       |
-| Custom    | `custom`    | Keep your existing persona/config unmanaged — gentle-ai does not inject a persona |
+| Custom    | `custom`    | Keep your existing persona/config unmanaged — atomwright does not inject a persona |
 
-`custom` is a compatibility/ownership choice, not a persona editor. Use it when you already have your own persona instructions and want gentle-ai to leave them alone.
+`custom` is a compatibility/ownership choice, not a persona editor. Use it when you already have your own persona instructions and want atomwright to leave them alone.
 
 ---
 
@@ -21,7 +21,7 @@
 Just run it — the Bubbletea TUI guides you through agent selection, components, skills, presets, and managed uninstall flows:
 
 ```bash
-gentle-ai
+atomwright
 ```
 
 The uninstall flow is also available from the TUI menu. It lets you:
@@ -30,7 +30,7 @@ The uninstall flow is also available from the TUI menu. It lets you:
 - select which managed components to remove (for example `sdd`, `persona`, or `context7`)
 - confirm the exact uninstall scope before applying changes
 
-Before any managed file is modified, `gentle-ai` creates a backup snapshot so the configuration can be restored later if needed.
+Before any managed file is modified, `atomwright` creates a backup snapshot so the configuration can be restored later if needed.
 
 ### Receipt-Driven Development during installation
 
@@ -40,10 +40,10 @@ The choice is optional and defaults to OFF when no global preference exists. You
 
 ### Disable TUI spinner animation
 
-Set `GENTLE_AI_NO_ANIMATION=1` to keep TUI spinner frames static:
+Set `ATOMWRIGHT_NO_ANIMATION=1` to keep TUI spinner frames static:
 
 ```bash
-GENTLE_AI_NO_ANIMATION=1 gentle-ai
+ATOMWRIGHT_NO_ANIMATION=1 atomwright
 ```
 
 This disables only spinner animation; install, update, sync, and uninstall operations continue normally. Unset the variable, or use any value other than `1`, to keep the default animation behavior.
@@ -54,33 +54,33 @@ This disables only spinner animation; install, update, sync, and uninstall opera
 
 ### install
 
-First-time setup — detects your tools, configures agents, injects all components. When installing a single agent with `--agent X`, gentle-ai **merges** the new agent into the existing `installed_agents` list in `state.json` and **preserves** any existing `model_assignments` — it does not overwrite the full state.
+First-time setup — detects your tools, configures agents, injects all components. When installing a single agent with `--agent X`, atomwright **merges** the new agent into the existing `installed_agents` list in `state.json` and **preserves** any existing `model_assignments` — it does not overwrite the full state.
 
 ```bash
 # Full ecosystem for multiple agents
-gentle-ai install \
+atomwright install \
   --agent claude-code,opencode,gemini-cli \
   --preset full-gentleman
 
 # Minimal setup for Cursor
-gentle-ai install \
+atomwright install \
   --agent cursor \
   --preset minimal
 
 # OpenClaw setup after installing OpenClaw manually
-gentle-ai install \
+atomwright install \
   --agent openclaw \
   --preset full-gentleman
 
 # Pick specific components and skills
-gentle-ai install \
+atomwright install \
   --agent claude-code \
   --component engram,sdd,skills,context7,persona,permissions \
   --skill go-testing,skill-creator,branch-pr,issue-creation \
   --persona gentleman
 
 # Dry-run first (preview plan without applying changes)
-gentle-ai install --dry-run \
+atomwright install --dry-run \
   --agent claude-code,opencode \
   --preset full-gentleman
 ```
@@ -90,9 +90,9 @@ gentle-ai install --dry-run \
 Refresh the project-local skill registry used by orchestrators before they delegate work:
 
 ```bash
-gentle-ai skill-registry refresh
-gentle-ai skill-registry refresh --force
-gentle-ai skill-registry refresh --cwd /path/to/project --quiet
+atomwright skill-registry refresh
+atomwright skill-registry refresh --force
+atomwright skill-registry refresh --cwd /path/to/project --quiet
 ```
 
 The command scans project skills first (`skills/`, `.opencode/skills/`, `.claude/skills/`, `.github/skills/`, and other supported workspace skill roots), then global agent skill directories. Project-local skills win over same-name global skills.
@@ -105,101 +105,92 @@ See [Skill Registry](skill-registry.md) for the full index-first flow and diagra
 
 ### sync
 
-Refresh managed assets to the current version. Run it after replacing or upgrading the `gentle-ai` binary, including with `brew upgrade`, `gentle-ai upgrade`, or `go install`. It does NOT reinstall binaries (engram, GGA) — only updates prompt content, skills, MCP configs, and SDD orchestrators.
+Refresh managed assets to the current version. Run it after replacing or upgrading the `atomwright` binary, including with `atomwright upgrade` or `go install`. It does NOT reinstall binaries (engram, GGA) — only updates prompt content, skills, MCP configs, and SDD orchestrators.
 
 Managed reviewer and runtime assets are version-bound to the binary. Until sync succeeds, review lifecycle operations fail closed when managed writer provenance is missing or mismatched.
 
-> **Important:** `gentle-ai sync` updates the agents recorded as installed by Gentle AI™, not every AI agent config directory on your machine.
+> **Important:** `atomwright sync` updates the agents recorded as installed by Gentle AI™, not every AI agent config directory on your machine.
 >
-> Gentle AI stores your selected install targets in `~/.gentle-ai/state.json`. Future `sync` runs use that stored selection so Gentle AI does not accidentally write into tools you did not choose to manage. If you rerun install and select only one agent, that new selection becomes the default sync scope.
+> Gentle AI stores your selected install targets in `~/.atomwright/state.json`. Future `sync` runs use that stored selection so Gentle AI does not accidentally write into tools you did not choose to manage. If you rerun install and select only one agent, that new selection becomes the default sync scope.
 >
-> Before syncing, you can preview the active scope with `gentle-ai sync --dry-run`. If you want to sync agents outside the stored selection, pass them explicitly with `--agent`.
+> Before syncing, you can preview the active scope with `atomwright sync --dry-run`. If you want to sync agents outside the stored selection, pass them explicitly with `--agent`.
 
 ```bash
 # Preview which agents sync will update
-gentle-ai sync --dry-run
+atomwright sync --dry-run
 
-# Sync the agents currently registered in ~/.gentle-ai/state.json
-gentle-ai sync
+# Sync the agents currently registered in ~/.atomwright/state.json
+atomwright sync
 
 # Sync specific agents only
-gentle-ai sync --agent claude-code --agent opencode
+atomwright sync --agent claude-code --agent opencode
 
 # Refresh OpenClaw workspace instructions and MCP config
-gentle-ai sync --agent openclaw
+atomwright sync --agent openclaw
 ```
 
 Sync is safe and idempotent — running it twice produces no changes the second time. When files change, the summary reports the changed file count and lists the changed file paths.
 
 `sync` refreshes the managed component set for the selected agents. It does not support `--component`; use `--include-permissions` or `--include-theme` for the opt-in components that are excluded from the default sync scope.
 
-After upgrading the binary, `gentle-ai sync --dry-run` previews the selected targets; `gentle-ai sync` refreshes their primary remote-authorization guidance. To select a specific managed client, use e.g. `gentle-ai sync --agent opencode`. This behavioral section is delivered with unconditional routing guidance, without requiring persona, SDD, or `--include-permissions`. It requires explicit destination, operation, and credential/session authorization before remote work or ambient access discovery/reuse.
+After upgrading the binary, `atomwright sync --dry-run` previews the selected targets; `atomwright sync` refreshes their primary remote-authorization guidance. To select a specific managed client, use e.g. `atomwright sync --agent opencode`. This behavioral section is delivered with unconditional routing guidance, without requiring persona, SDD, or `--include-permissions`. It requires explicit destination, operation, and credential/session authorization before remote work or ambient access discovery/reuse.
 
 This update covers the 15 non-Pi primary instruction carriers only. Executor roles, named profiles, and Pi's package-owned instructions require separate behavioral coverage. Existing automation modes and remembered approvals may suppress runtime prompts. The guidance is not a sandbox or a fresh-human-per-execution guarantee. Shared settings merging and profile cleanup preserve existing permission-rule order.
 
-For OpenCode native remote-command asks, opt in separately: `gentle-ai sync --agent opencode --include-permissions` (or `--agent kilocode` for the shared generated configuration). Defaults ask for direct `ssh`, `scp`, `sftp`, and `rsync`, bare or with arguments; local-only rsync also asks conservatively. Existing restrictions and explicit custom allows remain authoritative, so custom configurations may still allow remote commands. Defaults do not rewrite those personal allows. Agent overrides and remembered approvals may also bypass a prompt.
+For OpenCode native remote-command asks, opt in separately: `atomwright sync --agent opencode --include-permissions` (or `--agent kilocode` for the shared generated configuration). Defaults ask for direct `ssh`, `scp`, `sftp`, and `rsync`, bare or with arguments; local-only rsync also asks conservatively. Existing restrictions and explicit custom allows remain authoritative, so custom configurations may still allow remote commands. Defaults do not rewrite those personal allows. Agent overrides and remembered approvals may also bypass a prompt.
 
 Matcher fixtures follow OpenCode [v1.2.27 wildcard matching](https://github.com/anomalyco/opencode/blob/v1.2.27/packages/opencode/src/util/wildcard.ts) and its last-matching permission evaluation. They do not prove interception of absolute executable paths, env wrappers, interpreters, or arbitrary compound shell syntax; the runtime extracts command nodes separately. Kilocode runtime equivalence is not verified. Issue #4324 remains open for all-client/all-role completion.
 
 For OpenClaw, sync reads the active workspace from `~/.openclaw/openclaw.json` (`agents.defaults.workspace`). It writes `AGENTS.md` / `SOUL.md` into that workspace, while MCP servers stay in the global OpenClaw config under `mcp.servers`.
 
-For Hermes, gentle-ai is detect-only: it cannot install Hermes. Install Hermes manually first. Detection is driven by the `~/.hermes` config directory (the binary being on `PATH` is reported separately). Once Hermes is detected, `gentle-ai install --agent hermes` injects context7 and Engram™ MCP blocks into `~/.hermes/config.yaml`, writes the SDD orchestrator and persona into `~/.hermes/SOUL.md`, and copies skills to `~/.hermes/skills/`. Use `gentle-ai sync --agent hermes` to update the managed configuration after upgrades.
+For Hermes, atomwright is detect-only: it cannot install Hermes. Install Hermes manually first. Detection is driven by the `~/.hermes` config directory (the binary being on `PATH` is reported separately). Once Hermes is detected, `atomwright install --agent hermes` injects context7 and Engram™ MCP blocks into `~/.hermes/config.yaml`, writes the SDD orchestrator and persona into `~/.hermes/SOUL.md`, and copies skills to `~/.hermes/skills/`. Use `atomwright sync --agent hermes` to update the managed configuration after upgrades.
 
 ### uninstall
 
-Remove only the `gentle-ai` managed configuration from one or more agents. This does not uninstall external packages or binaries — it removes managed prompt sections, MCP entries, skills/config fragments, and other managed files, then updates `state.json` accordingly.
+Remove only the `atomwright` managed configuration from one or more agents. This does not uninstall external packages or binaries — it removes managed prompt sections, MCP entries, skills/config fragments, and other managed files, then updates `state.json` accordingly.
 
-Before any change is applied, `gentle-ai` creates a backup snapshot of the affected files.
+Before any change is applied, `atomwright` creates a backup snapshot of the affected files.
 
 ```bash
 # Partial uninstall for specific agents
-gentle-ai uninstall \
+atomwright uninstall \
   --agent claude-code \
   --agent opencode
 
 # Partial uninstall for specific components only
-gentle-ai uninstall \
+atomwright uninstall \
   --agent claude-code \
   --component sdd,persona,context7
 
 # Complete uninstall of managed config from all supported agents
-gentle-ai uninstall --all
+atomwright uninstall --all
 
 # Skip confirmation prompt
-gentle-ai uninstall --agent cursor --component skills --yes
+atomwright uninstall --agent cursor --component skills --yes
 ```
 
-If no `--component` flag is provided for a partial uninstall, `gentle-ai` removes all managed uninstallable components for the selected agent set.
+If no `--component` flag is provided for a partial uninstall, `atomwright` removes all managed uninstallable components for the selected agent set.
 
 ### update / upgrade
 
-Check for and install new versions of `gentle-ai` itself. The pre-upgrade backup snapshot covers only the agents recorded in `state.InstalledAgents` (`~/.gentle-ai/state.json`) — not every agent config directory that exists on your machine.
+Check for and install new versions of `atomwright` itself. The pre-upgrade backup snapshot covers only the agents recorded in `state.InstalledAgents` (`~/.atomwright/state.json`) — not every agent config directory that exists on your machine.
 
 ```bash
 # Check if a newer version is available
-gentle-ai update
+atomwright update
 
 # Upgrade to the latest release (downloads new binary, replaces current)
-gentle-ai upgrade
+atomwright upgrade
 ```
 
-After any upgrade or manual binary replacement, run `gentle-ai sync` to refresh all managed assets to the new version's content.
+After any upgrade or manual binary replacement, run `atomwright sync` to refresh all managed assets to the new version's content.
 
-If GitHub rate-limits update checks, export `GITHUB_TOKEN` or `GH_TOKEN` before running `gentle-ai update`/`upgrade`.
+If GitHub rate-limits update checks, export `GITHUB_TOKEN` or `GH_TOKEN` before running `atomwright update`/`upgrade`.
 
-If Homebrew refuses an upgrade from an untrusted tap, trust only the artifact Homebrew names and retry the upgrade:
-
-```bash
-# Formula tools, for example gentle-ai
-brew trust --formula gentleman-programming/tap/gentle-ai
-brew upgrade gentle-ai
-
-# Cask tools, for example engram
-brew trust --cask gentleman-programming/tap/engram
-brew upgrade engram
-```
-
-If you choose to install several tools from this tap, run `brew trust gentleman-programming/tap` instead. This broader option trusts all current and future formulas, casks, and external commands published in the tap.
+Atomwright is not published through Homebrew. There is no formula, cask, or
+tap, so nothing here needs `brew trust`. Upgrade with `atomwright upgrade`, or
+reinstall with the install script or `go install` — see
+[Quickstart](quickstart.md#install).
 
 **Self-update prompt behavior** (changed in v1.x slice 5 — `GENTLE_AI_CONFIRM_UPDATE` removed):
 
@@ -207,12 +198,12 @@ If you choose to install several tools from this tap, run `brew trust gentleman-
 |-----------|----------|
 | Interactive terminal (TTY) | Always prompts `Apply now? [Y/n]`. Empty Enter accepts. |
 | Non-TTY (CI, pipe, script) | Auto-declines — never hangs. |
-| `GENTLE_AI_YES=1` | Auto-accepts without prompting (for scripted upgrades). This variable is inherited by subprocesses, so scope it to a single invocation when needed (e.g. `GENTLE_AI_YES=1 gentle-ai …`). |
-| `GENTLE_AI_NO_SELF_UPDATE=1` | Skips the self-update check entirely. |
+| `ATOMWRIGHT_YES=1` | Auto-accepts without prompting (for scripted upgrades). This variable is inherited by subprocesses, so scope it to a single invocation when needed (e.g. `ATOMWRIGHT_YES=1 atomwright …`). |
+| `ATOMWRIGHT_NO_SELF_UPDATE=1` | Skips the self-update check entirely. |
 
 `GENTLE_AI_CONFIRM_UPDATE` was removed in slice 5. It is now ignored if set.
 
-`GENTLE_AI_SELF_UPDATE_DONE` is an internal loop guard and should not be set manually.
+`ATOMWRIGHT_SELF_UPDATE_DONE` is an internal loop guard and should not be set manually.
 
 ### model assignment
 
@@ -223,7 +214,7 @@ The TUI **Configure Models** screen can assign different models to SDD phases, `
 Read-only ecosystem health diagnostics — no changes made to your configuration:
 
 ```bash
-gentle-ai doctor
+atomwright doctor
 ```
 
 Checks performed:
@@ -231,7 +222,7 @@ Checks performed:
 | Check | What it verifies |
 |-------|-----------------|
 | Tool binaries | Required tools present on `PATH`; shadow detection (wrong binary resolves first) |
-| `state.json` validity | Parses `~/.gentle-ai/state.json` and reports any schema/corruption issues |
+| `state.json` validity | Parses `~/.atomwright/state.json` and reports any schema/corruption issues |
 | Engram MCP reachability | Confirms the Engram MCP server responds |
 | Disk space | Warns when available space is critically low |
 
@@ -240,9 +231,9 @@ Each check reports **pass**, **warn**, or **fail** with an optional remedy hint.
 ### version
 
 ```bash
-gentle-ai version
-gentle-ai --version
-gentle-ai -v
+atomwright version
+atomwright --version
+atomwright -v
 ```
 
 ---
@@ -257,7 +248,7 @@ gentle-ai -v
 | `--persona`                   | Persona mode: `gentleman`, `neutral`, `custom` (`custom` keeps your existing persona unmanaged)                   |
 | `--preset`                    | Preset: `full-gentleman`, `ecosystem-only`, `minimal`, `custom` (`custom` means manual component/skill selection) |
 | `--sdd-mode`                  | SDD orchestrator mode: `single` or `multi`                                                                        |
-| `--scope`                     | Install scope for agent-scoped files: `global` (default, writes to each selected agent's global config directory) or `workspace` (writes to the current project root). Also settable via `GENTLE_AI_INSTALL_SCOPE` env var for CI/non-interactive use. |
+| `--scope`                     | Install scope for agent-scoped files: `global` (default, writes to each selected agent's global config directory) or `workspace` (writes to the current project root). Also settable via `ATOMWRIGHT_INSTALL_SCOPE` env var for CI/non-interactive use. |
 | `--dry-run`                   | Preview the install plan without applying changes                                                                 |
 
 ## CLI Flags (sync)
@@ -279,18 +270,18 @@ gentle-ai -v
 
 ```bash
 # Create a "cheap" profile using a free model for all phases
-gentle-ai sync --profile cheap:openrouter/qwen/qwen3-30b-a3b:free
+atomwright sync --profile cheap:openrouter/qwen/qwen3-30b-a3b:free
 
 # Override the design phase to use a stronger model
-gentle-ai sync --profile-phase cheap:sdd-design:anthropic/claude-sonnet-4-20250514
+atomwright sync --profile-phase cheap:sdd-design:anthropic/claude-sonnet-4-20250514
 
 # Create multiple profiles in one command
-gentle-ai sync \
+atomwright sync \
   --profile cheap:openrouter/qwen/qwen3-30b-a3b:free \
   --profile premium:anthropic/claude-sonnet-4-20250514
 
 # Use compatibility mode with an external OpenCode profile manager
-gentle-ai sync --agent opencode --sdd-profile-strategy external-single-active
+atomwright sync --agent opencode --sdd-profile-strategy external-single-active
 ```
 
 See [OpenCode SDD Profiles](opencode-profiles.md) for the full guide.
@@ -306,59 +297,76 @@ See [OpenCode SDD Profiles](opencode-profiles.md) for the full guide.
 
 ---
 
+## Environment Variables
+
+Atomwright's environment variables use the `ATOMWRIGHT_` prefix. The inherited
+`GENTLE_AI_` prefix is still read as a deprecated alias, because these variables
+live in user dotfiles and CI configuration this project cannot edit.
+
+**Precedence:** when both are set, `ATOMWRIGHT_*` wins. The `GENTLE_AI_*`
+variable is still read when the `ATOMWRIGHT_*` one is unset — including when it
+is set to the empty string, which is treated as a deliberate choice rather than
+"unset". Whenever a `GENTLE_AI_*` alias is present, Atomwright prints one
+deprecation warning per variable at startup. The warning names both variable
+names and **never** their values: these variables can carry tokens and are
+captured verbatim in CI logs.
+
+| Current name | Deprecated alias | Controls |
+| --- | --- | --- |
+| `ATOMWRIGHT_CHANNEL` | `GENTLE_AI_CHANNEL` | Release channel for install/upgrade: `stable` (default), `beta`, or `nightly` (an alias for beta). |
+| `ATOMWRIGHT_CODEX_REVIEWER_LOOPBACK_BASE_URL` | `GENTLE_AI_CODEX_REVIEWER_LOOPBACK_BASE_URL` | Base URL of a loopback model provider for the Codex reviewer adapter. Unset means the adapter uses Codex's own provider configuration. |
+| `ATOMWRIGHT_ENGRAM_SETUP_MODE` | `GENTLE_AI_ENGRAM_SETUP_MODE` | Which agents Engram™ MCP setup runs for: `supported` (default), `opencode`, or `off`. |
+| `ATOMWRIGHT_ENGRAM_SETUP_STRICT` | `GENTLE_AI_ENGRAM_SETUP_STRICT` | Fail the install when Engram™ setup fails instead of degrading. Truthy values: `1`, `true`, `yes`, `on`. |
+| `ATOMWRIGHT_INSTALL_SCOPE` | `GENTLE_AI_INSTALL_SCOPE` | Install scope for agent-scoped files: `global` (default) or `workspace`. The non-interactive equivalent of `--scope`. |
+| `ATOMWRIGHT_NO_ANIMATION` | `GENTLE_AI_NO_ANIMATION` | Set to `1` to keep TUI spinner frames static. |
+| `ATOMWRIGHT_NO_SELF_UPDATE` | `GENTLE_AI_NO_SELF_UPDATE` | Set to `1` to skip the self-update check entirely. |
+| `ATOMWRIGHT_OPENCODE_BACKGROUND_SUBAGENTS` | `GENTLE_AI_OPENCODE_BACKGROUND_SUBAGENTS` | Managed OpenCode background-subagent policy: `auto`, `on`, or `off`. The non-interactive equivalent of `--opencode-background-subagents`. |
+| `ATOMWRIGHT_PI_BACKGROUND_SUBAGENTS` | `GENTLE_AI_PI_BACKGROUND_SUBAGENTS` | Managed Pi background-subagent policy: `auto`, `on`, or `off`. The non-interactive equivalent of `--pi-background-subagents`. |
+| `ATOMWRIGHT_SDD_STATUS_ENGRAM` | `GENTLE_AI_SDD_STATUS_ENGRAM` | Set to any non-empty value to let SDD status consult Engram™ in a workspace that has no `.engram` directory. An explicit `openspec/config.yaml` declaration still wins. |
+| `ATOMWRIGHT_SELF_UPDATE_DONE` | `GENTLE_AI_SELF_UPDATE_DONE` | Internal self-update loop guard (`1`). Do not set it manually. |
+| `ATOMWRIGHT_TELEMETRY` | `GENTLE_AI_TELEMETRY` | Set to `0` to opt out of telemetry for the run. See [Telemetry](telemetry.md). |
+| `ATOMWRIGHT_TELEMETRY_ENDPOINT` | `GENTLE_AI_TELEMETRY_ENDPOINT` | Override the telemetry collector URL (self-hosting or local testing). |
+| `ATOMWRIGHT_YES` | `GENTLE_AI_YES` | Set to `1` to auto-accept the self-update prompt in scripted upgrades. Inherited by subprocesses, so scope it to a single invocation. |
+
+That table is the complete alias roster. Names that merely share the
+`GENTLE_AI_` spelling but are **not** environment variables are deliberately not
+aliased, because changing them would change a wire format rather than a user's
+configuration:
+
+- `GENTLE_AI_REVIEW_*` reviewer prompt markers (for example the
+  `GENTLE_AI_REVIEW_BINDING ` prefix),
+- `{{GENTLE_AI_*}}` template placeholders,
+- the `GENTLE_AI_TELEMETRY` **value** pinned as an enum in the published
+  telemetry contract — distinct from the `ATOMWRIGHT_TELEMETRY` variable above.
+
+`GENTLE_AI_CONFIRM_UPDATE` is not in the table either: it was removed in v1.x
+slice 5 and is ignored if set. There is no `ATOMWRIGHT_CONFIRM_UPDATE`.
+
+---
+
 ## Typical Workflow
 
 ```bash
-# First time: install everything
-brew install gentleman-programming/tap/gentle-ai
-gentle-ai install --agent claude-code,cursor --preset full-gentleman
+# First time: install the binary, then install everything
+curl -sL https://raw.githubusercontent.com/pablogore/atomwright/main/scripts/install.sh | bash
+atomwright install --agent claude-code,cursor --preset full-gentleman
 
 # After a new release: upgrade + sync
-brew upgrade gentle-ai
-gentle-ai sync
+atomwright upgrade
+atomwright sync
 
 # Remove only managed SDD + persona config from one agent
-gentle-ai uninstall --agent claude-code --component sdd,persona
+atomwright uninstall --agent claude-code --component sdd,persona
 
 # Adding a new agent later
-gentle-ai install --agent windsurf --preset full-gentleman
+atomwright install --agent windsurf --preset full-gentleman
 ```
-
-### Homebrew upgrade troubleshooting
-
-Homebrew 6 can require explicit trust for non-official taps and, on Linux, can
-sandbox builds with Bubblewrap. `gentle-ai upgrade` and `scripts/install.sh`
-auto-trust only the Gentle AI formula. For the broader tap-wide trust option,
-see the [update and upgrade guidance](#update--upgrade). Manual upgrades may
-still need this one-time command:
-
-```bash
-brew trust --formula gentleman-programming/tap/gentle-ai
-brew upgrade gentle-ai
-```
-
-On Linux, if Homebrew reports that Bubblewrap cannot create a rootless sandbox,
-there is nothing for Gentle AI to install: Bubblewrap is already present, but the
-host blocks the rootless namespace primitives it needs. This is a security
-tradeoff and should be an explicit admin decision. If your policy allows it,
-fix the host namespace policy first:
-
-```bash
-sudo sysctl -w kernel.unprivileged_userns_clone=1
-sudo sysctl -w user.max_user_namespaces=28633
-sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
-```
-
-Use `HOMEBREW_NO_SANDBOX_LINUX=1 brew upgrade gentle-ai` only as a final
-workaround when your distro policy forbids the namespace settings; it disables
-Homebrew's Linux sandbox for that command.
-
 
 ---
 
 ## Dependency Management
 
-`gentle-ai` auto-detects prerequisites before installation and provides platform-specific guidance:
+`atomwright` auto-detects prerequisites before installation and provides platform-specific guidance:
 
 - **Detected tools**: git, curl, node, npm, brew, go
 - **Version checks**: validates minimum versions where applicable

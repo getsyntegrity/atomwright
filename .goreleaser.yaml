@@ -1,6 +1,6 @@
 version: 2
 
-project_name: gentle-ai
+project_name: atomwright
 
 before:
   hooks:
@@ -10,8 +10,8 @@ before:
     - go run ./internal/releaseprovenancecmd --out .goreleaser-provenance/manifest.json --config .goreleaser.yaml --goreleaser-version v2.15.2
 
 builds:
-  - main: ./cmd/gentle-ai
-    binary: gentle-ai
+  - main: ./cmd/atomwright
+    binary: atomwright
     env:
       - CGO_ENABLED=0
     goos:
@@ -79,7 +79,7 @@ archives:
     meta: true
     formats:
       - tar.gz
-    name_template: "gentle-ai-release-provenance-v1"
+    name_template: "atomwright-release-provenance-v1"
     files:
       - src: .goreleaser-provenance/manifest.json
         strip_parent: true
@@ -107,9 +107,9 @@ signs:
       - "-x"
       - "${signature}"
       - "-c"
-      - "signature from gentle-ai release"
+      - "signature from atomwright release"
       - "-t"
-      - "repo=Gentleman-Programming/gentle-ai;tag={{ .Tag }}"
+      - "repo=pablogore/atomwright;tag={{ .Tag }}"
     output: true
 
 changelog:
@@ -119,15 +119,3 @@ changelog:
       - "^docs:"
       - "^test:"
       - "^ci:"
-
-brews:
-  - repository:
-      owner: Gentleman-Programming
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    directory: Formula
-    name: gentle-ai
-    homepage: "https://github.com/Gentleman-Programming/gentle-ai"
-    description: "Gentle-AI — Ecosystem, Frameworks, Workflows for AI coding agents."
-    license: "MIT"
-    commit_msg_template: "chore: update gentle-ai formula to {{ .Tag }}"

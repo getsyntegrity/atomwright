@@ -10,7 +10,11 @@
 // the caller instead of resolved here.
 package telemetry
 
-import "time"
+import (
+	"time"
+
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
+)
 
 // EventSchema identifies the JSON POST body sent to the collector.
 const EventSchema = "gentle-ai.telemetry-event/v1"
@@ -25,18 +29,22 @@ const (
 	EventHeartbeat = "heartbeat"
 )
 
-// DefaultEndpoint is the collector URL used when GENTLE_AI_TELEMETRY_ENDPOINT
-// is not set.
+// DefaultEndpoint is the collector URL used when the endpoint override is not
+// set.
 const DefaultEndpoint = "https://telemetry.gentlemanprogramming.com/v1/events"
 
-// EndpointEnvVar overrides DefaultEndpoint.
-const EndpointEnvVar = "GENTLE_AI_TELEMETRY_ENDPOINT"
+// EndpointEnvSuffix is the unprefixed variable that overrides DefaultEndpoint.
+const EndpointEnvSuffix = "TELEMETRY_ENDPOINT"
+
+// EndpointEnvVar is the current, fully prefixed variable name, used where the
+// name is set directly.
+var EndpointEnvVar = identity.EnvPrefix() + EndpointEnvSuffix
 
 // NoticeLine is printed to stderr exactly once: by Opportunistic's
 // enrollment step, before any event is ever built or sent. That one
 // enrollment run sends nothing at all; the first real send only happens on
 // a later trigger. It is never printed by the sender itself.
-const NoticeLine = "Gentle AI sends anonymous usage metrics (version, OS, agents, counters) and may send anonymous runtime usage from supported Pi/OpenCode/Codex integrations (public model, effort, agent class, available token usage, timing, error categories); runtime usage is never stored locally; run gentle-ai telemetry disable to opt out."
+const NoticeLine = "Atomwright sends anonymous usage metrics (version, OS, agents, counters) and may send anonymous runtime usage from supported Pi/OpenCode/Codex integrations (public model, effort, agent class, available token usage, timing, error categories); runtime usage is never stored locally; run atomwright telemetry disable to opt out."
 
 // MaxPayloadBytes bounds the JSON POST body per the issue's contract.
 const MaxPayloadBytes = 4096

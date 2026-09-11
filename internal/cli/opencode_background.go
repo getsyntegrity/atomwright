@@ -6,13 +6,21 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
 	opencodeactivation "github.com/gentleman-programming/gentle-ai/v2/internal/opencode"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/verify"
 )
 
-const OpenCodeBackgroundSubagentsEnv = "GENTLE_AI_OPENCODE_BACKGROUND_SUBAGENTS"
+// openCodeBackgroundSubagentsEnvSuffix is the unprefixed variable name;
+// envcompat decides which prefix answers.
+const openCodeBackgroundSubagentsEnvSuffix = "OPENCODE_BACKGROUND_SUBAGENTS"
+
+// OpenCodeBackgroundSubagentsEnv is the current, fully prefixed variable name,
+// used where the name is shown to a user.
+var OpenCodeBackgroundSubagentsEnv = identity.EnvPrefix() + openCodeBackgroundSubagentsEnvSuffix
 
 // OpenCodeBackgroundResolveInput contains already-discovered sources. The
 // resolver is pure so loading state and reading the process environment remain
@@ -104,7 +112,7 @@ func parseBackgroundIntent(source, raw string, present bool) (model.OpenCodeBack
 }
 
 func resolveOpenCodeBackgroundCLI(set bool, raw string, persisted state.InstallState) (OpenCodeBackgroundResolution, error) {
-	envValue, envSet := os.LookupEnv(OpenCodeBackgroundSubagentsEnv)
+	envValue, envSet, _ := envcompat.Lookup(openCodeBackgroundSubagentsEnvSuffix)
 	return ResolveOpenCodeBackground(OpenCodeBackgroundResolveInput{
 		CLISet:       set,
 		CLIValue:     model.OpenCodeBackgroundIntent(raw),
@@ -120,7 +128,7 @@ func resolveOpenCodeBackgroundCLI(set bool, raw string, persisted state.InstallS
 // the TUI flow, so a missing prior and missing environment decision is the
 // only case that requests the TUI choice screen.
 func ResolveOpenCodeBackgroundInteractive(prior model.OpenCodeBackgroundIntent) (OpenCodeBackgroundResolution, error) {
-	envValue, envSet := os.LookupEnv(OpenCodeBackgroundSubagentsEnv)
+	envValue, envSet, _ := envcompat.Lookup(openCodeBackgroundSubagentsEnvSuffix)
 	return ResolveOpenCodeBackground(OpenCodeBackgroundResolveInput{
 		EnvSet:       envSet,
 		EnvValue:     envValue,

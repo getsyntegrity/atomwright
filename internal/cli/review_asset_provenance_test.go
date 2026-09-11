@@ -282,7 +282,7 @@ func TestManagedAssetsStopTransitionCarriesExactlyOneSignal(t *testing.T) {
 	// caller reading both would not know which one to trust.
 	executeWithContinuation := converged
 	bogusTransition := *converged.NextTransition
-	bogusTransition.Continuation = &ReviewManagedAssetsContinuation{Operation: "sync", Command: "gentle-ai sync --agent opencode", Agent: "opencode"}
+	bogusTransition.Continuation = &ReviewManagedAssetsContinuation{Operation: "sync", Command: "atomwright sync --agent opencode", Agent: "opencode"}
 	executeWithContinuation.NextTransition = &bogusTransition
 	if err := executeWithContinuation.Validate(); err == nil {
 		t.Fatal("STATUS accepted a sync continuation attached to an executable START transition")
@@ -363,7 +363,7 @@ func TestManagedAssetsContinuationUsesInvokingExecutable(t *testing.T) {
 		"unresolvable executable keeps the bare fallback": {
 			executable: func() (string, error) { return "", errors.New("unresolvable") },
 			goos:       "linux",
-			want:       `gentle-ai sync --agent opencode`,
+			want:       `atomwright sync --agent opencode`,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -519,13 +519,13 @@ func TestManagedAssetsContinuationRejectsUnsafeExecutableIdentities(t *testing.T
 			name:       "multiline argv zero falls through to canonical fallback",
 			resolveErr: errors.New("executable unavailable"),
 			argvZero:   filepath.Join(t.TempDir(), "gentle\rai"),
-			want:       "gentle-ai sync --agent opencode",
+			want:       "atomwright sync --agent opencode",
 		},
 		{
 			name:       "relative argv zero falls through to canonical fallback",
 			resolveErr: errors.New("executable unavailable"),
 			argvZero:   "gentle-ai",
-			want:       "gentle-ai sync --agent opencode",
+			want:       "atomwright sync --agent opencode",
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {

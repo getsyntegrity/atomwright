@@ -298,7 +298,7 @@ func TestRunSDDAttemptHelpContractsCoverEveryOperation(t *testing.T) {
 			if err := RunSDDAttempt([]string{tt.operation, "--help"}, &output); err != nil {
 				t.Fatalf("RunSDDAttempt(%s --help): %v", tt.operation, err)
 			}
-			if want := "Usage: gentle-ai sdd-attempt " + tt.operation + " [flags]"; !strings.Contains(output.String(), want) {
+			if want := "Usage: atomwright sdd-attempt " + tt.operation + " [flags]"; !strings.Contains(output.String(), want) {
 				t.Fatalf("help missing %q:\n%s", want, output.String())
 			}
 			if got := sddAttemptHelpFlagNames(output.String()); !reflect.DeepEqual(got, tt.flags) {
@@ -330,12 +330,12 @@ func TestRunSDDAttemptHelpAliasesArePositionIndependentAndRepositoryFree(t *test
 		args []string
 		want string
 	}{
-		{"parent long alias", []string{"--help", "--cwd", missingRepository}, "Usage: gentle-ai sdd-attempt <"},
-		{"parent short alias", []string{"-h", "--change", "missing"}, "Usage: gentle-ai sdd-attempt <"},
-		{"operation after help", []string{"--help", "begin", "--cwd", missingRepository, "--change", "missing"}, "Usage: gentle-ai sdd-attempt begin [flags]"},
-		{"operation before short alias", []string{"finish", "--cwd", missingRepository, "-h", "--change", "missing"}, "Usage: gentle-ai sdd-attempt finish [flags]"},
-		{"help between status inputs", []string{"status", "--change-instance", "instance", "--help", "--cwd", missingRepository, "--change", "missing"}, "Usage: gentle-ai sdd-attempt status [flags]"},
-		{"trailing grant help", []string{"grant", "--cwd", missingRepository, "--root", missingRepository, "--change", "missing", "--help"}, "Usage: gentle-ai sdd-attempt grant [flags]"},
+		{"parent long alias", []string{"--help", "--cwd", missingRepository}, "Usage: atomwright sdd-attempt <"},
+		{"parent short alias", []string{"-h", "--change", "missing"}, "Usage: atomwright sdd-attempt <"},
+		{"operation after help", []string{"--help", "begin", "--cwd", missingRepository, "--change", "missing"}, "Usage: atomwright sdd-attempt begin [flags]"},
+		{"operation before short alias", []string{"finish", "--cwd", missingRepository, "-h", "--change", "missing"}, "Usage: atomwright sdd-attempt finish [flags]"},
+		{"help between status inputs", []string{"status", "--change-instance", "instance", "--help", "--cwd", missingRepository, "--change", "missing"}, "Usage: atomwright sdd-attempt status [flags]"},
+		{"trailing grant help", []string{"grant", "--cwd", missingRepository, "--root", missingRepository, "--change", "missing", "--help"}, "Usage: atomwright sdd-attempt grant [flags]"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -372,7 +372,7 @@ func TestRunSDDAttemptHelpDoesNotSelectOperationLikeFlagValues(t *testing.T) {
 			if err := RunSDDAttempt(tt.args, &output); err != nil {
 				t.Fatalf("RunSDDAttempt(%v): %v", tt.args, err)
 			}
-			if !strings.Contains(output.String(), "Usage: gentle-ai sdd-attempt <") {
+			if !strings.Contains(output.String(), "Usage: atomwright sdd-attempt <") {
 				t.Fatalf("operation-like value %q selected operation help:\n%s", tt.value, output.String())
 			}
 		})

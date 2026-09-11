@@ -99,7 +99,7 @@ const reviewtransactionEscalationCauseSample = "budget_exceeded"
 // naming the bare `gentle-ai review mode disable` would let a reader
 // silently disable receipt-driven development for every repository on the
 // machine instead of just the one they meant. Verified by execution: the
-// bare form writes ~/.gentle-ai/state.json; this scoped form writes only
+// bare form writes the install state file; this scoped form writes only
 // under the named repository's own .git/gentle-ai directory.
 const reviewModeDisableCloneCommand = "gentle-ai review mode disable --scope clone --cwd <repo>"
 

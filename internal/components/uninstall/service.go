@@ -175,7 +175,7 @@ func NewService(homeDir, workspaceDir, appVersion string) (*Service, error) {
 		return nil, fmt.Errorf("create adapter registry: %w", err)
 	}
 
-	backupRoot := filepath.Join(homeDir, ".gentle-ai", "backups")
+	backupRoot := filepath.Join(state.Root(homeDir), "backups")
 	if err := os.MkdirAll(backupRoot, 0o755); err != nil {
 		return nil, fmt.Errorf("create backup root %q: %w", backupRoot, err)
 	}
@@ -439,7 +439,7 @@ func (s *Service) CompleteUninstall() (Result, error) {
 		return result, err
 	}
 
-	result.ManualActions = append(result.ManualActions, "To completely remove gentle-ai from your system, delete the executable (e.g., rm -f $(which gentle-ai))")
+	result.ManualActions = append(result.ManualActions, "To completely remove atomwright from your system, delete the executable (e.g., rm -f $(which atomwright))")
 	return result, nil
 }
 
@@ -720,9 +720,9 @@ func failureManualActions(failures []operationFailure, batch []model.AgentID, ho
 		if location == "" {
 			location = homeDir
 		}
-		command := "gentle-ai uninstall --all --yes"
+		command := "atomwright uninstall --all --yes"
 		if len(retry) > 0 {
-			command = "gentle-ai uninstall " + strings.Join(retry, " ") + " --yes"
+			command = "atomwright uninstall " + strings.Join(retry, " ") + " --yes"
 		}
 		actions = append(actions, fmt.Sprintf(
 			"Uninstall did not complete for %s at %s: %v. Those agents are still recorded in %s. Resolve the file, then rerun `%s`.",
@@ -748,7 +748,7 @@ func firstOrEmpty(items []string) string {
 }
 
 // retainedPiResources returns existing Pi-owned runtime and configuration paths
-// that gentle-ai deliberately leaves intact because they can be shared with Pi,
+// that this tool deliberately leaves intact because they can be shared with Pi,
 // gentle-pi packages, or user-managed configuration.
 func retainedPiResources(homeDir, workspaceDir string) []string {
 	paths := []string{
@@ -1011,7 +1011,7 @@ func (s *Service) componentOperations(adapter agents.Adapter, componentID model.
 			}
 			ops = append(ops, removeDirIfEmpty(pluginDir))
 
-			modelVariantsCacheDir := filepath.Join(homeDir, ".gentle-ai", "cache")
+			modelVariantsCacheDir := filepath.Join(state.Root(homeDir), "cache")
 			for _, cachePath := range modelVariantsCachePaths(modelVariantsCacheDir) {
 				targets = append(targets, cachePath)
 				ops = append(ops, removeFile(cachePath))

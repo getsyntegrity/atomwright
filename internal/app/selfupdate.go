@@ -12,6 +12,8 @@ import (
 
 	"github.com/mattn/go-isatty"
 
+	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/update"
@@ -26,10 +28,19 @@ var selfUpdateHomeDirFn = os.UserHomeDir
 
 // Environment variable names for self-update control.
 // NOTE: GENTLE_AI_CONFIRM_UPDATE removed in slice 5 — prompt is now unconditional.
+// The suffixes are unprefixed on purpose: envcompat decides which prefix
+// answers, so the inherited GENTLE_AI_ names keep working.
 const (
-	envNoSelfUpdate   = "GENTLE_AI_NO_SELF_UPDATE"
-	envSelfUpdateDone = "GENTLE_AI_SELF_UPDATE_DONE"
-	envYesUpdate      = "GENTLE_AI_YES"
+	envNoSelfUpdateSuffix   = "NO_SELF_UPDATE"
+	envSelfUpdateDoneSuffix = "SELF_UPDATE_DONE"
+	envYesUpdateSuffix      = "YES"
+)
+
+// The fully prefixed names are what a user sets today and what tests write.
+var (
+	envNoSelfUpdate   = identity.EnvPrefix() + envNoSelfUpdateSuffix
+	envSelfUpdateDone = identity.EnvPrefix() + envSelfUpdateDoneSuffix
+	envYesUpdate      = identity.EnvPrefix() + envYesUpdateSuffix
 )
 
 // isTerminal reports whether fd belongs to a native or Cygwin/MSYS2 terminal.
@@ -44,7 +55,8 @@ var isattyFn = isTerminal
 // without an interactive prompt. Set GENTLE_AI_YES=1 for scripted upgrades.
 // Injectable for tests.
 var selfUpdateYesFn = func() bool {
-	return os.Getenv(envYesUpdate) == "1"
+	value, _, _ := envcompat.Lookup(envYesUpdateSuffix)
+	return value == "1"
 }
 
 // promptFn is swappable for tests — asks the user whether to apply the update.
@@ -84,12 +96,12 @@ const selfUpdateTimeout = 7 * time.Second
 //  4. Proceed with update check
 func selfUpdate(ctx context.Context, version string, profile system.PlatformProfile, stdout io.Writer) error {
 	// Guard 1: loop prevention — already updated this invocation.
-	if os.Getenv(envSelfUpdateDone) == "1" {
+	if value, _, _ := envcompat.Lookup(envSelfUpdateDoneSuffix); value == "1" {
 		return nil
 	}
 
 	// Guard 2: user opt-out.
-	if os.Getenv(envNoSelfUpdate) == "1" {
+	if value, _, _ := envcompat.Lookup(envNoSelfUpdateSuffix); value == "1" {
 		return nil
 	}
 

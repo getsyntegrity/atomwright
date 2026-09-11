@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/filemerge"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/state"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/system"
 )
 
@@ -328,7 +329,7 @@ func (o ActivationOptions) normalized() ActivationOptions {
 }
 
 // BinDir returns the Gentle-owned launcher directory.
-func BinDir(homeDir string) string { return filepath.Join(homeDir, ".gentle-ai", "bin") }
+func BinDir(homeDir string) string { return filepath.Join(state.Root(homeDir), "bin") }
 
 // POSIXLauncherPath returns the POSIX launcher path.
 func POSIXLauncherPath(homeDir string) string { return filepath.Join(BinDir(homeDir), "opencode") }

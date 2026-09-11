@@ -36,6 +36,7 @@ import (
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/skills"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/telemetryruntime"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/components/theme"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/installcmd"
 	"github.com/gentleman-programming/gentle-ai/v2/internal/model"
 	opencodeactivation "github.com/gentleman-programming/gentle-ai/v2/internal/opencode"
@@ -351,7 +352,7 @@ func mergeFullInstallState(existing, fresh state.InstallState) state.InstallStat
 }
 
 // mergeExplicitAgentInstallState merges a fresh single-agent install's state
-// into the previously persisted ~/.gentle-ai/state.json (so `install --agent
+// into the previously persisted install state file (so `install --agent
 // X` preserves other previously installed agents and model assignments).
 //
 // When the existing state file is simply absent (first install, or an agent
@@ -706,7 +707,7 @@ func (s *runtimeState) compatibilityChangedFiles() []string {
 }
 
 func newInstallRuntime(homeDir string, scope InstallScope, channel InstallChannel, selection model.Selection, resolved planner.ResolvedPlan, profile system.PlatformProfile) (*installRuntime, error) {
-	backupRoot := filepath.Join(homeDir, ".gentle-ai", "backups")
+	backupRoot := filepath.Join(state.Root(homeDir), "backups")
 	compatibilityTransaction, err := newCompatibilityRefreshTransaction(homeDir, resolved.OrderedComponents, selection)
 	if err != nil {
 		return nil, err
@@ -1605,8 +1606,10 @@ func (s componentApplyStep) Run() error {
 		} else {
 			engramCommand = installedPath
 		}
-		setupMode := engram.ParseSetupMode(os.Getenv(engram.SetupModeEnvVar))
-		setupStrict := engram.ParseSetupStrict(os.Getenv(engram.SetupStrictEnvVar))
+		setupModeValue, _, _ := envcompat.Lookup(engram.SetupModeEnvSuffix)
+		setupStrictValue, _, _ := envcompat.Lookup(engram.SetupStrictEnvSuffix)
+		setupMode := engram.ParseSetupMode(setupModeValue)
+		setupStrict := engram.ParseSetupStrict(setupStrictValue)
 
 		// Resolve the installed engram version once (Decision 1 gate). Errors are
 		// intentionally ignored for gating purposes: an empty version string

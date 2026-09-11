@@ -45,10 +45,15 @@ import (
 // gentle-ai.*/vN (or /vN.M) schema identity literal from the doc's prose.
 var reviewIntegrationDocSchemaIDRegexp = regexp.MustCompile("`(gentle-ai\\.[a-z0-9.\\-]+/v[0-9]+(?:\\.[0-9]+)?)`")
 
-// reviewIntegrationDocCommandVerbRegexp extracts every `gentle-ai review
+// reviewIntegrationDocCommandVerbRegexp extracts every `atomwright review
 // <verb>` command name the doc names, from both fenced code blocks and
 // inline code spans (both use the same literal token sequence).
-var reviewIntegrationDocCommandVerbRegexp = regexp.MustCompile(`gentle-ai review ([a-z][a-z-]*)`)
+//
+// The invocation a human types is `atomwright review <verb>`. That is separate
+// from the `command` string inside an emitted next_transition payload, which
+// the published v2 schemas still pin to the `gentle-ai review ...` spelling;
+// changing that is a contract version bump, not a rename.
+var reviewIntegrationDocCommandVerbRegexp = regexp.MustCompile(`atomwright review ([a-z][a-z-]*)`)
 
 func readReviewIntegrationDoc(t *testing.T) string {
 	t.Helper()
@@ -91,14 +96,14 @@ func TestEveryDocumentedSchemaIdentityIsImplemented(t *testing.T) {
 }
 
 // TestEveryDocumentedReviewCommandIsReal is Guard B. It fails closed when the
-// doc names a `gentle-ai review <verb>` invocation that is not one of the
+// doc names an `atomwright review <verb>` invocation that is not one of the
 // verbs runReviewCommandContext/runReviewCommand actually dispatch --
 // extracted mechanically from their case labels, not hand-maintained.
 func TestEveryDocumentedReviewCommandIsReal(t *testing.T) {
 	docs := readReviewIntegrationDoc(t)
 	matches := reviewIntegrationDocCommandVerbRegexp.FindAllStringSubmatch(docs, -1)
 	if len(matches) == 0 {
-		t.Fatal("found no `gentle-ai review <verb>` commands in docs/review-integration.md; the extraction regexp is stale")
+		t.Fatal("found no `atomwright review <verb>` commands in docs/review-integration.md; the extraction regexp is stale")
 	}
 	documented := map[string]bool{}
 	for _, match := range matches {

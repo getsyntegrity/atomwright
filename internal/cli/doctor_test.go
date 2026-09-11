@@ -148,7 +148,7 @@ func TestCheckOneTool_ShadowedWindowsExt(t *testing.T) {
 
 	dir1 := t.TempDir()
 	dir2 := t.TempDir()
-	for _, p := range []string{filepath.Join(dir1, "gentle-ai.exe"), filepath.Join(dir2, "gentle-ai.cmd")} {
+	for _, p := range []string{filepath.Join(dir1, "atomwright.exe"), filepath.Join(dir2, "atomwright.cmd")} {
 		f, err := os.Create(p)
 		if err != nil {
 			t.Fatal(err)
@@ -156,9 +156,9 @@ func TestCheckOneTool_ShadowedWindowsExt(t *testing.T) {
 		_ = f.Close()
 	}
 
-	lookPathFn = func(string) (string, error) { return filepath.Join(dir1, "gentle-ai.exe"), nil }
+	lookPathFn = func(string) (string, error) { return filepath.Join(dir1, "atomwright.exe"), nil }
 
-	got := checkOneTool("gentle-ai", []string{dir1, dir2})
+	got := checkOneTool("atomwright", []string{dir1, dir2})
 
 	if got.Status != CheckStatusWarn {
 		t.Fatalf("expected warn for extensioned shadow, got %s: %s", got.Status, got.Detail)
@@ -310,7 +310,7 @@ func TestCheckStateJSON_Missing(t *testing.T) {
 
 func TestCheckStateJSON_Malformed(t *testing.T) {
 	homeDir := t.TempDir()
-	stateDir := filepath.Join(homeDir, ".gentle-ai")
+	stateDir := filepath.Join(homeDir, ".atomwright")
 	if err := os.MkdirAll(stateDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -330,7 +330,7 @@ func TestCheckStateJSON_Malformed(t *testing.T) {
 
 func TestCheckStateJSON_AgentConfigDirMissing(t *testing.T) {
 	homeDir := t.TempDir()
-	stateDir := filepath.Join(homeDir, ".gentle-ai")
+	stateDir := filepath.Join(homeDir, ".atomwright")
 	if err := os.MkdirAll(stateDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -354,7 +354,7 @@ func TestCheckStateJSON_AgentConfigDirMissing(t *testing.T) {
 
 func TestCheckStateJSON_ManagedConfigPathUnreadable(t *testing.T) {
 	homeDir := t.TempDir()
-	stateDir := filepath.Join(homeDir, ".gentle-ai")
+	stateDir := filepath.Join(homeDir, ".atomwright")
 	if err := os.MkdirAll(stateDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -402,7 +402,7 @@ func setupDanglingOpenCodeFixture(t *testing.T, statePayload, symlinkTarget stri
 	if err := os.MkdirAll(filepath.Dir(configDir), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.MkdirAll(filepath.Join(homeDir, ".gentle-ai"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(homeDir, ".atomwright"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if symlinkTarget == "" {
@@ -412,7 +412,7 @@ func setupDanglingOpenCodeFixture(t *testing.T, statePayload, symlinkTarget stri
 	if err := os.Symlink(targetPath, configDir); err != nil {
 		t.Skipf("symlink creation unavailable: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(homeDir, ".gentle-ai", "state.json"), []byte(statePayload), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(homeDir, ".atomwright", "state.json"), []byte(statePayload), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	return homeDir, configDir, targetPath
@@ -477,7 +477,7 @@ func TestCheckStateJSON_DanglingAndAbsentConfigDirsSuppressSync(t *testing.T) {
 
 func TestCheckStateJSON_DanglingAncestorSymlinkSuppressesSync(t *testing.T) {
 	homeDir := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(homeDir, ".gentle-ai"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(homeDir, ".atomwright"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	ancestor := filepath.Join(homeDir, ".config")
@@ -485,7 +485,7 @@ func TestCheckStateJSON_DanglingAncestorSymlinkSuppressesSync(t *testing.T) {
 	if err := os.Symlink(missingTarget, ancestor); err != nil {
 		t.Skipf("symlink creation unavailable: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(homeDir, ".gentle-ai", "state.json"), []byte(`{"installed_agents":["opencode"]}`), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(homeDir, ".atomwright", "state.json"), []byte(`{"installed_agents":["opencode"]}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	configDir := filepath.Join(ancestor, "opencode")
@@ -523,12 +523,12 @@ func TestCheckStateJSON_DanglingAncestorSymlinkSuppressesSync(t *testing.T) {
 
 func TestCheckStateJSON_AbsentAncestorChainKeepsSyncRemedy(t *testing.T) {
 	homeDir := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(homeDir, ".gentle-ai"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(homeDir, ".atomwright"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	// windsurf lives two levels below home (~/.codeium/windsurf); neither
 	// level exists, so the path is genuinely missing and sync must stay.
-	if err := os.WriteFile(filepath.Join(homeDir, ".gentle-ai", "state.json"), []byte(`{"installed_agents":["windsurf"]}`), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(homeDir, ".atomwright", "state.json"), []byte(`{"installed_agents":["windsurf"]}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -547,7 +547,7 @@ func TestCheckStateJSON_AbsentAncestorChainKeepsSyncRemedy(t *testing.T) {
 
 func TestCheckStateJSON_HealthySymlinkAncestorKeepsSyncRemedy(t *testing.T) {
 	homeDir := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(homeDir, ".gentle-ai"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(homeDir, ".atomwright"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	realConfigRoot := filepath.Join(t.TempDir(), "real-config-root")
@@ -558,7 +558,7 @@ func TestCheckStateJSON_HealthySymlinkAncestorKeepsSyncRemedy(t *testing.T) {
 		t.Skipf("symlink creation unavailable: %v", err)
 	}
 	// ~/.config resolves fine; only the opencode dir underneath is absent.
-	if err := os.WriteFile(filepath.Join(homeDir, ".gentle-ai", "state.json"), []byte(`{"installed_agents":["opencode"]}`), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(homeDir, ".atomwright", "state.json"), []byte(`{"installed_agents":["opencode"]}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -577,7 +577,7 @@ func TestCheckStateJSON_HealthySymlinkAncestorKeepsSyncRemedy(t *testing.T) {
 
 func TestCheckStateJSON_OK(t *testing.T) {
 	homeDir := t.TempDir()
-	stateDir := filepath.Join(homeDir, ".gentle-ai")
+	stateDir := filepath.Join(homeDir, ".atomwright")
 	if err := os.MkdirAll(stateDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -603,7 +603,7 @@ func TestCheckStateJSON_OK(t *testing.T) {
 
 func TestCheckInstalledAssetVersion_MatchingPass(t *testing.T) {
 	homeDir := t.TempDir()
-	stateDir := filepath.Join(homeDir, ".gentle-ai")
+	stateDir := filepath.Join(homeDir, ".atomwright")
 	if err := os.MkdirAll(stateDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -620,7 +620,7 @@ func TestCheckInstalledAssetVersion_MatchingPass(t *testing.T) {
 
 func TestCheckInstalledAssetVersion_SkewWarning(t *testing.T) {
 	homeDir := t.TempDir()
-	stateDir := filepath.Join(homeDir, ".gentle-ai")
+	stateDir := filepath.Join(homeDir, ".atomwright")
 	if err := os.MkdirAll(stateDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -963,7 +963,7 @@ func TestRunDoctor_IntegrationAllMocked(t *testing.T) {
 	}()
 
 	homeDir := t.TempDir()
-	stateDir := filepath.Join(homeDir, ".gentle-ai")
+	stateDir := filepath.Join(homeDir, ".atomwright")
 	if err := os.MkdirAll(stateDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -993,7 +993,7 @@ func TestRunDoctor_IntegrationAllMocked(t *testing.T) {
 	// match the PATH-resolved copy exactly (the common case) to keep the
 	// expected output byte-identical to before that feature landed. The new
 	// feature has its own dedicated tests in doctor_invoked_binary_test.go.
-	osExecutableDoctor = func() (string, error) { return "/usr/local/bin/gentle-ai", nil }
+	osExecutableDoctor = func() (string, error) { return "/usr/local/bin/atomwright", nil }
 
 	var buf bytes.Buffer
 	if err := RunDoctor(context.Background(), &buf); err != nil {
@@ -1003,7 +1003,7 @@ func TestRunDoctor_IntegrationAllMocked(t *testing.T) {
 	want := fmt.Sprintf(`gentle-ai doctor — system health check
 =======================================
 
-  [ok]  tool:gentle-ai                 gentle-ai found at /usr/local/bin/gentle-ai; invoked executable: /usr/local/bin/gentle-ai (version dev)
+  [ok]  tool:atomwright                atomwright found at /usr/local/bin/atomwright; invoked executable: /usr/local/bin/atomwright (version dev)
   [ok]  tool:gga                       gga found at /usr/local/bin/gga
   [ok]  tool:engram                    engram found at /usr/local/bin/engram
   [ok]  tool:claude                    claude found at /usr/local/bin/claude
@@ -1014,7 +1014,7 @@ func TestRunDoctor_IntegrationAllMocked(t *testing.T) {
 
 Summary: 8 passed, 0 failed, 0 warnings
 Status:  healthy
-`, configPath, filepath.Join(homeDir, ".gentle-ai"))
+`, configPath, filepath.Join(homeDir, ".atomwright"))
 	if got := buf.String(); got != want {
 		t.Fatalf("RunDoctor output mismatch\ngot:\n%s\nwant:\n%s", got, want)
 	}
@@ -1040,7 +1040,7 @@ func TestRunDoctor_DanglingConfigSymlinkIsReadOnly(t *testing.T) {
 	}()
 
 	homeDir, configDir, missingTarget := setupDanglingOpenCodeFixture(t, `{"installed_agents":["opencode"]}`, "")
-	statePath := filepath.Join(homeDir, ".gentle-ai", "state.json")
+	statePath := filepath.Join(homeDir, ".atomwright", "state.json")
 	stateDir := filepath.Dir(statePath)
 	stateBefore, err := os.ReadFile(statePath)
 	if err != nil {
@@ -1056,7 +1056,7 @@ func TestRunDoctor_DanglingConfigSymlinkIsReadOnly(t *testing.T) {
 	httpGetFn = func(string, time.Duration) (int, error) { return 200, nil }
 	pathDirsFn = func() []string { return []string{"/usr/local/bin"} }
 	osUserHomeDirDoctor = func() (string, error) { return homeDir, nil }
-	osExecutableDoctor = func() (string, error) { return "/usr/local/bin/gentle-ai", nil }
+	osExecutableDoctor = func() (string, error) { return "/usr/local/bin/atomwright", nil }
 	t.Setenv(engramHealthEnvVar, "https://engram.example.test")
 
 	var output bytes.Buffer
@@ -1096,7 +1096,7 @@ func TestRunDoctor_DanglingConfigSymlinkIsReadOnly(t *testing.T) {
 
 func TestDoctorSyncDisagreement_RealCLIBoundary(t *testing.T) {
 	homeDir, configDir, missingTarget := setupDanglingOpenCodeFixture(t, `{"installed_agents":["opencode"]}`, "")
-	statePath := filepath.Join(homeDir, ".gentle-ai", "state.json")
+	statePath := filepath.Join(homeDir, ".atomwright", "state.json")
 	stateBefore, err := os.ReadFile(statePath)
 	if err != nil {
 		t.Fatal(err)
@@ -1225,7 +1225,7 @@ func TestCheckToolBinaries_AgentNotInState_NotReported(t *testing.T) {
 	var sawGentleAI, sawEngram, sawPi bool
 	for _, r := range results {
 		switch r.Name {
-		case "tool:gentle-ai":
+		case "tool:atomwright":
 			sawGentleAI = true
 		case "tool:engram":
 			sawEngram = true
@@ -1254,7 +1254,7 @@ func TestCheckToolBinaries_StateMissing_ChecksCoreOnly(t *testing.T) {
 	for _, r := range results {
 		required[string(r.Name)] = struct{}{}
 	}
-	for _, core := range []string{"tool:gentle-ai", "tool:gga", "tool:engram"} {
+	for _, core := range []string{"tool:atomwright", "tool:gga", "tool:engram"} {
 		if _, ok := required[core]; !ok {
 			t.Errorf("expected %s in core-only output, got %+v", core, required)
 		}
@@ -1285,18 +1285,18 @@ func TestCheckOneTool_DirectoryWithToolName_NotCountedAsDuplicate(t *testing.T) 
 	dirWithFile := t.TempDir()
 	dirWithDir := t.TempDir()
 
-	if err := os.WriteFile(filepath.Join(dirWithFile, "gentle-ai"), []byte("fake"), 0o755); err != nil {
+	if err := os.WriteFile(filepath.Join(dirWithFile, "atomwright"), []byte("fake"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.Mkdir(filepath.Join(dirWithDir, "gentle-ai"), 0o755); err != nil {
+	if err := os.Mkdir(filepath.Join(dirWithDir, "atomwright"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 
 	lookPathFn = func(string) (string, error) {
-		return filepath.Join(dirWithFile, "gentle-ai"), nil
+		return filepath.Join(dirWithFile, "atomwright"), nil
 	}
 
-	got := checkOneTool("gentle-ai", []string{dirWithFile, dirWithDir})
+	got := checkOneTool("atomwright", []string{dirWithFile, dirWithDir})
 
 	if got.Status != CheckStatusPass {
 		t.Fatalf("expected pass when only one real binary exists; got %s: %s", got.Status, got.Detail)
@@ -1330,16 +1330,16 @@ func TestCheckOneTool_FileWithoutExecBit_NotCountedAsDuplicate(t *testing.T) {
 	dir2 := t.TempDir()
 
 	// One executable copy, one non-executable copy.
-	if err := os.WriteFile(filepath.Join(dir1, "gentle-ai"), []byte("#!/bin/sh\nexit 0"), 0o755); err != nil {
+	if err := os.WriteFile(filepath.Join(dir1, "atomwright"), []byte("#!/bin/sh\nexit 0"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir2, "gentle-ai"), []byte("not executable"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir2, "atomwright"), []byte("not executable"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
-	lookPathFn = func(string) (string, error) { return filepath.Join(dir1, "gentle-ai"), nil }
+	lookPathFn = func(string) (string, error) { return filepath.Join(dir1, "atomwright"), nil }
 
-	got := checkOneTool("gentle-ai", []string{dir1, dir2})
+	got := checkOneTool("atomwright", []string{dir1, dir2})
 
 	if got.Status != CheckStatusPass {
 		t.Fatalf("expected pass when second copy lacks the execute bit; got %s: %s", got.Status, got.Detail)
@@ -1374,7 +1374,7 @@ func TestRunDoctor_OnlySelectedAgentsAreRequired(t *testing.T) {
 	executableExtsFn = func() []string { return []string{""} }
 
 	homeDir := t.TempDir()
-	stateDir := filepath.Join(homeDir, ".gentle-ai")
+	stateDir := filepath.Join(homeDir, ".atomwright")
 	if err := os.MkdirAll(stateDir, 0o755); err != nil {
 		t.Fatal(err)
 	}

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/envcompat"
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
 	"net"
 	"net/url"
 	"os"
@@ -13,7 +15,11 @@ import (
 	"strings"
 )
 
-const codexReviewerLoopbackBaseURLEnvironment = "GENTLE_AI_CODEX_REVIEWER_LOOPBACK_BASE_URL"
+const codexReviewerLoopbackBaseURLEnvSuffix = "CODEX_REVIEWER_LOOPBACK_BASE_URL"
+
+// codexReviewerLoopbackBaseURLEnvironment is the current, fully prefixed name,
+// used where the name is shown or set directly.
+var codexReviewerLoopbackBaseURLEnvironment = identity.EnvPrefix() + codexReviewerLoopbackBaseURLEnvSuffix
 
 const codexReviewerLoopbackProviderID = "gentle_ai_reviewer_loopback"
 
@@ -79,7 +85,8 @@ func codexReviewerArguments(scratch, outputPath string) ([]string, error) {
 		"--output-last-message", outputPath,
 	}
 
-	baseURL, enabled, err := codexReviewerLoopbackBaseURL(os.Getenv(codexReviewerLoopbackBaseURLEnvironment))
+	loopbackBaseURL, _, _ := envcompat.Lookup(codexReviewerLoopbackBaseURLEnvSuffix)
+	baseURL, enabled, err := codexReviewerLoopbackBaseURL(loopbackBaseURL)
 	if err != nil {
 		return nil, err
 	}

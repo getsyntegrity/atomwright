@@ -43,7 +43,7 @@ Agent calls `engram mcp --tools=agent` via configured MCP entry
   +--> retrieve: mem_context / mem_search / mem_get_observation
   |
   v
-Engram runtime stores and searches memory outside gentle-ai source
+Engram runtime stores and searches memory outside atomwright source
 ```
 
 ## Memory invariants

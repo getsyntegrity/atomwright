@@ -6,11 +6,11 @@ import (
 )
 
 func printHelp(w io.Writer, version string) {
-	fmt.Fprintf(w, `gentle-ai — Atomwright: Atomic, Grounded, Reviewed Change Delivery (%s)
+	fmt.Fprintf(w, `atomwright — Atomwright: Atomic, Grounded, Reviewed Change Delivery (%s)
 
 USAGE
-  gentle-ai                     Launch interactive TUI
-  gentle-ai <command> [flags]
+  atomwright                     Launch interactive TUI
+  atomwright <command> [flags]
 
 COMMANDS
   install      Configure AI coding agents on this machine
@@ -49,7 +49,7 @@ COMMANDS
                'review start' asks per candidate before a review that would do work;
                accepting covers that candidate only and nothing is granted for later candidates,
                'not now' applies to that candidate only and persists nothing, turning reviews
-               off for good needs a deliberate 'gentle-ai review mode disable', and a session
+               off for good needs a deliberate 'atomwright review mode disable', and a session
                without a terminal reviews the change and says so instead of asking
 
 COMPATIBILITY COMMANDS
@@ -80,7 +80,7 @@ COMPATIBILITY COMMANDS
 FLAGS
   --help, -h    Show global help; every review subcommand also supports help
 
-Run 'gentle-ai help' for this message.
+Run 'atomwright help' for this message.
 Documentation: https://github.com/pablogore/atomwright
 Atomwright is an independent fork of Gentle AI; it is not official, sponsored, or endorsed.
 `, version)

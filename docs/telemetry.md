@@ -16,7 +16,7 @@ no migration cleanup. Legacy install/heartbeat telemetry below is separate.
 
 ### Pi command contract
 
-Invoke `gentle-ai telemetry runtime send --json` with one sanitized JSON object on
+Invoke `atomwright telemetry runtime send --json` with one sanitized JSON object on
 stdin, at most **16 KiB**. The CLI allows **500 ms to read stdin**, then discards
 incomplete input. Close stdin normally. Launch asynchronously from the tool event
 hook; **do not await the process or network**. Discard command output/errors and
@@ -133,7 +133,7 @@ Update the Go allowlist and schema together when deliberately revising this regi
 
 ### One bounded HTTPS attempt
 
-The existing default or `GENTLE_AI_TELEMETRY_ENDPOINT` supplies the HTTPS authority.
+The existing default or `ATOMWRIGHT_TELEMETRY_ENDPOINT` supplies the HTTPS authority.
 Native code replaces the path with `/v1/runtime-events` and removes query/fragment.
 HTTP, URL userinfo (including username-only), and redirects are refused. One POST
 has a **3-second total network timeout**, including response reading; acknowledgements
@@ -168,7 +168,7 @@ no checkpoint can unsend HTTP already in flight. No policy lock is introduced.
 
 ## Automatic OpenCode collection
 
-The managed plugin invokes `gentle-ai telemetry runtime opencode --json` directly
+The managed plugin invokes `atomwright telemetry runtime opencode --json` directly
 and asynchronously. Native code checks policy, normalizes one bounded source
 observation, then uses the same one-attempt sender. Example stdin:
 
@@ -224,7 +224,7 @@ or changes exporter settings.
 ## Automatic Claude Code collection
 
 Claude Code installs asynchronous `Stop` and `SubagentStop` command hooks that
-invoke `gentle-ai telemetry runtime claude --json`. Each hook starts one one-shot
+invoke `atomwright telemetry runtime claude --json`. Each hook starts one one-shot
 process; native code checks the existing telemetry policy before reading stdin,
 uses the same 16 KiB/500 ms input bound, and sends at most once with no daemon,
 queue, persistence, retry, or filesystem mutation.
@@ -277,7 +277,7 @@ not documented compatibility guarantees in those references.
 ## Automatic Codex collection
 
 Managed Codex `hooks.json` entries invoke
-`gentle-ai telemetry runtime codex --json` asynchronously for `SubagentStop` and
+`atomwright telemetry runtime codex --json` asynchronously for `SubagentStop` and
 `Stop`. These events and their input fields are documented by the
 [Codex hooks reference](https://developers.openai.com/codex/hooks). Runtime policy is
 checked before hook stdin, local state, or transcript data is read, again after
@@ -380,7 +380,7 @@ observations have no durable daily rollup. See [collector operations](telemetry-
 
 ## Read collection policy without side effects
 
-Run `gentle-ai telemetry policy --json` for runtime collection permission,
+Run `atomwright telemetry policy --json` for runtime collection permission,
 not a send attempt. Omit `--json` for a concise human-readable answer.
 Unlike `status --json`, which still creates missing state for a stable ID,
 `policy` never creates or repairs state, generates IDs, increments counters,
@@ -417,7 +417,7 @@ Every event carries:
 - a random `install_id` (UUID v4), generated once and stored locally — never
   a machine ID, MAC address, or anything else that could be shared with
   another tool
-- the `gentle-ai` version, `os`, and `arch` (the same values `--version`
+- the `atomwright` version, `os`, and `arch` (the same values `--version`
   effectively describes)
 - the agents and components you have installed (e.g. `claude-code`, `sdd`)
 - whether receipt-driven development (RDD) is enabled
@@ -427,7 +427,7 @@ Every event carries:
 
 Nothing else. In particular: no paths, repository names, usernames,
 hostnames, prompts, diffs, source code, or IP addresses. The collector does
-not store the client IP address either. Run `gentle-ai telemetry preview` at
+not store the client IP address either. Run `atomwright telemetry preview` at
 any time to see the exact bytes that would be sent next — that command never
 sends anything.
 
@@ -437,18 +437,23 @@ The full JSON contract lives at
 ## When it is sent
 
 The very first time `install`, `update`, or `sync` ever completes on a fresh
-installation, gentle-ai does exactly one thing: it prints this line to
+installation, atomwright does exactly one thing: it prints this line to
 stderr, synchronously, in that same command —
 
 ```text
-Gentle AI sends anonymous usage metrics (version, OS, agents, counters) and may send anonymous runtime usage from supported Pi/OpenCode/Codex integrations (public model, effort, agent class, available token usage, timing, error categories); runtime usage is never stored locally; run gentle-ai telemetry disable to opt out.
+Atomwright sends anonymous usage metrics (version, OS, agents, counters) and may send anonymous runtime usage from supported Pi/OpenCode/Codex integrations (public model, effort, agent class, available token usage, timing, error categories); runtime usage is never stored locally; run atomwright telemetry disable to opt out.
 ```
+
+> **Known inconsistency:** that notice is reproduced verbatim from
+> `internal/telemetry.NoticeLine`, which still names the pre-rename product and
+> command. The command to run is `atomwright telemetry disable`. Updating the
+> constant is tracked separately.
 
 — and stores a locally generated `install_id`. **Nothing is sent on that
 first run.** The first actual `install` event is only sent starting from the
 *next* trigger: the following `install`/`update`/`sync`, or the 24-hour
 heartbeat window, whichever comes first. This means if you run
-`gentle-ai telemetry disable` before that next run, nothing was ever sent
+`atomwright telemetry disable` before that next run, nothing was ever sent
 about your installation.
 
 That notice line is printed exactly once, ever, per installation — every
@@ -465,7 +470,7 @@ completed `sdd-attempt finish|settle` each increment their own local counter
 first, and only then opportunistically check whether a heartbeat is due —
 the same 24-hour limit and failure backoff apply, so this adds at most one
 send per day even for a host that finishes many reviews or SDD phases in a
-row. This is what lets a host such as Gentle Pi, which drives gentle-ai only
+row. This is what lets a host such as Gentle Pi, which drives atomwright only
 through `review ...` and `sdd-attempt ...` and never through
 `install`/`update`/`sync`, still send a heartbeat.
 
@@ -474,23 +479,23 @@ through `review ...` and `sdd-attempt ...` and never through
 Telemetry respects, in this order:
 
 1. `DO_NOT_TRACK` set to anything but empty, `0`, or `false`
-2. `GENTLE_AI_TELEMETRY=0`
+2. `ATOMWRIGHT_TELEMETRY=0`
 3. `CI` or `GITHUB_ACTIONS` set to anything but empty, `0`, or `false` (most CI providers export one of them)
 
-Legacy install/heartbeat builds without a release identity (`gentle-ai --version` reporting `dev` or `0.0.0-dev`, which is what a plain `go build` or a test harness produces) never send those events or write their telemetry state; the legacy collector refuses such versions too. Pseudo-versions from `go install ...@main` carry a commit stamp and count as real installs. Runtime observations carry no version and use the existing enrolled policy checks above.
-4. `gentle-ai telemetry disable`
+Legacy install/heartbeat builds without a release identity (`atomwright --version` reporting `dev` or `0.0.0-dev`, which is what a plain `go build` or a test harness produces) never send those events or write their telemetry state; the legacy collector refuses such versions too. Pseudo-versions from `go install ...@main` carry a commit stamp and count as real installs. Runtime observations carry no version and use the existing enrolled policy checks above.
+4. `atomwright telemetry disable`
 
 Any one of these disables sending; nothing else needs to change. Re-enable a
-local opt-out with `gentle-ai telemetry enable`.
+local opt-out with `atomwright telemetry enable`.
 
 ## Commands
 
 ```
-gentle-ai telemetry status [--json]
-gentle-ai telemetry enable
-gentle-ai telemetry disable
-gentle-ai telemetry preview [--json]
-gentle-ai telemetry trigger [--json]
+atomwright telemetry status [--json]
+atomwright telemetry enable
+atomwright telemetry disable
+atomwright telemetry preview [--json]
+atomwright telemetry trigger [--json]
 ```
 
 - `status` reports whether sending is enabled and which of the sources above
@@ -499,13 +504,13 @@ gentle-ai telemetry trigger [--json]
   history, or the counters. It also reports `last_failure_at` and, while a
   failed send is still in its 6-hour backoff window, `backoff_until`.
 - `enable` / `disable` set the local opt-out persisted next to the rest of
-  gentle-ai's state.
+  atomwright's state.
 - `preview` prints the exact event that would be sent next, without sending
   it.
 - `trigger` is the host entry point: it runs exactly the same opportunistic
   check `install`/`update`/`sync` already run internally (enrollment,
   install-once, the 24-hour heartbeat limit, the failure backoff, and every
-  kill switch all apply). A host that only ever drives gentle-ai through
+  kill switch all apply). A host that only ever drives atomwright through
   `review ...` or `sdd-attempt ...` — Gentle Pi, for example — can call this
   once per session to still get a heartbeat instead of never sending one.
   Finishing a native review or an `sdd-attempt finish|settle` already
@@ -522,5 +527,5 @@ nothing to look up or delete on request.
 ## Endpoint
 
 The default collector is `https://telemetry.gentlemanprogramming.com/v1/events`,
-overridable with `GENTLE_AI_TELEMETRY_ENDPOINT` (useful for self-hosting or
+overridable with `ATOMWRIGHT_TELEMETRY_ENDPOINT` (useful for self-hosting or
 testing against a local collector).

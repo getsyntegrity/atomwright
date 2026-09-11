@@ -1,5 +1,5 @@
 # Binaries
-/gentle-ai
+/atomwright
 *.exe
 *.dll
 *.so
@@ -24,8 +24,8 @@ Thumbs.db
 
 # Docker
 *.tar
-cmd/gentle-ai/main
-cmd/gentle-ai/gentle-ai
+cmd/atomwright/main
+cmd/atomwright/atomwright
 dist/
 .goreleaser-provider-contract/
 .goreleaser-provenance/

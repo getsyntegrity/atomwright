@@ -1,6 +1,10 @@
 package telemetry
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/gentleman-programming/gentle-ai/v2/internal/identity"
+)
 
 // Source names which input decided whether telemetry is enabled, in the
 // exact precedence order the issue specifies.
@@ -14,6 +18,11 @@ const (
 	SourceDefault      Source = "default"
 )
 
+// telemetryEnvSuffix is the unprefixed opt-out variable. SourceEnvOptOut above
+// keeps its inherited spelling on purpose: it is a pinned wire enum value in
+// contracts/telemetry/v1, not a variable name.
+const telemetryEnvSuffix = "TELEMETRY"
+
 // Decision reports whether sending is allowed and which source decided it.
 type Decision struct {
 	Enabled bool
@@ -26,7 +35,7 @@ type Getenv func(key string) string
 
 // Decide evaluates the kill switches in their documented precedence:
 // DO_NOT_TRACK set to anything but empty, "0", or "false", then
-// GENTLE_AI_TELEMETRY=0, then CI or GITHUB_ACTIONS set to anything but
+// the TELEMETRY opt-out set to 0, then CI or GITHUB_ACTIONS set to anything but
 // empty, "0", or "false", then the persisted state's enabled
 // flag. The first one that opts out wins; with none present, telemetry is
 // enabled by default.
@@ -34,7 +43,7 @@ func Decide(getenv Getenv, persisted State) Decision {
 	if doNotTrack(getenv("DO_NOT_TRACK")) {
 		return Decision{Enabled: false, Source: SourceDoNotTrack}
 	}
-	if getenv("GENTLE_AI_TELEMETRY") == "0" {
+	if lookup(getenv, telemetryEnvSuffix) == "0" {
 		return Decision{Enabled: false, Source: SourceEnvOptOut}
 	}
 	if truthy(getenv("CI")) || truthy(getenv("GITHUB_ACTIONS")) {
@@ -58,11 +67,26 @@ func truthy(v string) bool {
 	return v != "" && v != "0" && v != "false"
 }
 
-// Endpoint resolves the collector URL: GENTLE_AI_TELEMETRY_ENDPOINT when set
-// and non-empty, otherwise DefaultEndpoint.
+// Endpoint resolves the collector URL: the endpoint override when set and
+// non-empty, otherwise DefaultEndpoint.
 func Endpoint(getenv Getenv) string {
-	if v := strings.TrimSpace(getenv(EndpointEnvVar)); v != "" {
+	if v := strings.TrimSpace(lookup(getenv, EndpointEnvSuffix)); v != "" {
 		return v
 	}
 	return DefaultEndpoint
+}
+
+// lookup resolves suffix against the current prefix first and the inherited one
+// second, mirroring envcompat.
+//
+// envcompat itself reads the real process environment, and every telemetry
+// decision is taken through an injected Getenv so tests can describe an
+// environment without mutating the process. Reusing it here would quietly
+// bypass that injection, so the same precedence is applied to the caller's
+// environment instead.
+func lookup(getenv Getenv, suffix string) string {
+	if v := getenv(identity.EnvPrefix() + suffix); v != "" {
+		return v
+	}
+	return getenv(identity.LegacyEnvPrefix() + suffix)
 }
