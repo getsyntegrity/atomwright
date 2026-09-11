@@ -59,8 +59,13 @@ as the default verification backend is future work.
 | `internal/tui/styles/styles.go` | Welcome-screen tagline |
 | `README.md` | Replaced with the Atomwright vision, origin, and license attribution |
 | `LICENSE` | Atomwright copyright **added**; upstream notice retained verbatim |
-| `TRADEMARKS.md` | Upstream policy retained verbatim; fork notice prepended |
-| `AGENTS.md`, `CONTRIBUTING.md` | Document titles and intro prose |
+| `NOTICE.md` | **Added** — independent-fork statement, trademark ownership, inherited-identifier disclosure |
+| `AGENTS.md`, `CONTRIBUTING.md` | Document titles, intro prose, contributor-facing repository links |
+
+`TRADEMARKS.md` is **not** modified by this change. It is preserved byte-for-byte from the base
+commit, so that the upstream policy travels with the code it governs unchanged. `git diff
+a7502587..HEAD -- TRADEMARKS.md` produces no output. The fork statement lives in `NOTICE.md`
+instead; nothing in this repository reinterprets, amends, or narrows the upstream policy.
 | `package.json` | `description`, `repository`, `bugs`, `homepage` metadata |
 
 ## Deliberately unchanged (deferred identifiers)
@@ -91,8 +96,10 @@ Renaming any of these is a migration, not a rename. Each is recorded here as fut
 
 - The shipped CLI is still the inherited Gentle AI runtime. Atomwright's atomic-delivery workflow is
   not implemented.
-- Because the invocation token is still `gentle-ai`, this fork does not yet fully satisfy the
-  "Forks and modified distributions" clause of `TRADEMARKS.md` at the CLI-identifier level. That must
-  be resolved before any public distribution or release.
+- Because the invocation token is still `gentle-ai`, this fork does not yet satisfy the
+  "Forks and modified distributions" clause of `TRADEMARKS.md` at the CLI-identifier level. The
+  upstream policy covers `gentle-ai` when it is used as a project or CLI identifier, so retaining it
+  is a temporary compatibility measure that must be resolved before any public distribution or
+  release. See `NOTICE.md`.
 - `docs/**` still contains extensive inherited Gentle AI prose. It was left untouched to keep this
   change atomic and reviewable.

@@ -1,16 +1,5 @@
 # Trademark Policy
 
-<!-- Atomwright fork notice -->
-> **Note for this fork.** Atomwright is an independent fork of Gentle AI. The marks described in
-> this policy are **not** Atomwright's marks: they belong to Alan Buscaglia and are reproduced here
-> unchanged so that the upstream policy travels with the code it governs. Atomwright uses a distinct
-> primary name and branding, as the "Forks and modified distributions" section below requires, and
-> claims no sponsorship, endorsement, certification, or affiliation.
->
-> Inherited technical identifiers such as `gentle-ai`, `~/.gentle-ai/`, `GENTLE_AI_*`, and the Go
-> module path are retained as operational identifiers, which this policy explicitly does not treat
-> as brand usage.
-
 The Gentle AI™ and Engram™ names and logos identify the official projects and their maintainers. This policy explains their permitted use; it does not change the MIT license for the software.
 
 ## Covered marks

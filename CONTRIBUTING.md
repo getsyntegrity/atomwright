@@ -405,4 +405,4 @@ Violations may result in removal from the project.
 
 ## Questions?
 
-Use [GitHub Discussions](https://github.com/pablogore/atomwright/discussions) — not issues — for questions, ideas, and general conversation.
+Open an issue. Atomwright does not currently have a separate discussion forum.

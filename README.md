@@ -190,19 +190,19 @@ The goal is not the cheapest possible answer. It is the lowest-cost path to a tr
 Atomwright is an independent fork of the open-source
 [Gentle AI](https://github.com/Gentleman-Programming/gentle-ai) project by Gentleman Programming.
 
-It is **not** official, sponsored, endorsed, certified, or affiliated with Gentle AI, its
-maintainers, Anthropic, OpenAI, or the maintainers of any listed integration. Per the upstream
-[trademark policy](TRADEMARKS.md), this fork uses a distinct primary name and branding, and refers
-to Gentle AI only to state truthfully what it is derived from.
+It is **not** official, sponsored, endorsed, certified, partnered with, or affiliated with Gentle
+AI, Gentleman Programming, Anthropic, OpenAI, or the maintainers of any listed integration. The full
+fork statement is in [`NOTICE.md`](NOTICE.md).
 
-The Gentle AI™ and Engram™ marks remain the property of Alan Buscaglia.
+The upstream trademark policy is reproduced unchanged in [`TRADEMARKS.md`](TRADEMARKS.md) and governs
+the marks it describes.
 
-Inherited technical identifiers — the Go module path, the `gentle-ai` command, the `~/.gentle-ai/`
-configuration directory, `GENTLE_AI_*` environment variables, and injected configuration markers —
-are intentionally unchanged for now. They are operational identifiers, not branding, and renaming
-them requires a migration rather than a rename. See
-[`docs/atomwright/upstream-baseline.md`](docs/atomwright/upstream-baseline.md) for the full list of
-deferred identifiers.
+Some technical identifiers inherited from Gentle AI — the Go module path, the `gentle-ai` command,
+the `~/.gentle-ai/` configuration directory, `GENTLE_AI_*` environment variables, and injected
+configuration markers — remain temporarily for compatibility, because renaming them requires a
+migration rather than a rename. They must be migrated before Atomwright is publicly distributed.
+See [`NOTICE.md`](NOTICE.md) and
+[`docs/atomwright/upstream-baseline.md`](docs/atomwright/upstream-baseline.md).
 
 ## License
 
@@ -210,5 +210,5 @@ Atomwright is distributed under the [MIT License](LICENSE), inherited from Gentl
 
 The upstream copyright notice is retained in full, as the license requires, alongside the
 Atomwright copyright for subsequent modifications. Trademark and brand usage is governed separately
-by [`TRADEMARKS.md`](TRADEMARKS.md); the MIT license grants copyright permissions only, and does not
-grant permission to use upstream project names or logos.
+by the unchanged upstream [`TRADEMARKS.md`](TRADEMARKS.md); the MIT license grants copyright
+permissions only, and does not grant permission to use upstream project names or logos.
