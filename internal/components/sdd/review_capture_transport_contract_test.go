@@ -34,7 +34,7 @@ func TestInstalledContractNamesTheTransportEachRuntimeActuallyUses(t *testing.T)
 						t.Errorf("Pi contract missing facade transport clause %q", want)
 					}
 				}
-				if strings.Contains(contract, "gentle-ai review status") {
+				if strings.Contains(contract, "atomwright review status") {
 					t.Error("Pi contract exposes raw STATUS")
 				}
 				return

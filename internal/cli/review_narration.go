@@ -96,12 +96,12 @@ const reviewtransactionEscalationCauseSample = "budget_exceeded"
 // reviewModeDisableCloneCommand is the scoped form of the self-service
 // delivery exit named throughout this registry (adversarial finding F6):
 // `--scope` defaults to `global` (review_mode.go's own flag default), so
-// naming the bare `gentle-ai review mode disable` would let a reader
+// naming the bare `atomwright review mode disable` would let a reader
 // silently disable receipt-driven development for every repository on the
 // machine instead of just the one they meant. Verified by execution: the
 // bare form writes the install state file; this scoped form writes only
 // under the named repository's own .git/gentle-ai directory.
-const reviewModeDisableCloneCommand = "gentle-ai review mode disable --scope clone --cwd <repo>"
+const reviewModeDisableCloneCommand = "atomwright review mode disable --scope clone --cwd <repo>"
 
 // reviewModeDisableCloneCaveat is appended everywhere
 // reviewModeDisableCloneCommand is named, so a reader of just one narration
@@ -118,20 +118,20 @@ var reviewStopReasonNarration = map[string]string{
 		"This is a product defect, not something to retry. If you just want your work delivered, run `" + reviewModeDisableCloneCommand + "` " +
 		reviewModeDisableCloneCaveat + " so ordinary repository policy (hooks, tests, CI) decides instead; nothing is silently approved. To get this review itself fixed, report the defect with this run's details.",
 	"corrected_candidate_unavailable": "Change the candidate content so it differs from the frozen original, then re-run " +
-		"`gentle-ai review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + reviewUndeclaredRuntimeIdentitySlot + " --next-transition`. " +
+		"`atomwright review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + reviewUndeclaredRuntimeIdentitySlot + " --next-transition`. " +
 		"That is the right path when the review found real defects. If instead the reviewers were given the wrong input " +
 		"and their findings describe content that was never the candidate, a maintainer can quarantine those results and " +
-		"reopen their lenses over the same frozen content: run `gentle-ai review reopen-results --prepare --cwd <repo> --lineage <id> " +
+		"reopen their lenses over the same frozen content: run `atomwright review reopen-results --prepare --cwd <repo> --lineage <id> " +
 		"--expected-revision <revision> --target <target> --reason <reason> --actor <actor> --quarantine-lens <lens>` " +
 		"(repeat `--quarantine-lens` per affected lens) and follow its output.",
 	"empty_base_diff_bootstrap_required": "This selected committed base has no changes to review. " +
 		"If you are following the authorized first-publication bootstrap, a maintainer must first insert an empty root below the content commit. " +
-		"Then run `gentle-ai review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + reviewUndeclaredRuntimeIdentitySlot + " --next-transition --base-ref <empty-root> --committed-only`.",
+		"Then run `atomwright review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + reviewUndeclaredRuntimeIdentitySlot + " --next-transition --base-ref <empty-root> --committed-only`.",
 	"lens_context_budget_exceeded": "This frozen candidate cannot fit complete reviewer evidence without truncation, so this review stops before an inspection result. " +
-		"Reduce the candidate scope or target identity, then run `gentle-ai review start` for that new candidate; or run `" + reviewModeDisableCloneCommand + "` " + reviewModeDisableCloneCaveat + " to deliver under ordinary repository policy instead.",
+		"Reduce the candidate scope or target identity, then run `atomwright review start` for that new candidate; or run `" + reviewModeDisableCloneCommand + "` " + reviewModeDisableCloneCaveat + " to deliver under ordinary repository policy instead.",
 	"managed_assets_outdated": "This installation's reviewer assets no longer match this version of Gentle AI, so this review stops before it starts. " +
-		"Run `gentle-ai sync --agent " + reviewUndeclaredRuntimeIdentitySlot + "` to bring them back in sync, then re-run " +
-		"`gentle-ai review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + reviewUndeclaredRuntimeIdentitySlot + " --next-transition`.",
+		"Run `atomwright sync --agent " + reviewUndeclaredRuntimeIdentitySlot + "` to bring them back in sync, then re-run " +
+		"`atomwright review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + reviewUndeclaredRuntimeIdentitySlot + " --next-transition`.",
 	"corrupted_or_unverifiable_authority": "This review's stored record cannot be trusted as-is, and it cannot be repaired automatically. " +
 		"Ask a maintainer to inspect it directly, or run `" + reviewModeDisableCloneCommand + "` " +
 		reviewModeDisableCloneCaveat + " to deliver under ordinary repository policy instead.",
@@ -146,12 +146,12 @@ var reviewStopReasonNarration = map[string]string{
 		reviewModeDisableCloneCaveat + " to deliver under ordinary repository policy instead.",
 	"recovery_scope_unchanged": "Change the candidate so it targets something different from what is already on record, then retry the recovery, " +
 		"or run `" + reviewModeDisableCloneCommand + "` " + reviewModeDisableCloneCaveat + " to deliver under ordinary repository policy instead.",
-	"rdd_disabled": "Review mode is disabled. Run `gentle-ai review mode status --cwd <repo> --json` to inspect the deciding scope; STATUS renders the exact scoped enable command for this request.",
+	"rdd_disabled": "Review mode is disabled. Run `atomwright review mode status --cwd <repo> --json` to inspect the deciding scope; STATUS renders the exact scoped enable command for this request.",
 	"staged_workspace_overlay_recovery_unavailable": "Pass `--lineage <id>` to continue the review you already started, " +
-		"or drop `--workspace-overlay` and run `gentle-ai review start --projection staged` to start fresh.",
+		"or drop `--workspace-overlay` and run `atomwright review start --projection staged` to start fresh.",
 	"unachievable_lens_slot": "A reviewer could not be completed for this candidate under current conditions, and every selected reviewer is required, so this review cannot finish as scoped. " +
-		"If that failure was transient, run `gentle-ai review capture-unachievable` again with the same binding and `--withdraw=true` so this review re-offers the same reviewer. " +
-		"If it is not transient, reduce the candidate scope and start a new review with `gentle-ai review start`, or run `" + reviewModeDisableCloneCommand + "` " +
+		"If that failure was transient, run `atomwright review capture-unachievable` again with the same binding and `--withdraw=true` so this review re-offers the same reviewer. " +
+		"If it is not transient, reduce the candidate scope and start a new review with `atomwright review start`, or run `" + reviewModeDisableCloneCommand + "` " +
 		reviewModeDisableCloneCaveat + " to deliver under ordinary repository policy instead.",
 }
 

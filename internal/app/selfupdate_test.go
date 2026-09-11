@@ -656,7 +656,7 @@ func TestSelfUpdate_SetsPendingSyncOnSuccess(t *testing.T) {
 }
 
 // TestSelfUpdate_DoesNotSetPendingSyncOnFailure verifies that when the
-// gentle-ai upgrade fails, PendingSync is NOT set in state (no retry needed
+// atomwright upgrade fails, PendingSync is NOT set in state (no retry needed
 // since sync was never deferred).
 func TestSelfUpdate_DoesNotSetPendingSyncOnFailure(t *testing.T) {
 	unsetEnv(t, envNoSelfUpdate)

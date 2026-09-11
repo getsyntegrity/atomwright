@@ -75,7 +75,7 @@ func runTelemetryRuntime(args []string, stdout io.Writer) error {
 
 func runTelemetryRuntimeInput(args []string, stdout io.Writer, input io.Reader) error {
 	if len(args) != 2 || (args[0] != "send" && args[0] != "opencode" && args[0] != "claude" && args[0] != "codex") || args[1] != "--json" {
-		return errors.New("usage: gentle-ai telemetry runtime <send|opencode|claude|codex> --json (bounded aggregate or hook on stdin)")
+		return errors.New("usage: atomwright telemetry runtime <send|opencode|claude|codex> --json (bounded aggregate or hook on stdin)")
 	}
 	decision := "disabled"
 	if telemetry.Decide(os.Getenv, telemetry.State{Enabled: true}).Enabled {

@@ -134,7 +134,7 @@ func TestRunSDDAttemptRejectsMissingOrAmbiguousInputs(t *testing.T) {
 		{name: "positional argument", args: []string{"status", "--cwd", repo, "--change", "thin", "extra"}, want: "unexpected sdd-attempt argument"},
 		// Grant's missing-flag refusal follows acquire/settle: it enumerates
 		// every missing flag and names the rerunnable continuation.
-		{name: "missing grant roots", args: []string{"grant", "--cwd", repo, "--change", "thin", "--change-instance", "instance-token", "--request-id", "grant", "--actor", "maintainer", "--reason", "rollout"}, want: "sdd-attempt grant requires --root; rerun `gentle-ai sdd-attempt grant` with those missing flags"},
+		{name: "missing grant roots", args: []string{"grant", "--cwd", repo, "--change", "thin", "--change-instance", "instance-token", "--request-id", "grant", "--actor", "maintainer", "--reason", "rollout"}, want: "sdd-attempt grant requires --root; rerun `atomwright sdd-attempt grant` with those missing flags"},
 		{name: "missing grant instance and audit fields", args: []string{"grant", "--cwd", repo, "--change", "thin", "--root", repo}, want: "sdd-attempt grant requires --change-instance, --request-id, --actor, --reason"},
 		{name: "irrelevant grant flag", args: []string{"grant", "--cwd", repo, "--change", "thin", "--root", repo, "--change-instance", "instance-token", "--request-id", "grant", "--actor", "maintainer", "--reason", "rollout", "--work-unit", "unit"}, want: "flag provided but not defined"},
 	}

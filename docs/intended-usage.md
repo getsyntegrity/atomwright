@@ -10,7 +10,7 @@ This page explains how gentle-ai is meant to be used. Not the flags, not the arc
 
 ## After Installing -- You're Ready
 
-Once you run `gentle-ai` and select your agent(s), components, and preset, the ecosystem is configured for normal use. You do not need to memorize SDD phases, hand-edit generated config files, or manually wire the agent workflow.
+Once you run `atomwright` and select your agent(s), components, and preset, the ecosystem is configured for normal use. You do not need to memorize SDD phases, hand-edit generated config files, or manually wire the agent workflow.
 
 Open your AI agent in a project and start working. For richer project context, the agent may run `/sdd-init` or refresh the skill registry automatically when SDD needs it. You can also run those manually, but they are not required for basic usage.
 
@@ -117,7 +117,7 @@ The orchestrator must stop acting as a monolithic executor when complexity appea
 
 - **4-file rule**: reading 4+ files to understand a flow means delegate exploration or run an exploration phase.
 - **Multi-file write rule**: touching 2+ non-trivial files means use one writer or require fresh review before completion.
-- **PR rule**: review can provide fresh evidence for a commit, push, or PR, but it never authorizes delivery. Receipt-driven development is opt-in with `gentle-ai review mode enable --scope global`; whether it is on or off, ordinary repository policy decides delivery.
+- **PR rule**: review can provide fresh evidence for a commit, push, or PR, but it never authorizes delivery. Receipt-driven development is opt-in with `atomwright review mode enable --scope global`; whether it is on or off, ordinary repository policy decides delivery.
 - **Incident rule**: after wrong cwd, worktree/git accident, merge recovery, confusing test command, or environment workaround, run a fresh audit before continuing.
 - **Long-session rule**: after roughly 20 tool calls, 5 exploratory reads, or 2 non-mechanical edits with growing complexity, pause and delegate, re-plan, or justify why not.
 - **Fresh review rule**: use fresh context for adversarial review of diffs, conflicts, PR readiness, and incidents when the agent platform supports it.
@@ -143,10 +143,10 @@ Once installed, your agent detects what you're working on and loads the relevant
 
 How it works:
 
-1. **The registry refreshes at startup where the agent supports hooks.** Normal Pi startup runs the `gentle-pi` session hook. Codex, Claude Code, and OpenCode run `gentle-ai skill-registry refresh --quiet` from their installed startup/plugin hooks.
+1. **The registry refreshes at startup where the agent supports hooks.** Normal Pi startup runs the `gentle-pi` session hook. Codex, Claude Code, and OpenCode run `atomwright skill-registry refresh --quiet` from their installed startup/plugin hooks.
 2. **The refresh is cached.** Gentle-AI™ fingerprints discovered `SKILL.md` files using schema version, path, mtime, and size. If `.atl/.skill-registry.cache.json` matches and `.atl/skill-registry.md` exists, startup is a cheap cache-hit.
 3. **The orchestrator uses it automatically** -- once the registry exists, the orchestrator reads it at session start and passes exact matching `SKILL.md` paths to sub-agents. You don't interact with the registry after that.
-4. **Manual fallback stays available** -- run `gentle-ai skill-registry refresh --force` from a project if you want to regenerate immediately.
+4. **Manual fallback stays available** -- run `atomwright skill-registry refresh --force` from a project if you want to regenerate immediately.
 
 There's also an automated side: `sdd-init` runs the same registry logic internally, so if you use SDD in a new project, the registry gets built as part of that flow.
 
@@ -170,6 +170,6 @@ The less you think about gentle-ai after installing, the better it's working.
 | Just start coding with your AI agent                       | Memorize SDD phases or commands                                                   |
 | Let the agent suggest SDD when a task is big enough        | Force SDD on every small task                                                     |
 | Trust that engram is saving context when installed and active | Dig into engram's storage unless you need `engram sync` or `engram tui`           |
-| Let startup hooks or SDD init refresh the skill registry      | Manually rescan skills unless you need `gentle-ai skill-registry refresh --force` |
+| Let startup hooks or SDD init refresh the skill registry      | Manually rescan skills unless you need `atomwright skill-registry refresh --force` |
 | Say "use sdd" if you know you want structured planning     | Worry about which SDD phase comes next                                            |
 | Re-run the installer to update or change your setup        | Manually patch skill files or persona instructions                                |

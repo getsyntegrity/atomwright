@@ -14,7 +14,7 @@ import (
 	"github.com/pablogore/atomwright/v2/internal/telemetry"
 )
 
-// TelemetryStatusSchema identifies the `gentle-ai telemetry status|enable|disable`
+// TelemetryStatusSchema identifies the `atomwright telemetry status|enable|disable`
 // projection (gentle-ai.telemetry-status/v1).
 const TelemetryStatusSchema = telemetry.StatusSchema
 
@@ -40,7 +40,7 @@ type TelemetryStatusResult struct {
 	Counters          telemetry.Counters `json:"counters"`
 }
 
-// TelemetryTriggerSchema identifies `gentle-ai telemetry trigger`'s answer
+// TelemetryTriggerSchema identifies `atomwright telemetry trigger`'s answer
 // (gentle-ai.telemetry-trigger/v1).
 const TelemetryTriggerSchema = "gentle-ai.telemetry-trigger/v1"
 
@@ -52,15 +52,15 @@ type TelemetryTriggerResult struct {
 	Source   string `json:"source"`
 }
 
-// RunTelemetry implements `gentle-ai telemetry status|enable|disable|preview`
+// RunTelemetry implements `atomwright telemetry status|enable|disable|preview`
 // plus the hidden `telemetry send` subcommand that SpawnDetachedSend
 // launches in the background (payload arrives on its stdin, never a file
 // path, so there is never a path for it to remove). status, enable, disable,
 // and preview never send anything themselves.
 func RunTelemetry(args []string, stdout io.Writer) error {
 	if len(args) == 0 || args[0] == "help" || args[0] == "-h" || args[0] == "--help" {
-		_, _ = fmt.Fprintln(stdout, "Usage: gentle-ai telemetry <status|policy|enable|disable|preview|trigger|runtime> [--json]")
-		_, _ = fmt.Fprintln(stdout, "Anonymous, opt-out usage telemetry. status reports whether sending is enabled and why; policy reads effective collection permission without creating or repairing state; enable/disable set the local opt-out; preview prints the exact payload that would be sent next, without sending it; trigger runs the same opportunistic check install/update/sync run internally (enrollment, install-once, the 24h heartbeat limit, and the failure backoff all apply) — hosts such as Gentle Pi that call gentle-ai only through review/sdd-attempt use this to still get a heartbeat. The first run only shows the notice and sends nothing; sending starts on the following trigger. Opt out permanently with `gentle-ai telemetry disable`, or for one run with DO_NOT_TRACK=1.")
+		_, _ = fmt.Fprintln(stdout, "Usage: atomwright telemetry <status|policy|enable|disable|preview|trigger|runtime> [--json]")
+		_, _ = fmt.Fprintln(stdout, "Anonymous, opt-out usage telemetry. status reports whether sending is enabled and why; policy reads effective collection permission without creating or repairing state; enable/disable set the local opt-out; preview prints the exact payload that would be sent next, without sending it; trigger runs the same opportunistic check install/update/sync run internally (enrollment, install-once, the 24h heartbeat limit, and the failure backoff all apply) — hosts such as Gentle Pi that call gentle-ai only through review/sdd-attempt use this to still get a heartbeat. The first run only shows the notice and sends nothing; sending starts on the following trigger. Opt out permanently with `atomwright telemetry disable`, or for one run with DO_NOT_TRACK=1.")
 		return nil
 	}
 
@@ -102,7 +102,7 @@ func runTelemetryPolicy(args []string, stdout io.Writer) error {
 		return err
 	}
 	if flags.NArg() != 0 {
-		return fmt.Errorf("telemetry policy takes no positional arguments; run 'gentle-ai telemetry policy' without positional arguments")
+		return fmt.Errorf("telemetry policy takes no positional arguments; run 'atomwright telemetry policy' without positional arguments")
 	}
 	result := TelemetryPolicyResult{Schema: "gentle-ai.telemetry-policy/v1", Operation: "policy", Source: telemetry.SourceStateDisable, Reason: "state_unavailable"}
 	decision := telemetry.Decide(os.Getenv, telemetry.State{Enabled: true})
@@ -141,7 +141,7 @@ func runTelemetryStateCommand(operation string, args []string, stdout io.Writer)
 		return err
 	}
 	if flags.NArg() != 0 {
-		return fmt.Errorf("unexpected telemetry %s argument %q", operation, flags.Arg(0)) // refusal:by-design operator-knowledge: rerun `gentle-ai telemetry status|enable|disable` with no positional arguments
+		return fmt.Errorf("unexpected telemetry %s argument %q", operation, flags.Arg(0)) // refusal:by-design operator-knowledge: rerun `atomwright telemetry status|enable|disable` with no positional arguments
 	}
 
 	homeDir, err := osUserHomeDir()
@@ -196,9 +196,9 @@ func runTelemetryStateCommand(operation string, args []string, stdout io.Writer)
 	_, _ = fmt.Fprintf(stdout, "install_id: %s\n", result.InstallID)
 	_, _ = fmt.Fprintf(stdout, "endpoint: %s\n", result.Endpoint)
 	if !result.Enabled {
-		_, _ = fmt.Fprintln(stdout, "run `gentle-ai telemetry enable` to opt back in")
+		_, _ = fmt.Fprintln(stdout, "run `atomwright telemetry enable` to opt back in")
 	} else {
-		_, _ = fmt.Fprintln(stdout, "run `gentle-ai telemetry disable` to opt out")
+		_, _ = fmt.Fprintln(stdout, "run `atomwright telemetry disable` to opt out")
 	}
 	return nil
 }
@@ -219,7 +219,7 @@ func runTelemetryPreview(args []string, stdout io.Writer) error {
 		return err
 	}
 	if flags.NArg() != 0 {
-		return fmt.Errorf("unexpected telemetry preview argument %q", flags.Arg(0)) // refusal:by-design operator-knowledge: rerun `gentle-ai telemetry preview` with no positional arguments
+		return fmt.Errorf("unexpected telemetry preview argument %q", flags.Arg(0)) // refusal:by-design operator-knowledge: rerun `atomwright telemetry preview` with no positional arguments
 	}
 
 	homeDir, err := osUserHomeDir()
@@ -316,7 +316,7 @@ func telemetryInstalledSelection(homeDir string) ([]string, []string, error) {
 }
 
 // telemetryRDDEnabled reads the effective receipt-driven-development mode
-// through the same read-only reader `gentle-ai review mode status` uses. A
+// through the same read-only reader `atomwright review mode status` uses. A
 // resolution failure (e.g. cwd is not a repository) is reported as disabled
 // rather than failing the caller: telemetry must never block on this.
 func telemetryRDDEnabled(cwd string) bool {
@@ -336,7 +336,7 @@ func telemetryRDDEnabled(cwd string) bool {
 // switch, so this returns false without ever resolving a home directory or
 // reading/writing anything. Only when the environment allows it does this
 // resolve home and re-run Decide against the real persisted state (which a
-// prior `gentle-ai telemetry disable` may have turned off).
+// prior `atomwright telemetry disable` may have turned off).
 func telemetryEnabledHomeDir() (string, bool) {
 	if envDecision := telemetry.Decide(os.Getenv, telemetry.State{Enabled: true}); !envDecision.Enabled {
 		return "", false
@@ -416,7 +416,7 @@ func runTelemetryTriggerCommand(args []string, stdout io.Writer) error {
 		return err
 	}
 	if flags.NArg() != 0 {
-		return fmt.Errorf("unexpected telemetry trigger argument %q", flags.Arg(0)) // refusal:by-design operator-knowledge: rerun `gentle-ai telemetry trigger` with no positional arguments
+		return fmt.Errorf("unexpected telemetry trigger argument %q", flags.Arg(0)) // refusal:by-design operator-knowledge: rerun `atomwright telemetry trigger` with no positional arguments
 	}
 
 	homeDir, err := osUserHomeDir()

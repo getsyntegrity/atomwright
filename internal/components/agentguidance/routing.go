@@ -67,7 +67,7 @@ func RenderRouting(agent model.AgentID) (string, error) {
 	// not exist for the user, who would otherwise ask to stop using
 	// receipt-driven development and be argued with instead of obeyed.
 	output.WriteString("\n### Receipt-driven development is user-owned\n\n")
-	output.WriteString("The user controls receipt-driven development with a switch: `gentle-ai review mode enable|disable|status`.\n\n")
+	output.WriteString("The user controls receipt-driven development with a switch: `atomwright review mode enable|disable|status`.\n\n")
 	output.WriteString("- It is **opt-in and off by default**. Until the user explicitly enables it, reviews do not run and delivery follows ordinary repository policy. Do not treat that as a fault to diagnose or work around.\n")
 	output.WriteString("- `status` is read-only. It reports the deciding source and the effective mode, and changes nothing. A `default` deciding source means nobody has chosen, so the effective mode is off.\n")
 	output.WriteString("- When the user asks to stop using receipt-driven development, run `disable`. Do not argue, do not work around it, and do not propose alternatives first.\n")

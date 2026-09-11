@@ -143,7 +143,7 @@ func TestResolveSelectionStates(t *testing.T) {
 
 // TestAmbiguousChangeSelectionNamesARunnableCommandPerChange pins the machine
 // surface, not the markdown one. #2117 step 5: the SDD task-failure envelope
-// hands the caller `gentle-ai sdd-status --cwd <cwd> --json` as its
+// hands the caller `atomwright sdd-status --cwd <cwd> --json` as its
 // continuation. With more than one active change that lands here, and the
 // blocked reason used to be the entire guidance: it listed the change names and
 // named no command, so an automated consumer following our own continuation had
@@ -166,7 +166,7 @@ func TestAmbiguousChangeSelectionNamesARunnableCommandPerChange(t *testing.T) {
 	for _, change := range []string{"first", "second"} {
 		// The selector is positional: ParseCommandArgs has no --change flag
 		// (#3278, #2790), so this is the only runnable spelling.
-		want := "gentle-ai sdd-status " + change + " --cwd " + root
+		want := "atomwright sdd-status " + change + " --cwd " + root
 		if !strings.Contains(reasons, want) {
 			t.Fatalf("blocked reasons named no runnable command for %q; a refusal that lists options and no command is the shape this project does not ship.\ngot:\n%s", change, reasons)
 		}
@@ -191,7 +191,7 @@ func TestDispatcherMarkdownRendersSelectChangeInstructions(t *testing.T) {
 	// continuation, the blocked reason ("Change selection is ambiguous: ...")
 	// is the entire guidance and names no way out.
 	dispatcher := RenderDispatcherMarkdown(status)
-	for _, want := range []string{"### Next Selection Operation", "gentle-ai sdd-status --cwd", "gentle-ai sdd-continue --cwd", "<change-name>"} {
+	for _, want := range []string{"### Next Selection Operation", "atomwright sdd-status --cwd", "atomwright sdd-continue --cwd", "<change-name>"} {
 		if !strings.Contains(dispatcher, want) {
 			t.Fatalf("dispatcher missing %q for select-change:\n%s", want, dispatcher)
 		}

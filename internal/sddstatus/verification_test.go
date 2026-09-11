@@ -70,7 +70,7 @@ func TestValidateVerifyReportAdmission(t *testing.T) {
 		{"untagged fence", strings.Replace(valid, "```yaml", "```", 1), "first non-empty line must be ```yaml", false},
 		{"tilde fence", strings.Replace(valid, "```yaml", "~~~yaml", 1), "first non-empty line must be ```yaml", false},
 		{"heading before fence", "# Verify report\n\n" + valid, "first non-empty line must be ```yaml", false},
-		{"refusal names the validator", strings.Replace(valid, "```yaml", "```", 1), "gentle-ai sdd-verify-validate", false},
+		{"refusal names the validator", strings.Replace(valid, "```yaml", "```", 1), "atomwright sdd-verify-validate", false},
 		{"unterminated", strings.TrimSuffix(valid, "```"), "unterminated", false},
 		{"duplicate", strings.Replace(valid, "verdict: pass", "verdict: pass\nverdict: pass", 1), "duplicate", false},
 		{"unknown", strings.Replace(valid, "verdict: pass", "verdict: pass\nextra: value", 1), "unknown", false},

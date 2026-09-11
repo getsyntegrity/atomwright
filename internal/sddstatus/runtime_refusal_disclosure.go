@@ -18,7 +18,7 @@ import "fmt"
 // work. The exit is to stop claiming a remediation, which no message ever said.
 func runtimeDischargedFailureRefusal(evidence string, dischargedByOrdinal int) error {
 	return fmt.Errorf(
-		"failed verification %s has already been repaired by the passing settlement at attempt %d, so the attempt chain holds no unremediated failure for this correction to name; this work unit is ordinary work — settle it with the same flags but WITHOUT --remediates-evidence-revision. Run `gentle-ai sdd-attempt status --cwd <repo> --change <change>` to read the chain: a correction plan decomposed into several bounded work units names the failure once, on the slice that repairs it, and the remaining slices settle plainly",
+		"failed verification %s has already been repaired by the passing settlement at attempt %d, so the attempt chain holds no unremediated failure for this correction to name; this work unit is ordinary work — settle it with the same flags but WITHOUT --remediates-evidence-revision. Run `atomwright sdd-attempt status --cwd <repo> --change <change>` to read the chain: a correction plan decomposed into several bounded work units names the failure once, on the slice that repairs it, and the remaining slices settle plainly",
 		evidence, dischargedByOrdinal)
 }
 

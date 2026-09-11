@@ -731,7 +731,7 @@ func (builder SnapshotBuilder) IntendedUntrackedInventory(ctx context.Context) (
 // intendedUntrackedInventoryCommand is the runnable STATUS that publishes the
 // canonical untracked inventory; the bare `--next-transition` form is refused
 // without a negotiated contract and runtime identity (issue #2895).
-const intendedUntrackedInventoryCommand = "gentle-ai review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent <runtime> --next-transition"
+const intendedUntrackedInventoryCommand = "atomwright review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent <runtime> --next-transition"
 
 // StillUntracked keeps the entries of a frozen intended-untracked declaration
 // that the index does not carry yet (issue #3759). A declared path committed

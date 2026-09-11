@@ -1838,7 +1838,7 @@ var organicRoutingGuidanceRequiredFragments = []string{
 	"Optional SDD",
 	"never selects SDD",
 	"never create SDD artifacts",
-	"gentle-ai review mode enable|disable|status",
+	"atomwright review mode enable|disable|status",
 	"disabled/unmanaged",
 }
 
@@ -2566,7 +2566,7 @@ func TestOrganicRuntimeCurrentReviewHardening(t *testing.T) {
 			t.Fatal("differing result replaced an occupied reviewer slot")
 		}
 		if !strings.Contains(conflictStderr, "reviewer_result_slot_occupied") ||
-			!strings.Contains(conflictStderr, "gentle-ai review status --cwd <repo> --contract gentle-ai.review-integration/v2 --next-transition") ||
+			!strings.Contains(conflictStderr, "atomwright review status --cwd <repo> --contract gentle-ai.review-integration/v2 --next-transition") ||
 			!strings.Contains(conflictStderr, "authoritative continuation") {
 			t.Fatalf("occupied-slot continuation = %q", conflictStderr)
 		}
@@ -3425,14 +3425,14 @@ func organicNamedContinuation(t *testing.T, message string) []string {
 	return tokens
 }
 
-// runNamedReviewStart dispatches a `gentle-ai review start ...` continuation
+// runNamedReviewStart dispatches a `atomwright review start ...` continuation
 // read out of a product message, with the working directory already at the
 // repository so the invocation runs exactly as printed. extra carries only an
 // operator-supplied placeholder value the message asked for.
 func (harness *organicHarness) runNamedReviewStart(tokens []string, extra ...string) organicStartResult {
 	harness.t.Helper()
 	if len(tokens) < 2 || tokens[0] != "review" || tokens[1] != "start" {
-		harness.t.Fatalf("named continuation is %v, want gentle-ai review start", tokens)
+		harness.t.Fatalf("named continuation is %v, want atomwright review start", tokens)
 	}
 	payload := harness.gentle(append(append([]string{}, tokens...), extra...)...)
 	var started organicStartResult

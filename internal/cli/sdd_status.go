@@ -13,7 +13,7 @@ func sddReviewDisabledForWorkspace(workspaceRoot string) (bool, error) {
 	return reviewDrivenDevelopmentDisabled(context.Background(), workspaceRoot)
 }
 
-// RunSDDStatus is the CLI entry point for `gentle-ai sdd-status [change]`.
+// RunSDDStatus is the CLI entry point for `atomwright sdd-status [change]`.
 //
 // The kill switch reaches SDD status here, at the one layer that owns the
 // single source of truth for both of its sources. An unreadable switch fails
@@ -49,7 +49,7 @@ func RunSDDStatus(args []string, stdout io.Writer) error {
 	return err
 }
 
-// RunSDDContinue is the CLI entry point for `gentle-ai sdd-continue [change]`.
+// RunSDDContinue is the CLI entry point for `atomwright sdd-continue [change]`.
 func RunSDDContinue(args []string, stdout io.Writer) error {
 	parsed, err := sddstatus.ParseCommandArgs(args)
 	if err != nil {

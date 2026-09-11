@@ -29,7 +29,7 @@ func TestSDDAttemptBeginNamesTheResetThatClearsDrift(t *testing.T) {
 	message := driftedBeginRefusal(t, fixture, "drifted-begin-2", fixture.objective)
 
 	arguments := namedRunnableGentleCommand(t, message)
-	if len(arguments) < 3 || arguments[0] != "gentle-ai" || arguments[1] != "sdd-attempt" || arguments[2] != "reset" {
+	if len(arguments) < 3 || arguments[0] != "atomwright" || arguments[1] != "sdd-attempt" || arguments[2] != "reset" {
 		t.Fatalf("refusal names %v, not a runnable sdd-attempt reset:\n%s", arguments, message)
 	}
 	arguments = arguments[2:]
@@ -97,10 +97,10 @@ func TestSDDAttemptBeginNamesTheRescopeWhenCandidateHasNotDrifted(t *testing.T) 
 	message := driftedBeginRefusal(t, fixture, "changed-begin-2", changed)
 
 	arguments := namedRunnableGentleCommand(t, message)
-	if len(arguments) < 3 || arguments[0] != "gentle-ai" || arguments[1] != "sdd-attempt" || arguments[2] != "rescope" {
+	if len(arguments) < 3 || arguments[0] != "atomwright" || arguments[1] != "sdd-attempt" || arguments[2] != "rescope" {
 		t.Fatalf("refusal names %v, not the rescope that actually clears this state:\n%s", arguments, message)
 	}
-	if strings.Contains(message, "gentle-ai sdd-attempt reset") {
+	if strings.Contains(message, "atomwright sdd-attempt reset") {
 		t.Fatalf("refusal names a reset that is refused one layer deeper:\n%s", message)
 	}
 	arguments = arguments[2:]

@@ -23,7 +23,7 @@ import (
 // Opportunistic's enrollment step — precisely so the notice can never be
 // printed after data has already left the machine.
 //
-// This is the body of the hidden `gentle-ai telemetry send` subcommand,
+// This is the body of the hidden `atomwright telemetry send` subcommand,
 // which reads payload from its own stdin (never a file, so there is never a
 // path to remove); SpawnDetachedSend launches that subcommand in the
 // background, but PerformSend itself is called directly and synchronously so

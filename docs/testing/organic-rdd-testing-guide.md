@@ -60,27 +60,27 @@ The binaries are on the prerelease page: **https://github.com/Gentleman-Programm
 
 ### Flow 1: Routing without SDD (the main fix)
 
-1. [ ] `gentle-ai install --scope workspace --agents claude-code --components permissions` → **Expected**: it installs and ends with "You're ready", without asking anything about SDD.
+1. [ ] `atomwright install --scope workspace --agents claude-code --components permissions` → **Expected**: it installs and ends with "You're ready", without asking anything about SDD.
 2. [ ] Open `$HOME/demo/.claude/CLAUDE.md` → **Expected**: a routing section with **direct inline**, **delegated direct** and **optional SDD**.
 3. [ ] Search for `WorkRun` or `work-capabilities` → **Expected**: **zero results**. If it shows up, that is a bug.
-4. [ ] Search for `review mode` → **Expected**: `gentle-ai review mode enable|disable|status` shows up.
+4. [ ] Search for `review mode` → **Expected**: `atomwright review mode enable|disable|status` shows up.
 5. [ ] Run the same install again → **Expected**: same output and the files do NOT change.
 
 ### Flow 2: Kill switch
 
-1. [ ] `gentle-ai review mode status --cwd $HOME/demo --json` → **Expected**: effective `off`, source `default` — receipt-driven development is opt-in, so a fresh install reviews nothing until you ask it to.
-2. [ ] `gentle-ai review start --cwd $HOME/demo` → **Expected**: refused, naming that reviews are off **and naming the command that turns them on**:
+1. [ ] `atomwright review mode status --cwd $HOME/demo --json` → **Expected**: effective `off`, source `default` — receipt-driven development is opt-in, so a fresh install reviews nothing until you ask it to.
+2. [ ] `atomwright review start --cwd $HOME/demo` → **Expected**: refused, naming that reviews are off **and naming the command that turns them on**:
 
 ```
 receipt-driven development is disabled: start is rejected because the default mode source
-keeps it off; turn reviews on with gentle-ai review mode enable --scope=global
+keeps it off; turn reviews on with atomwright review mode enable --scope=global
 ```
 
 It does NOT hang, it does NOT review. A refusal that exits non-zero and names no command is the defect.
-3. [ ] `gentle-ai review mode enable --scope global --cwd $HOME/demo` then `status` → **Expected**: effective `on`, source `global`.
-4. [ ] `gentle-ai review mode disable --cwd $HOME/demo` → **Expected**: it confirms reviews are off.
+3. [ ] `atomwright review mode enable --scope global --cwd $HOME/demo` then `status` → **Expected**: effective `on`, source `global`.
+4. [ ] `atomwright review mode disable --cwd $HOME/demo` → **Expected**: it confirms reviews are off.
 5. [ ] `status` again → **Expected**: effective `off`, source `global` (an explicit off, not the default).
-6. [ ] `gentle-ai review start --cwd $HOME/demo` → **Expected**: the same shape of refusal, naming commands that actually reach `on` from where you are. If you turned it off at clone scope, the message must name `--scope=global` **then** `--scope=clone`: clearing the clone override alone drops you on the opt-in default, still off.
+6. [ ] `atomwright review start --cwd $HOME/demo` → **Expected**: the same shape of refusal, naming commands that actually reach `on` from where you are. If you turned it off at clone scope, the message must name `--scope=global` **then** `--scope=clone`: clearing the clone override alone drops you on the opt-in default, still off.
 7. [ ] `enable --scope global` and `status` → **Expected**: `on` again.
 8. [ ] `disable --scope clone`, clone (`git clone $HOME/demo $HOME/demo2`) and `status` in `demo2` → **Expected**: `demo2` gives **on** (the global enable still applies) — turning a clone off is NOT inherited.
 7. [ ] **Before moving on**: `enable --scope clone` in `demo` → **Expected**: `on`.
@@ -88,7 +88,7 @@ It does NOT hang, it does NOT review. A refusal that exits non-zero and names no
 ### Flow 3: Documentation-only change (zero ceremony)
 
 1. [ ] Edit `README.md` (plain text) and stage **only that file**: `git add README.md`.
-2. [ ] `gentle-ai review start --cwd $HOME/demo` → **Expected**: `risk_level: low`, `selected_lenses: []` — zero reviewers, no question; START closes and burns the review.
+2. [ ] `atomwright review start --cwd $HOME/demo` → **Expected**: `risk_level: low`, `selected_lenses: []` — zero reviewers, no question; START closes and burns the review.
 
 ### Current review lifecycle (use for every flow below)
 
@@ -105,7 +105,7 @@ It does NOT hang, it does NOT review. A refusal that exits non-zero and names no
 
 ### Flow 5: The consent question (needs a real terminal)
 
-1. [ ] With a tier 1/2 change ready, `review start` in an interactive terminal → **Expected**: **two** options — `1) Run the review now` / `2) Not now, just this once` — and a final line naming `gentle-ai review mode disable`. **There is no option 3.**
+1. [ ] With a tier 1/2 change ready, `review start` in an interactive terminal → **Expected**: **two** options — `1) Run the review now` / `2) Not now, just this once` — and a final line naming `atomwright review mode disable`. **There is no option 3.**
 2. [ ] Answer `2` → **Expected**: it does not review this candidate.
 3. [ ] ANOTHER change and `review start` → **Expected**: it asks again.
 4. [ ] Answer `1` → **Expected**: it reviews, and the next change no longer asks.
@@ -139,7 +139,7 @@ git push -u origin HEAD
 
 ## Flows 9 to 13: what we fixed with your feedback
 
-These flows are new. Each one reproduces a bug someone in the community found in earlier rounds. They need a binary **later than Refresh 4**. Check which build you have with `gentle-ai doctor`: it names the binary you actually invoked and its version, and warns when that differs from the one on your `PATH`. If yours predates the current refresh, download it again from the release page or build from the PR branch.
+These flows are new. Each one reproduces a bug someone in the community found in earlier rounds. They need a binary **later than Refresh 4**. Check which build you have with `atomwright doctor`: it names the binary you actually invoked and its version, and warns when that differs from the one on your `PATH`. If yours predates the current refresh, download it again from the release page or build from the PR branch.
 
 ### Flow 9: Published commits stay ordinary delivery
 
@@ -159,7 +159,7 @@ Reported by @lu149e, with the root cause confirmed by @Denver2828.
 1. [ ] `mkdir $HOME/unborn && cd $HOME/unborn && git init -b main`.
 2. [ ] Create a code file, `gofmt` if it applies, and `git add -A`. **Do not commit yet.**
 3. [ ] `git rev-parse --verify HEAD` → **Expected**: it fails, because there is no first commit yet. That is correct.
-4. [ ] `gentle-ai review start --cwd "$PWD"` → **Expected**: the review **starts**. It used to blow up with `Needed a single revision`.
+4. [ ] `atomwright review start --cwd "$PWD"` → **Expected**: the review **starts**. It used to blow up with `Needed a single revision`.
 
 ### Flow 11: STATUS transitions run exactly as returned
 
@@ -168,7 +168,7 @@ This one is for people using agents. A controller must not infer a lifecycle act
 1. [ ] With a review in progress, ask for the next transition:
 
 ```
-gentle-ai review status --next-transition --contract gentle-ai.review-integration/v2
+atomwright review status --next-transition --contract gentle-ai.review-integration/v2
 ```
 
 2. [ ] First read `next_transition.kind`. If it is `execute`, run the returned operation with its ordered argument tokens exactly as returned → **Expected**: the transition runs without reordered, synthesized, or added arguments.
@@ -251,7 +251,7 @@ macOS puts `$TMPDIR` under `/var/folders/...`, and `/var` is a symlink to `/priv
 ```
 echo "one more line" >> guide.md
 git add guide.md
-gentle-ai review start --cwd .
+atomwright review start --cwd .
 # For this docs-only low-risk case, START closes and burns the review.
 ```
 
@@ -322,7 +322,7 @@ Run everything below with output going **outside** the repo.
 1. [ ] Ask for the next transition and retain its execute operation and ordered argument tokens:
 
 ```
-gentle-ai review status --next-transition --contract gentle-ai.review-integration/v2 --cwd . > /tmp/rdd-out/nt.json
+atomwright review status --next-transition --contract gentle-ai.review-integration/v2 --cwd . > /tmp/rdd-out/nt.json
 ```
 
 2. [ ] Now change the workspace, exactly as a linter would: `echo "lint output" > lint-report.txt` **inside the repo**.
@@ -394,7 +394,7 @@ into whichever of the two it happens to reach first.
 2. [ ] Run the ordinary review lifecycle there:
 
 ```
-gentle-ai review start --cwd .
+atomwright review start --cwd .
 # Follow each STATUS-issued review capture-result invocation.
 # The final admitted capture closes and burns the review.
 ```
@@ -426,10 +426,10 @@ a typed refusal, not a stack of failed writes.
 sudo mount -o remount,ro <mountpoint>     # or: sudo mount -o ro,bind /src /ro-copy
 ```
 
-2. [ ] `gentle-ai review status --cwd .` → **Expected**: it works. Status is
+2. [ ] `atomwright review status --cwd .` → **Expected**: it works. Status is
    read-only by contract and must not need to write anything, not even a lock
    file.
-3. [ ] `gentle-ai review start --cwd .` → **Expected**: a typed refusal naming
+3. [ ] `atomwright review start --cwd .` → **Expected**: a typed refusal naming
    that the store is not writable. A raw `EROFS` or
    `read-only file system` with no continuation is the defect.
 4. [ ] → **Expected**: nothing was half-created. After the refusal,
@@ -514,7 +514,7 @@ reported as a permanent corruption.
 
 ```powershell
 1..20 | ForEach-Object {
-  gentle-ai review start --cwd .
+  atomwright review start --cwd .
   # Follow each STATUS-issued review capture-result invocation.
   # The final admitted capture closes and burns the review.
 }
@@ -575,19 +575,19 @@ read, a restored VM snapshot, a laptop resuming with a dead battery, or a
 container starting with a host clock behind the one that wrote the state.
 
 1. [ ] Establish a baseline: start a review, follow every STATUS-issued capture
-   until it closes, then record `gentle-ai review status --cwd .`.
+   until it closes, then record `atomwright review status --cwd .`.
 2. [ ] Move the clock backwards by an hour **after** closure:
 
 ```
 sudo date -s "-1 hour"        # or restore a VM snapshot taken an hour ago
 ```
 
-3. [ ] Run `gentle-ai review status --cwd .` → **Expected**: the same lineage
+3. [ ] Run `atomwright review status --cwd .` → **Expected**: the same lineage
    and closed state. No time-based refusal or `authority_corrupted`.
 4. [ ] The kill switch keeps a timestamp for provenance. Test that directly:
-   `gentle-ai review mode disable`, then `gentle-ai review mode enable`, then
+   `atomwright review mode disable`, then `atomwright review mode enable`, then
    move the clock back past `rdd_mode_recorded_at` in
-   `$HOME/.gentle-ai/state.json`, then run `gentle-ai review mode status --json`
+   `$HOME/.gentle-ai/state.json`, then run `atomwright review mode status --json`
    → **Expected**: `effective: on`, with the source that decided it.
 5. [ ] Move the clock **forwards** by a day and repeat steps 3 and 4 →
    **Expected**: identical answers. A rule that only holds in one direction is
@@ -602,20 +602,20 @@ sudo date -s "-1 hour"        # or restore a VM snapshot taken an hour ago
 **Historical candidate rationale, superseded.** The `v2.2.0-rc.1` friction
 harness drove the binary but could not drive a document. At that time, its
 candidate procedure treated the product as closed when reviews were off and
-`gentle-ai sdd-status <change> --json` reported the archive dependency `ready`
+`atomwright sdd-status <change> --json` reported the archive dependency `ready`
 with a `reviewGate` carrying `delivery: "disabled/unmanaged"` whose `result`
 was never `allow`. It then contrasted that result with the candidate
 `sdd-archive` skill, which required `reviewGate.result: allow`. The procedure
 below is preserved only as superseded candidate history, not as current release
 behavior.
 
-1. [ ] `gentle-ai install` (or `gentle-ai sync`) into a throwaway HOME, then
+1. [ ] `atomwright install` (or `atomwright sync`) into a throwaway HOME, then
    read the installed `sdd-archive` skill and the shared review-ledger contract
    → **Historical candidate expectation, superseded:** both require
    `reviewGate.result: allow`.
 2. [ ] In a repository with a complete, verified SDD change, run
-   `gentle-ai review mode disable` and then
-   `gentle-ai sdd-status <change> --json` → **Historical candidate expectation,
+   `atomwright review mode disable` and then
+   `atomwright sdd-status <change> --json` → **Historical candidate expectation,
    superseded:** `archive` is not blocked, `reviewGate.delivery` is
    `disabled/unmanaged`, and `reviewGate.result` is **not** `allow`.
 3. [ ] Ask your agent to archive that change → **Historical candidate observation
@@ -637,7 +637,7 @@ Six things that made earlier reports measure the wrong thing. They are not bugs,
 ```
 mkdir -p /tmp/rdd-out
 cd $HOME/demo
-gentle-ai review start --cwd . > /tmp/rdd-out/o.txt 2> /tmp/rdd-out/e.txt
+atomwright review start --cwd . > /tmp/rdd-out/o.txt 2> /tmp/rdd-out/e.txt
 ```
 
 This one cost the maintainer an hour of chasing a defect that was his own redirect. Flow 24 turns it into a deliberate test instead.
@@ -645,15 +645,15 @@ This one cost the maintainer an hour of chasing a defect that was his own redire
 **If an agent runs it, set `CI=1`.** The consent question only shows up when there is a real terminal. Many agent harnesses allocate a pseudo-terminal, so the tool asks… and nobody answers: the shell hangs until it is killed, and the flow ends up as PARTIAL for a reason that is not the product's.
 
 ```
-CI=1 gentle-ai review start
+CI=1 atomwright review start
 ```
 
 With `CI=1` the tool reviews anyway and warns on stderr that it did not ask. It is the same path CI already uses. **Exception: Flow 5 is precisely the test for the question**, so that one needs a real terminal and does not take `CI=1`; if your environment does not have one, mark it N/A.
 
-**Exit codes get lost through a pipe.** In bash, `$?` gives you the status of the **last command in the pipeline**, not the binary's. If you run `gentle-ai ... | tee log.txt`, `$?` is `tee`'s and it is always 0. In PowerShell, `$LASTEXITCODE` does give you the binary's, and that is why the same case "behaved differently" between Windows and Linux. To measure properly:
+**Exit codes get lost through a pipe.** In bash, `$?` gives you the status of the **last command in the pipeline**, not the binary's. If you run `atomwright ... | tee log.txt`, `$?` is `tee`'s and it is always 0. In PowerShell, `$LASTEXITCODE` does give you the binary's, and that is why the same case "behaved differently" between Windows and Linux. To measure properly:
 
 ```
-gentle-ai review start --projection staged --base-ref HEAD~1 > out.txt 2> err.txt
+atomwright review start --projection staged --base-ref HEAD~1 > out.txt 2> err.txt
 echo "exit=$?"
 ```
 

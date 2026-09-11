@@ -137,9 +137,9 @@ func ParseSyncFlags(args []string) (SyncFlags, error) {
 		}
 		usageText = strings.TrimRight(usageText, "\n")
 		if usageText != "" {
-			return SyncFlags{}, fmt.Errorf("%w — run `gentle-ai sync --help` for the supported flags:\n%s", err, usageText)
+			return SyncFlags{}, fmt.Errorf("%w — run `atomwright sync --help` for the supported flags:\n%s", err, usageText)
 		}
-		return SyncFlags{}, fmt.Errorf("%w — run `gentle-ai sync --help` for the supported flags", err)
+		return SyncFlags{}, fmt.Errorf("%w — run `atomwright sync --help` for the supported flags", err)
 	}
 	fs.Visit(func(f *flag.Flag) {
 		switch f.Name {
@@ -184,7 +184,7 @@ func ParseSyncFlags(args []string) (SyncFlags, error) {
 
 func PrintSyncHelp(w io.Writer) {
 	fmt.Fprint(w, `USAGE
-  gentle-ai sync [flags]
+  atomwright sync [flags]
 
 FLAGS
   --agent, --agents <list>           Agents to sync
@@ -1705,7 +1705,7 @@ func persistSyncManagedAssetStateWithBackground(homeDir string, selection model.
 			latest = state.InstallState{}
 		} else if err != nil {
 			return fmt.Errorf(
-				"read install state for managed asset provenance: %w; run `gentle-ai install` to rewrite %s",
+				"read install state for managed asset provenance: %w; run `atomwright install` to rewrite %s",
 				err, state.Path(homeDir))
 		}
 
@@ -1835,7 +1835,7 @@ func RunSync(args []string) (SyncResult, error) {
 	}
 
 	// Restore Codex effort and carril model assignments from state so that
-	// `gentle-ai sync` preserves the user's per-phase effort and per-carril
+	// `atomwright sync` preserves the user's per-phase effort and per-carril
 	// model choices instead of falling back to canonical defaults every time.
 	// This mirrors the TUI path (loadPersistedAssignments in app.go).
 	if len(selection.CodexModelAssignments) == 0 && len(persistedState.CodexModelAssignments) > 0 {
@@ -2045,7 +2045,7 @@ func RenderSyncReport(result SyncResult) string {
 	}
 
 	if result.NoOp {
-		fmt.Fprintln(&b, "gentle-ai sync — no managed sync actions needed")
+		fmt.Fprintln(&b, "atomwright sync — no managed sync actions needed")
 		if len(result.Agents) == 0 {
 			fmt.Fprintln(&b, "No agents were discovered or specified. Nothing to sync.")
 		} else {
@@ -2057,7 +2057,7 @@ func RenderSyncReport(result SyncResult) string {
 	}
 
 	if result.DryRun {
-		fmt.Fprintln(&b, "gentle-ai sync — dry-run")
+		fmt.Fprintln(&b, "atomwright sync — dry-run")
 		fmt.Fprintf(&b, "Agents: %s\n", joinAgentIDs(result.Agents))
 
 		compParts := make([]string, 0, len(result.Selection.Components))
@@ -2073,7 +2073,7 @@ func RenderSyncReport(result SyncResult) string {
 		return strings.TrimRight(b.String(), "\n")
 	}
 
-	fmt.Fprintln(&b, "gentle-ai sync — managed sync executed")
+	fmt.Fprintln(&b, "atomwright sync — managed sync executed")
 	fmt.Fprintf(&b, "Agents synced: %s\n", joinAgentIDs(result.Agents))
 
 	compParts := make([]string, 0, len(result.Selection.Components))
@@ -2107,8 +2107,8 @@ func RenderSyncReport(result SyncResult) string {
 
 // withFailedSyncVerificationNote replaces the generic
 // verify.VerificationIssuesMessage with one naming the concrete command that
-// retries a failed sync: `gentle-ai sync`. Unlike the install path, sync has
-// no per-agent retry command -- rerunning `gentle-ai sync` re-applies every
+// retries a failed sync: `atomwright sync`. Unlike the install path, sync has
+// no per-agent retry command -- rerunning `atomwright sync` re-applies every
 // discovered/persisted agent, so no agent list is needed.
 //
 // It is scoped to exactly the generic failure text so it never clobbers a
@@ -2118,7 +2118,7 @@ func withFailedSyncVerificationNote(report verify.Report) verify.Report {
 	if report.Ready || report.FinalNote != verify.VerificationIssuesMessage {
 		return report
 	}
-	report.FinalNote = verify.VerificationIssuesMessageForCommand("gentle-ai sync")
+	report.FinalNote = verify.VerificationIssuesMessageForCommand("atomwright sync")
 	return report
 }
 
@@ -2141,7 +2141,7 @@ func runPostSyncVerification(homeDir, workspaceDir string, selection model.Selec
 							}
 							return err
 						}
-						return fmt.Errorf("retired managed file still exists; rerun `gentle-ai sync` to finish retiring it")
+						return fmt.Errorf("retired managed file still exists; rerun `atomwright sync` to finish retiring it")
 					},
 				})
 				continue
@@ -2169,7 +2169,7 @@ func runPostSyncVerification(homeDir, workspaceDir string, selection model.Selec
 			Description: "legacy OpenCode review plugin removed",
 			Run: func(context.Context) error {
 				if _, err := os.Lstat(legacyPath); err == nil {
-					return fmt.Errorf("legacy OpenCode review plugin still exists; rerun `gentle-ai sync` to complete the managed plugin migration")
+					return fmt.Errorf("legacy OpenCode review plugin still exists; rerun `atomwright sync` to complete the managed plugin migration")
 				} else if !os.IsNotExist(err) {
 					return err
 				}

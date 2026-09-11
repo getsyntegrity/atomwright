@@ -75,9 +75,9 @@ type ReviewUnachievableLensWithdraw struct {
 type ReviewTransitionExecution struct {
 	Operation string `json:"operation"`
 	// Command is the complete, literally runnable command line for this
-	// transition, e.g. "gentle-ai review start --contract=... --target=...".
+	// transition, e.g. "atomwright review start --contract=... --target=...".
 	// Operation alone is a dotted logical name, so a caller had to already know
-	// that "review.start" means "gentle-ai review start" before it could run
+	// that "review.start" means "atomwright review start" before it could run
 	// anything. Operation, Arguments and their Tokens stay byte-identical, so
 	// existing consumers never move.
 	Command           string                      `json:"command,omitempty"`
@@ -542,7 +542,7 @@ func reviewMissingCaptureTransition(binding ReviewTransitionBinding, selectedLen
 const reviewCaptureResultCaptureOperation = "review.capture-result"
 
 // reviewNativeCaptureOperationPrefix marks a capture_operation this product
-// performs itself. Everything after it is the runnable `gentle-ai review`
+// performs itself. Everything after it is the runnable `atomwright review`
 // verb, which is exactly why such an input's arguments are argv.
 const reviewNativeCaptureOperationPrefix = "review."
 
@@ -565,7 +565,7 @@ func reviewNativeCaptureVerb(captureOperation string) (string, bool) {
 }
 
 // reviewCaptureResultCommandName renders the exact runnable command name for
-// reviewCaptureResultCaptureOperation, e.g. "gentle-ai review capture-result".
+// reviewCaptureResultCaptureOperation, e.g. "atomwright review capture-result".
 func reviewCaptureResultCommandName() string {
 	verb, _ := reviewNativeCaptureVerb(reviewCaptureResultCaptureOperation)
 	return reviewTransitionCommandTool + " review " + verb
@@ -1162,7 +1162,7 @@ func reviewTransitionArgumentToken(argument ReviewTransitionArgument) string {
 // The arguments of an input whose capture_operation names an operation this
 // product performs are tokenized through the same single tokenizer the execute
 // form uses, because they are the same thing: the flags of a real
-// `gentle-ai review <verb>` command. A caller no longer re-derives
+// `atomwright review <verb>` command. A caller no longer re-derives
 // "--lineage=" + value by hand, which is where a hand-assembled invocation
 // twice dropped or mispaired --repository-context. An "external.*" input is
 // left untokenized on purpose; see reviewNativeCaptureVerb.

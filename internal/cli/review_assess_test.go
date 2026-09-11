@@ -129,7 +129,7 @@ func TestReviewAssessCommittedOnlyBaseDiffMatchesStart(t *testing.T) {
 
 // TestReviewAssessUnbuildableCandidateNamesResolution proves an unbuildable
 // candidate (an unresolvable --base-ref) fails closed with a message naming a
-// literal `gentle-ai review assess ...` resolution, per the refusal ratchet
+// literal `atomwright review assess ...` resolution, per the refusal ratchet
 // and issue #4295's fail-closed requirement. Hosts that cannot resolve the
 // named continuation are documented to treat this exactly like a "high"
 // result.
@@ -141,8 +141,8 @@ func TestReviewAssessUnbuildableCandidateNamesResolution(t *testing.T) {
 	if err == nil {
 		t.Fatalf("review assess with an unresolvable --base-ref unexpectedly succeeded: %s", output.String())
 	}
-	if !strings.Contains(err.Error(), "gentle-ai review assess") {
-		t.Fatalf("unbuildable review assess error does not name a gentle-ai review assess resolution: %v", err)
+	if !strings.Contains(err.Error(), "atomwright review assess") {
+		t.Fatalf("unbuildable review assess error does not name a atomwright review assess resolution: %v", err)
 	}
 }
 

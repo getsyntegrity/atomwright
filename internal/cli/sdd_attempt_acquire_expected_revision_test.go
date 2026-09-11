@@ -80,15 +80,15 @@ func TestRunSDDAttemptAcquireTokenAndExpectedRevisionMustAgree(t *testing.T) {
 }
 
 // assertSDDAttemptCommandFlagsAreDefined proves the OTHER half of a named
-// continuation being runnable (#4160): every `gentle-ai sdd-attempt <verb>
+// continuation being runnable (#4160): every `atomwright sdd-attempt <verb>
 // ...` command extracted from a refusal must only carry `--flag` names that
 // verb's own flag.FlagSet actually defines. #4160 was reachable exactly
 // because nothing checked this: guidance could point a caller at a verb with
 // a flag that verb's own parser rejects outright.
 func assertSDDAttemptCommandFlagsAreDefined(t *testing.T, arguments []string) {
 	t.Helper()
-	if len(arguments) < 3 || arguments[0] != "gentle-ai" || arguments[1] != "sdd-attempt" {
-		t.Fatalf("not a runnable gentle-ai sdd-attempt command: %v", arguments)
+	if len(arguments) < 3 || arguments[0] != "atomwright" || arguments[1] != "sdd-attempt" {
+		t.Fatalf("not a runnable atomwright sdd-attempt command: %v", arguments)
 	}
 	verb := arguments[2]
 	if _, ok := sddAttemptOperationDefinition(verb); !ok {
@@ -106,12 +106,12 @@ func assertSDDAttemptCommandFlagsAreDefined(t *testing.T, arguments []string) {
 			index++
 		}
 		if _, ok := sddAttemptOperationFlag(verb, name); !ok {
-			t.Fatalf("gentle-ai sdd-attempt %s names --%s, which that operation does not define: %v", verb, name, arguments)
+			t.Fatalf("atomwright sdd-attempt %s names --%s, which that operation does not define: %v", verb, name, arguments)
 		}
 	}
 }
 
-// allNamedGentleCommands extracts every backtick-delimited `gentle-ai ...`
+// allNamedGentleCommands extracts every backtick-delimited `atomwright ...`
 // command a message names, in order, reusing the exact same tokenizer
 // namedRunnableGentleCommand relies on so a walk of several commands in one
 // message stays byte-identical to what a single extraction would produce.
@@ -130,7 +130,7 @@ func allNamedGentleCommands(t *testing.T, message string) [][]string {
 			break
 		}
 		span := remainder[:closing]
-		if strings.HasPrefix(span, "gentle-ai ") {
+		if strings.HasPrefix(span, "atomwright ") {
 			found = append(found, splitNamedCommand(t, span))
 		}
 		rest = remainder[closing+1:]
@@ -139,7 +139,7 @@ func allNamedGentleCommands(t *testing.T, message string) [][]string {
 }
 
 // TestSDDAttemptGuidanceCommandsOnlyNameDefinedFlags is the guidance-side
-// guard for #4160: every `gentle-ai sdd-attempt <verb>` command named by
+// guard for #4160: every `atomwright sdd-attempt <verb>` command named by
 // runtime guidance must only carry flags that verb actually defines. This
 // walks the two representative shapes reset/status guidance actually
 // prints -- the drifted-objective refusal (begin points at reset) and the

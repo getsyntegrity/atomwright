@@ -16,7 +16,7 @@ import (
 	"github.com/pablogore/atomwright/v2/internal/assets"
 )
 
-const freshV2RerunInstruction = "Start a fresh implementation state and rerun `gentle-ai sdd-status --contract gentle-ai.sdd-status/v2`."
+const freshV2RerunInstruction = "Start a fresh implementation state and rerun `atomwright sdd-status --contract gentle-ai.sdd-status/v2`."
 
 func TestSDDStatusV2CleanBreak(t *testing.T) {
 	t.Run("v2 is the sole default and v1 is refused read-only", func(t *testing.T) {

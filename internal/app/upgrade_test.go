@@ -20,7 +20,7 @@ func renderUpgradeReportForTest(results []upgrade.ToolUpgradeResult, dryRun bool
 
 // --- TestRunArgs_UpgradeDryRunFlag ---
 
-// TestRunArgs_UpgradeDryRun verifies that `gentle-ai upgrade --dry-run` runs without
+// TestRunArgs_UpgradeDryRun verifies that `atomwright upgrade --dry-run` runs without
 // error, outputs relevant messaging, and does NOT attempt any real installation.
 // The environment has no tools installed, so no upgrades are available.
 func TestRunArgs_UpgradeDryRun(t *testing.T) {
@@ -60,7 +60,7 @@ func TestRunArgs_UpgradeDryRun(t *testing.T) {
 	}
 }
 
-// TestRunArgs_UpgradeNoArgs runs `gentle-ai upgrade` without flags.
+// TestRunArgs_UpgradeNoArgs runs `atomwright upgrade` without flags.
 // With no updates available in the test environment, it should exit cleanly.
 func TestRunArgs_UpgradeNoArgs(t *testing.T) {
 	var buf bytes.Buffer
@@ -77,7 +77,7 @@ func TestRunArgs_UpgradeNoArgs(t *testing.T) {
 	}
 }
 
-// TestRunArgs_UpgradeToolFilter verifies that `gentle-ai upgrade engram` filters
+// TestRunArgs_UpgradeToolFilter verifies that `atomwright upgrade engram` filters
 // to only check/upgrade engram.
 func TestRunArgs_UpgradeToolFilter(t *testing.T) {
 	var buf bytes.Buffer

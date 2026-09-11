@@ -434,7 +434,7 @@ func RenderUninstallResult(result componentuninstall.Result, err error, mode mod
 				b.WriteString("\n")
 				b.WriteString(styles.ErrorStyle.Render("  " + syncErr.Error()))
 				b.WriteString("\n\n")
-				b.WriteString(styles.WarningStyle.Render("You can run 'gentle-ai sync' manually to retry."))
+				b.WriteString(styles.WarningStyle.Render("You can run 'atomwright sync' manually to retry."))
 			} else {
 				b.WriteString(styles.SuccessStyle.Render("✓ Clean install sync complete"))
 				b.WriteString("\n")

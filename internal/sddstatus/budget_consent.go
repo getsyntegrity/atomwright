@@ -116,7 +116,7 @@ func BudgetConsentEnvelope(in BudgetConsentInput) (BudgetConsentResult, error) {
 				Label:  "Open a fresh budget and keep going",
 				Effect: "Resets this objective to a fresh bounded budget. Every attempt already recorded stays in the immutable chain, nothing is erased, and no verification, review or receipt is fabricated.",
 				Invocation: fmt.Sprintf(
-					"gentle-ai sdd-attempt reset --cwd %s --change %s --expected-revision %q --request-id %s --reason %q --actor %s",
+					"atomwright sdd-attempt reset --cwd %s --change %s --expected-revision %q --request-id %s --reason %q --actor %s",
 					pathquote.Quote(in.Repo), in.Change, in.Revision,
 					sddBudgetConsentResetRequestID(in), sddBudgetConsentReason(in), sddRuntimeAuditActor),
 			},
@@ -125,13 +125,13 @@ func BudgetConsentEnvelope(in BudgetConsentInput) (BudgetConsentResult, error) {
 				Label:  "Stop here",
 				Effect: "Leaves the objective exhausted and every attempt preserved. Nothing is reset and nothing is lost; the change simply does not continue until someone decides otherwise.",
 				Invocation: fmt.Sprintf(
-					"gentle-ai sdd-attempt status --cwd %s --change %s",
+					"atomwright sdd-attempt status --cwd %s --change %s",
 					pathquote.Quote(in.Repo), in.Change),
 			},
 		},
 		OffPath: consentenvelope.OffPath{
 			Note:    "Receipt-driven review is a separate switch and turning it off does NOT clear this: the attempt budget is SDD's own accounting, and review has no say in whether a work unit may open.",
-			Command: fmt.Sprintf("gentle-ai review mode status --cwd %s", pathquote.Quote(in.Repo)),
+			Command: fmt.Sprintf("atomwright review mode status --cwd %s", pathquote.Quote(in.Repo)),
 		},
 	}
 	if err := core.ValidateCompleteness(sddBudgetConsentGranted, sddBudgetConsentDeclined); err != nil {

@@ -9,7 +9,7 @@ the client sends opportunistically, without ever learning who they are or
 where they run.
 
 The client side (when to send, `DO_NOT_TRACK`/`GENTLE_AI_TELEMETRY`/`CI`
-opt-out, `gentle-ai telemetry status|enable|disable|preview`) is implemented
+opt-out, `atomwright telemetry status|enable|disable|preview`) is implemented
 on a sibling branch and is out of scope here. This document covers the
 collector: the wire contract it accepts, storage and retention, the deploy
 kit under `deploy/telemetry/`, and how to read `/v1/summary`.

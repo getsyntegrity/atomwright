@@ -14,7 +14,7 @@ import (
 // `opencode run` in a sandboxed HOME with the real gentle-ai transport plugin
 // installed globally, a real driver model invoking one review Task, the real
 // tool.execute.before/after hooks relaying the start and completion frames
-// through a live `gentle-ai review opencode-transport` child, and a real
+// through a live `atomwright review opencode-transport` child, and a real
 // reviewer subagent model producing the captured verdict. This is the lane
 // that catches host-app behavior (like swallowed hook throws) the emulated
 // deterministic opencode lane cannot see.
@@ -154,7 +154,7 @@ func realOpenCodeReviewAgents(realHome string) (map[string]any, error) {
 		}
 	}
 	if len(review) == 0 {
-		return nil, fmt.Errorf("no review-* agents; run gentle-ai sync for OpenCode first")
+		return nil, fmt.Errorf("no review-* agents; run atomwright sync for OpenCode first")
 	}
 	return review, nil
 }

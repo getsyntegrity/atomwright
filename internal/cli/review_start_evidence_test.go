@@ -370,7 +370,7 @@ func TestReviewFacadeStartLensesRequiredHintsNegotiatedContract(t *testing.T) {
 	}
 	// The direct route refuses --agent, so this caller never declared a
 	// runtime and the hint must omit the complete agent segment (issue #2885).
-	wantCommand := fmt.Sprintf("gentle-ai review start --contract %s --target %s --projection %s", ReviewIntegrationContractV2, started.TargetIdentity, started.Projection)
+	wantCommand := fmt.Sprintf("atomwright review start --contract %s --target %s --projection %s", ReviewIntegrationContractV2, started.TargetIdentity, started.Projection)
 	if !strings.Contains(started.Hint, wantCommand) {
 		t.Fatalf("lenses-required start hint = %q, want it to contain %q", started.Hint, wantCommand)
 	}
@@ -417,7 +417,7 @@ func TestReviewFacadeStartBaseDiffRefusalReplaysFrozenSelector(t *testing.T) {
 		t.Fatalf("refusal has no executable command: %v", err)
 	}
 	command := strings.Fields(err.Error()[opening+1 : opening+1+closing])
-	if len(command) < 3 || !reflect.DeepEqual(command[:3], []string{"gentle-ai", "review", "start"}) {
+	if len(command) < 3 || !reflect.DeepEqual(command[:3], []string{"atomwright", "review", "start"}) {
 		t.Fatalf("refusal command = %v", command)
 	}
 	args := append([]string{"start", "--cwd", repo}, withoutReplayRuntimeIdentity(t, command[3:])...)

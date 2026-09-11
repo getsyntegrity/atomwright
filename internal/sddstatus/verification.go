@@ -272,7 +272,7 @@ func validVerifyReportVerdict(verdict string) bool {
 // verifyEnvelopeFenceRefusal names the exact first line the contract admits
 // and the command that checks candidate bytes, so a refused report can be
 // fixed from the message alone (#2828).
-const verifyEnvelopeFenceRefusal = "missing valid gentle-ai.verify-result/v1 envelope: the first non-empty line must be ```yaml (```yml and any letter case are admitted; ~~~ fences, untagged fences, and content before the fence are not); check the exact bytes with gentle-ai sdd-verify-validate --input <path|-> --requirements <n> --scenarios <n>"
+const verifyEnvelopeFenceRefusal = "missing valid gentle-ai.verify-result/v1 envelope: the first non-empty line must be ```yaml (```yml and any letter case are admitted; ~~~ fences, untagged fences, and content before the fence are not); check the exact bytes with atomwright sdd-verify-validate --input <path|-> --requirements <n> --scenarios <n>"
 
 func parseLeadingEnvelope(text string) ([]string, int, string) {
 	// PowerShell 5.1 writes a UTF-8 BOM that TrimSpace never removes (#2828).
@@ -728,7 +728,7 @@ func decodeRemediationEvidenceJSON(text string) (remediationEvidence, bool) {
 // concrete, passing evidence — this does not manufacture success, only its
 // identity once admission has already required it.
 func DeriveRemediationEvidenceRevision(evidenceJSON, expectedFailedRevision string) (string, error) {
-	const rerun = "; correct it and rerun `gentle-ai sdd-attempt settle` with the fixed --remediation-evidence"
+	const rerun = "; correct it and rerun `atomwright sdd-attempt settle` with the fixed --remediation-evidence"
 	evidence, ok := decodeRemediationEvidenceJSON(strings.TrimSpace(evidenceJSON))
 	if !ok {
 		return "", errors.New("remediation evidence is not a strict gentle-ai.remediation-evidence/v1 JSON object: no unknown fields, no trailing content, exact schema" + rerun)

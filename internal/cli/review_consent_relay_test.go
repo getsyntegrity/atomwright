@@ -461,7 +461,7 @@ func TestConsentDeclineOnLowRiskCandidateIsRefused(t *testing.T) {
 		"--lineage", "review-consent-low-decline", "--consent", "declined",
 	}), &output)
 	if err == nil || !strings.Contains(output.String(), "nothing to decline") ||
-		!strings.Contains(output.String(), "rerun gentle-ai review start without --consent") {
+		!strings.Contains(output.String(), "rerun atomwright review start without --consent") {
 		t.Fatalf("low-risk decline must be refused with the reason and rerun: %v\n%s", err, output.String())
 	}
 }
@@ -507,7 +507,7 @@ func TestHeadlessSkipNoticeFollowsAnExplicitOptIn(t *testing.T) {
 	if err == nil {
 		t.Fatalf("an unconfigured clone started a review nobody asked for:\n%s", output.String())
 	}
-	if !strings.Contains(err.Error(), "gentle-ai review mode enable --scope=global") {
+	if !strings.Contains(err.Error(), "atomwright review mode enable --scope=global") {
 		t.Fatalf("the opt-in refusal names no way in: %v", err)
 	}
 	if console.String() != "" {

@@ -444,7 +444,7 @@ func TestCodeGraphGuidanceMarkdownForSDDOnlyWhenSelected(t *testing.T) {
 				mustWriteFile(t, filepath.Join(home, ".claude", "CLAUDE.md"), []byte(strings.Join([]string{
 					"existing Claude guidance",
 					"<!-- gentle-ai:codegraph-guidance -->",
-					"CodeGraph guidance with `gentle-ai codegraph init --cwd <project-root>`",
+					"CodeGraph guidance with `atomwright codegraph init --cwd <project-root>`",
 					"<!-- /gentle-ai:codegraph-guidance -->",
 				}, "\n")))
 			},
@@ -493,7 +493,7 @@ func TestCodeGraphGuidanceMarkdownForSDDOnlyWhenSelected(t *testing.T) {
 				}
 				return
 			}
-			if !strings.Contains(got, "gentle-ai codegraph init --cwd <project-root>") {
+			if !strings.Contains(got, "atomwright codegraph init --cwd <project-root>") {
 				t.Fatalf("CodeGraph guidance missing search-order rule:\n%s", got)
 			}
 		})
@@ -533,7 +533,7 @@ func TestComponentApplyStepOmitsCodeGraphGuidanceWithoutSelection(t *testing.T) 
 	mustWriteFile(t, filepath.Join(home, ".codex", "AGENTS.md"), []byte(strings.Join([]string{
 		"existing Codex guidance",
 		"<!-- gentle-ai:codegraph-guidance -->",
-		"CodeGraph guidance with `gentle-ai codegraph init --cwd <project-root>`",
+		"CodeGraph guidance with `atomwright codegraph init --cwd <project-root>`",
 		"<!-- /gentle-ai:codegraph-guidance -->",
 	}, "\n")))
 
@@ -780,7 +780,7 @@ func assertOpenCodeSharedPromptCodeGraphGuidance(t *testing.T, home string, want
 		t.Fatalf("ReadFile(%q) error = %v", promptPath, err)
 	}
 	text := string(content)
-	hasGuidance := strings.Contains(text, "<!-- gentle-ai:codegraph-guidance -->") && strings.Contains(text, "gentle-ai codegraph init --cwd <project-root>")
+	hasGuidance := strings.Contains(text, "<!-- gentle-ai:codegraph-guidance -->") && strings.Contains(text, "atomwright codegraph init --cwd <project-root>")
 	if hasGuidance != want {
 		t.Fatalf("CodeGraph guidance present = %v, want %v in %s", hasGuidance, want, promptPath)
 	}

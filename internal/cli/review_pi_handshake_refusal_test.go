@@ -14,7 +14,7 @@ import (
 // invocation must read (#3440). It names the one missing condition and
 // nothing else.
 //
-// The old cause offered `gentle-ai review mode disable --scope clone` and
+// The old cause offered `atomwright review mode disable --scope clone` and
 // then listed `claude-code, opencode, codex` as the supported runtimes. That
 // list is built by reviewTransportSupportedRuntimeIDs, which calls
 // reviewImmutableRuntimeCapability for every agent IN THIS PROCESS -- under
@@ -112,7 +112,7 @@ func TestPiHandshakeGuidanceStaysScopedToPi(t *testing.T) {
 			if strings.Contains(err.Error(), reviewPiHostRelayContractEnvironment) {
 				t.Fatalf("refusal for %q leaks the pi relay handshake: %v", runtime, err)
 			}
-			if !strings.Contains(err.Error(), "gentle-ai review mode disable --scope clone --cwd <repo>") {
+			if !strings.Contains(err.Error(), "atomwright review mode disable --scope clone --cwd <repo>") {
 				t.Fatalf("refusal for %q lost the generic exit guidance: %v", runtime, err)
 			}
 		})

@@ -120,7 +120,7 @@ func TestListBackupsWithSourceMetadata(t *testing.T) {
 	}
 }
 
-// TestRunArgsRestoreListIsDispatched verifies that `gentle-ai restore --list`
+// TestRunArgsRestoreListIsDispatched verifies that `atomwright restore --list`
 // is correctly dispatched through RunArgs and produces a meaningful response
 // (either a backup list or a "no backups" message — never "unknown command").
 func TestRunArgsRestoreListIsDispatched(t *testing.T) {
@@ -2227,7 +2227,7 @@ func writeAppSDDStatusFile(t *testing.T, path string, content string) {
 }
 
 // TestRunArgs_TUIRestartsAfterGentleAIUpgradeResult verifies that when the TUI
-// reports a successful gentle-ai upgrade, RunArgs calls restartAfterGentleAIUpgrade
+// reports a successful atomwright upgrade, RunArgs calls restartAfterGentleAIUpgrade
 // which (after task 4.6) prints the restart guidance message instead of re-execing.
 func TestRunArgs_TUIRestartsAfterGentleAIUpgradeResult(t *testing.T) {
 	assumeInteractiveTTY(t)
@@ -2261,7 +2261,7 @@ func TestRunArgs_TUIRestartsAfterGentleAIUpgradeResult(t *testing.T) {
 		t.Fatalf("RunArgs(TUI) error = %v", err)
 	}
 	// After task 4.6: restart message is printed, no re-exec occurs.
-	if !strings.Contains(buf.String(), "restart gentle-ai") {
+	if !strings.Contains(buf.String(), "restart atomwright") {
 		t.Fatalf("output missing restart notice:\n%s", buf.String())
 	}
 }
@@ -2570,7 +2570,7 @@ func TestRunArgs_PendingSync_PrintsDoctorAdvisory(t *testing.T) {
 	}
 
 	out := buf.String()
-	if !strings.Contains(out, "Run 'gentle-ai doctor' to verify ecosystem health after upgrade") {
+	if !strings.Contains(out, "Run 'atomwright doctor' to verify ecosystem health after upgrade") {
 		t.Errorf("stdout = %q, want doctor advisory when PendingSync=true on launch", out)
 	}
 }
@@ -2624,7 +2624,7 @@ func TestRunArgs_PendingSync_PrintsDoctorAdvisoryEvenOnSyncFailure(t *testing.T)
 	}
 
 	out := buf.String()
-	if !strings.Contains(out, "Run 'gentle-ai doctor' to verify ecosystem health after upgrade") {
+	if !strings.Contains(out, "Run 'atomwright doctor' to verify ecosystem health after upgrade") {
 		t.Errorf("stdout = %q, want doctor advisory even when deferred sync fails", out)
 	}
 }

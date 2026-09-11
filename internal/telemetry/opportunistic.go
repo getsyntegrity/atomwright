@@ -26,7 +26,7 @@ type Deps struct {
 }
 
 // Decision names, exhaustively, what a single Opportunistic call did. It is
-// the vocabulary `gentle-ai telemetry trigger --json` reports.
+// the vocabulary `atomwright telemetry trigger --json` reports.
 type TriggerDecision string
 
 const (

@@ -250,7 +250,7 @@ func (store RuntimeStore) Acquire(ctx context.Context, request CompactAcquireReq
 		return CompactAttemptResult{}, err
 	}
 	if request.RemediatesEvidenceRevision != "" && !runtimeRevisionPattern.MatchString(request.RemediatesEvidenceRevision) {
-		return CompactAttemptResult{}, errors.New("remediates_evidence_revision must be sha256; rerun `gentle-ai sdd-attempt acquire` with --remediates-evidence-revision sha256:<64-lowercase-hex>")
+		return CompactAttemptResult{}, errors.New("remediates_evidence_revision must be sha256; rerun `atomwright sdd-attempt acquire` with --remediates-evidence-revision sha256:<64-lowercase-hex>")
 	}
 	// #4160: a caller naming both the ownership-continuation proof and the CAS
 	// input must not name two different ledger states at once. A matching
@@ -258,7 +258,7 @@ func (store RuntimeStore) Acquire(ctx context.Context, request CompactAcquireReq
 	// pure input-shape check -- no ledger read is needed to catch the
 	// contradiction.
 	if request.Token != "" && begin.ExpectedRevision != "" && request.Token != begin.ExpectedRevision {
-		return CompactAttemptResult{}, errors.New("token and expected_revision disagree; rerun `gentle-ai sdd-attempt acquire` with --token and --expected-revision naming the same revision, or only one of them")
+		return CompactAttemptResult{}, errors.New("token and expected_revision disagree; rerun `atomwright sdd-attempt acquire` with --token and --expected-revision naming the same revision, or only one of them")
 	}
 
 	replay, err := store.load()
@@ -374,7 +374,7 @@ func (store RuntimeStore) Settle(ctx context.Context, request CompactSettleReque
 			return CompactAttemptResult{}, deriveErr
 		}
 		if request.EvidenceRevision != "" && request.EvidenceRevision != derived {
-			return CompactAttemptResult{}, fmt.Errorf("--evidence-revision %s does not match the revision derived from --remediation-evidence (%s); rerun `gentle-ai sdd-attempt settle` omitting --evidence-revision, or with exactly the derived value", request.EvidenceRevision, derived)
+			return CompactAttemptResult{}, fmt.Errorf("--evidence-revision %s does not match the revision derived from --remediation-evidence (%s); rerun `atomwright sdd-attempt settle` omitting --evidence-revision, or with exactly the derived value", request.EvidenceRevision, derived)
 		}
 		request.EvidenceRevision = derived
 	}
@@ -475,14 +475,14 @@ func failedEvidenceRemediationSettleable(status RuntimeStatus, failedEvidence st
 
 func normalizeCompactSettleRequest(request CompactSettleRequest) error {
 	if request.Outcome == AttemptInterrupted && request.EvidenceRevision != "" {
-		return errors.New("interrupted evidence_revision must be empty; rerun `gentle-ai sdd-attempt settle` without --evidence-revision")
+		return errors.New("interrupted evidence_revision must be empty; rerun `atomwright sdd-attempt settle` without --evidence-revision")
 	}
 	// The token is settle's own flag (#3879): checked here so a malformed one
 	// never surfaces as finish's "expected runtime revision", a flag settle
 	// does not accept.
 	if !runtimeRevisionPattern.MatchString(request.Token) {
 		return errors.New("token must be the exact sha256:<64-lowercase-hex> value acquire returned; run " + compactStatusCommand +
-			" to read the live attempt's token, then rerun `gentle-ai sdd-attempt settle` with --token <that value>")
+			" to read the live attempt's token, then rerun `atomwright sdd-attempt settle` with --token <that value>")
 	}
 	_, err := normalizeFinishAttemptRequest(FinishAttemptRequest{
 		ExpectedRevision: request.Token, RequestID: request.RequestID, Outcome: request.Outcome,
@@ -495,7 +495,7 @@ func normalizeCompactSettleRequest(request CompactSettleRequest) error {
 		return err
 	}
 	if request.RemediatesEvidenceRevision != "" && !runtimeRevisionPattern.MatchString(request.RemediatesEvidenceRevision) {
-		return errors.New("remediates_evidence_revision must be sha256; rerun `gentle-ai sdd-attempt settle` with --remediates-evidence-revision sha256:<64-lowercase-hex>")
+		return errors.New("remediates_evidence_revision must be sha256; rerun `atomwright sdd-attempt settle` with --remediates-evidence-revision sha256:<64-lowercase-hex>")
 	}
 	return nil
 }
@@ -677,11 +677,11 @@ func compactBlockedExitText(reason CompactBlockReason, token string) string {
 	switch reason {
 	case CompactBlockCorruptAuthority:
 		return "the attempt ledger for this work unit cannot be read as valid authority; run " +
-			"`gentle-ai sdd-attempt status --cwd <repo> --change <change>` to see what is readable, " +
+			"`atomwright sdd-attempt status --cwd <repo> --change <change>` to see what is readable, " +
 			"then ask a maintainer to inspect the SDD runtime authority under the Git common directory"
 	case CompactBlockInvalidContinuation:
 		return "this call does not continue the attempt currently on record; run " +
-			"`gentle-ai sdd-attempt status --cwd <repo> --change <change>` to see the live attempt and its " +
+			"`atomwright sdd-attempt status --cwd <repo> --change <change>` to see the live attempt and its " +
 			"current revision, then reissue this call against that state"
 	case CompactBlockMaintainerDecision:
 		// #2530: this said "rescope or reset", and rescope is structurally
@@ -699,8 +699,8 @@ func compactBlockedExitText(reason CompactBlockReason, token string) string {
 		// off cannot open one. Reset is the whole exit, and it is named here
 		// as a complete command instead of as advice.
 		return "this work unit's attempt or changed-line budget needs a maintainer decision; run " +
-			"`gentle-ai sdd-attempt status --cwd <repo> --change <change>` for the accounting, then have a " +
-			"maintainer reset the objective with `gentle-ai sdd-attempt reset --cwd <repo> --change <change> " +
+			"`atomwright sdd-attempt status --cwd <repo> --change <change>` for the accounting, then have a " +
+			"maintainer reset the objective with `atomwright sdd-attempt reset --cwd <repo> --change <change> " +
 			"--expected-revision <the revision that status prints> --request-id \"<unique-request-id>\" " +
 			"--reason \"<why-the-objective-is-being-reset>\" --actor \"<actor>\"`; turning receipt-driven " +
 			"review off does not clear this, because review governs delivery of a finished change, not " +
@@ -714,17 +714,17 @@ func compactBlockedExitText(reason CompactBlockReason, token string) string {
 		// --evidence-goal; settle additionally requires --cwd, --change,
 		// --request-id, --outcome, --evidence-revision, --diagnosis,
 		// --harness-disposition, --cleanup-evidence, --process-evidence).
-		// Only `gentle-ai sdd-attempt status --cwd <repo> --change <change>`
+		// Only `atomwright sdd-attempt status --cwd <repo> --change <change>`
 		// is named as a complete command; the token is described as an
 		// addition to the caller's own already-in-flight acquire/settle
 		// call, never as a standalone invocation.
 		return "a distinct attempt token " + token + " is already active for this work unit; run " +
-			"`gentle-ai sdd-attempt status --cwd <repo> --change <change>` to see it, then add `--token " + token +
+			"`atomwright sdd-attempt status --cwd <repo> --change <change>` to see it, then add `--token " + token +
 			"` to your own `sdd-attempt acquire` call to continue that exact attempt, or to your " +
 			"`sdd-attempt settle` call to close it before starting a new one"
 	case CompactBlockRemediationUnsatisfiable:
 		return "this acquire declares a correction that cannot settle: the attempt chain either does not hold the declared failed evidence unremediated, or the candidate still matches the state that failed without an audited evidence-only retry; no token is issued. Run " +
-			"`gentle-ai sdd-attempt status --cwd <repo> --change <change>` to read the chain and candidate provenance, then correct the candidate and reissue this acquire through any reset or rescope the current objective requires; if an unchanged retry is justified, use an audited reset or rescope where structurally applicable before reissuing it"
+			"`atomwright sdd-attempt status --cwd <repo> --change <change>` to read the chain and candidate provenance, then correct the candidate and reissue this acquire through any reset or rescope the current objective requires; if an unchanged retry is justified, use an audited reset or rescope where structurally applicable before reissuing it"
 	default:
 		return ""
 	}
@@ -801,13 +801,13 @@ func compactBlockedWithExit(reason CompactBlockReason, exit string) CompactAttem
 	return CompactAttemptResult{State: CompactStateBlocked, Reason: reason, Exit: exit, Detail: exit}
 }
 
-const compactStatusCommand = "`gentle-ai sdd-attempt status --cwd <repo> --change <change>`"
+const compactStatusCommand = "`atomwright sdd-attempt status --cwd <repo> --change <change>`"
 
-const compactResetCommand = "`gentle-ai sdd-attempt reset --cwd <repo> --change <change> --expected-revision <the revision that status prints> " +
+const compactResetCommand = "`atomwright sdd-attempt reset --cwd <repo> --change <change> --expected-revision <the revision that status prints> " +
 	"--request-id \"<unique-request-id>\" --reason \"<why-the-objective-is-being-reset>\" --actor \"<actor>\"`"
 
 func compactAcquireCommand(workUnit string) string {
-	return "`gentle-ai sdd-attempt acquire --cwd <repo> --change <change> --request-id \"<unique-request-id>\" --work-unit \"" + workUnit +
+	return "`atomwright sdd-attempt acquire --cwd <repo> --change <change> --request-id \"<unique-request-id>\" --work-unit \"" + workUnit +
 		"\" --evidence-goal \"<stable-goal>\" --max-attempts <count> --max-changed-lines <count>`"
 }
 

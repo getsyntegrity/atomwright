@@ -185,7 +185,7 @@ func renderUpgradeResult(b *strings.Builder, report *upgrade.UpgradeReport, widt
 
 	if reportUpgradedGentleAI(report) {
 		b.WriteString("\n")
-		b.WriteString(styles.WarningStyle.Render("⚠ gentle-ai was upgraded. Restart gentle-ai before running sync or continuing."))
+		b.WriteString(styles.WarningStyle.Render("⚠ atomwright was upgraded. Restart atomwright before running sync or continuing."))
 	}
 
 	b.WriteString("\n\n")

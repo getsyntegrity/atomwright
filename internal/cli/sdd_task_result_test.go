@@ -87,7 +87,7 @@ func TestSDDTaskResultContinuationPreservesIdentity(t *testing.T) {
 				t.Fatal(err)
 			}
 			if tc.name == "explicit change" {
-				if payload.Continuation != `gentle-ai sdd-status 'feat'\''x' --cwd '/re'\''po' --json` {
+				if payload.Continuation != `atomwright sdd-status 'feat'\''x' --cwd '/re'\''po' --json` {
 					t.Fatalf("explicit-change compatibility lost: %q", payload.Continuation)
 				}
 				return

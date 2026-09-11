@@ -29,7 +29,7 @@ func reviewModeHome(t *testing.T) string {
 // subject is the review lifecycle -- rather than the switch itself -- has to
 // opt in the way a real user does before an offer, a gate, or a review will
 // exist at all. It writes the same explicit global "on" that
-// `gentle-ai review mode enable` persists, rather than reaching past the
+// `atomwright review mode enable` persists, rather than reaching past the
 // switch, so these fixtures keep exercising the resolution path they are
 // meant to run through.
 //

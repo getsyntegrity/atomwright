@@ -31,8 +31,8 @@ func TestResolveEmbedsAndRoutesNativeRuntimeAuthority(t *testing.T) {
 			t.Fatalf("runtime status = %#v, want active ordinal 1", status.RuntimeStatus)
 		}
 		assertRuntimeContinuationOffered(t, status, active.Revision)
-		if instructions := strings.Join(status.PhaseInstructions.Apply, "\n"); !strings.Contains(instructions, "gentle-ai sdd-attempt acquire") ||
-			!strings.Contains(instructions, "gentle-ai sdd-attempt settle") {
+		if instructions := strings.Join(status.PhaseInstructions.Apply, "\n"); !strings.Contains(instructions, "atomwright sdd-attempt acquire") ||
+			!strings.Contains(instructions, "atomwright sdd-attempt settle") {
 			t.Fatalf("apply instructions omit native runtime commands:\n%s", instructions)
 		}
 	})

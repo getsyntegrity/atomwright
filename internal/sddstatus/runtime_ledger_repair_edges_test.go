@@ -252,7 +252,7 @@ func TestRuntimeConsecutiveRescopeRepairContinuationQuotesDynamicArguments(t *te
 
 func TestRuntimeConsecutiveRescopeRepairRequiredErrorPrintsContinuationOnNewLine(t *testing.T) {
 	const revision = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	const continuation = "gentle-ai sdd-attempt repair --cwd /tmp/repo --change repair-2839"
+	const continuation = "atomwright sdd-attempt repair --cwd /tmp/repo --change repair-2839"
 
 	got := (&runtimeConsecutiveRescopeRepairRequiredError{
 		Revision:     revision,

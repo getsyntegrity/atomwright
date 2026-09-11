@@ -50,7 +50,7 @@ func TestRejectedHistoricalRecordNamesItsFileAndMaintainer(t *testing.T) {
 	if err == nil {
 		t.Fatal("status read the hand-corrupted finish record as valid authority")
 	}
-	for _, want := range []string{"invalid_finish_event", recordPath, "maintainer", "gentle-ai sdd-attempt status --cwd <repo> --change <change>"} {
+	for _, want := range []string{"invalid_finish_event", recordPath, "maintainer", "atomwright sdd-attempt status --cwd <repo> --change <change>"} {
 		if !strings.Contains(err.Error(), want) {
 			t.Fatalf("status rejection lacks %q: %v", want, err)
 		}

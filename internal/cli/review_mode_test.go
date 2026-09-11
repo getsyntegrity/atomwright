@@ -390,7 +390,7 @@ func TestReviewModeCloneScopeEnableRejectsGlobalOffWithoutLocalOverride(t *testi
 		disabled.Source != reviewtransaction.RDDModeSourceGlobal {
 		t.Fatalf("clone enable error = %v, want global typed disabled error", err)
 	}
-	if !strings.Contains(err.Error(), "gentle-ai review mode enable --scope=global") {
+	if !strings.Contains(err.Error(), "atomwright review mode enable --scope=global") {
 		t.Fatalf("clone enable error does not name the global continuation: %v", err)
 	}
 	if result := decodeReviewModeResult(t, output.Bytes()); result.Status.Effective != reviewtransaction.RDDModeOff ||
@@ -476,7 +476,7 @@ func TestReviewModeCloneScopeEnableRejectsExplicitOffWhileGlobalOff(t *testing.T
 		blocked.Source != reviewtransaction.RDDModeSourceGlobal {
 		t.Fatalf("explicit-off clone enable error = %v, want global typed disabled error", err)
 	}
-	if !strings.Contains(err.Error(), "gentle-ai review mode enable --scope=global") {
+	if !strings.Contains(err.Error(), "atomwright review mode enable --scope=global") {
 		t.Fatalf("explicit-off clone enable error does not name the global continuation: %v", err)
 	}
 	result := decodeReviewModeResult(t, output.Bytes())
@@ -893,7 +893,7 @@ func assertReviewConsentPrompt(t *testing.T, prompt, reason string) string {
 		"result safer",
 		"1) Review this change",
 		"2) Skip this time",
-		"gentle-ai review mode disable",
+		"atomwright review mode disable",
 	} {
 		if !strings.Contains(prompt, want) {
 			t.Fatalf("consent prompt missing %q:\n%s", want, prompt)
@@ -940,7 +940,7 @@ func reviewModeHome(t *testing.T) string {
 // development is off until someone explicitly enables it, so a test whose
 // subject is the review lifecycle -- rather than the switch itself -- has to
 // opt in the way a real user does before a review will start at all. It writes
-// the same explicit global "on" that `gentle-ai review mode enable` persists,
+// the same explicit global "on" that `atomwright review mode enable` persists,
 // rather than reaching past the switch, so these fixtures keep exercising the
 // resolution path they are meant to run through.
 //
@@ -991,7 +991,7 @@ func TestReviewModeCloneScopeEnableNamesTheGlobalExitWhileGlobalUnset(t *testing
 	for _, want := range []string{
 		"receipt-driven development: off (decided by default)",
 		"can only disable",
-		"gentle-ai review mode enable --scope global",
+		"atomwright review mode enable --scope global",
 	} {
 		if !strings.Contains(human, want) {
 			t.Fatalf("clone enable on an unset global does not say the global switch decides (%q missing):\n%s", want, human)

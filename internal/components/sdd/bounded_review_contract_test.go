@@ -58,7 +58,7 @@ func boundedReviewRequiredClausesFor(agent model.AgentID) []string {
 	}
 	return append(captureTransportClausesFor(agent), []string{
 		"Native Compact Review Orchestration",
-		"gentle-ai review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + string(agent) + " --next-transition",
+		"atomwright review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + string(agent) + " --next-transition",
 		"## Entry rule",
 		"before reporting it complete",
 		"Selectorless STATUS only preflights the current worktree candidate",
@@ -175,7 +175,7 @@ func TestBoundedReviewStopInventoryIsCompleteWithoutRepeatingStatus(t *testing.T
 	}
 
 	for _, want := range []string{
-		"`D` means `gentle-ai review mode disable --scope clone --cwd <B>`",
+		"`D` means `atomwright review mode disable --scope clone --cwd <B>`",
 		"`S` means re-query the exact captured target-root STATUS command with lineage and target.",
 		"then `S`; do not reuse the pre-correction target",
 		"then `S`.",
@@ -184,10 +184,10 @@ func TestBoundedReviewStopInventoryIsCompleteWithoutRepeatingStatus(t *testing.T
 			t.Errorf("stop inventory missing continuation alias rule %q", want)
 		}
 	}
-	if strings.Contains(inventory, "gentle-ai review status --cwd") {
+	if strings.Contains(inventory, "atomwright review status --cwd") {
 		t.Fatal("stop inventory repeats the canonical STATUS command instead of using S")
 	}
-	canonicalStatus := "gentle-ai review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + runtimeAgentIDPlaceholder + " --next-transition"
+	canonicalStatus := "atomwright review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + runtimeAgentIDPlaceholder + " --next-transition"
 	if got := strings.Count(content, canonicalStatus); got != 1 {
 		t.Fatalf("bounded review contract contains %d canonical STATUS commands, want exactly one", got)
 	}
@@ -272,8 +272,8 @@ func TestGeneratedOpenCodeReviewControllersUseNegotiatedStatusRouting(t *testing
 		t.Run(name, func(t *testing.T) {
 			clauses := append([]string{"lineage, revision, and target"}, required...)
 			if name == "orchestrator" {
-				clauses = append(clauses, "gentle-ai review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent "+string(model.AgentOpenCode)+" --next-transition")
-			} else if strings.Contains(content, "gentle-ai review status --cwd <repo>") {
+				clauses = append(clauses, "atomwright review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent "+string(model.AgentOpenCode)+" --next-transition")
+			} else if strings.Contains(content, "atomwright review status --cwd <repo>") {
 				t.Error("generated OpenCode post-apply controller repeats the canonical STATUS command")
 			}
 			for _, clause := range clauses {
@@ -282,9 +282,9 @@ func TestGeneratedOpenCodeReviewControllersUseNegotiatedStatusRouting(t *testing
 				}
 			}
 			for _, stale := range []string{
-				"Call `gentle-ai review start` once.",
-				"runs `gentle-ai review start --cwd <repo>`",
-				"| 01 | `gentle-ai review start`",
+				"Call `atomwright review start` once.",
+				"runs `atomwright review start --cwd <repo>`",
+				"| 01 | `atomwright review start`",
 				"reconcile-terminal-mirrors",
 			} {
 				if strings.Contains(content, stale) {
@@ -351,7 +351,7 @@ func TestBoundedReviewContractRendersForAdvertisedRuntimes(t *testing.T) {
 			content := renderSDDOrchestratorAsset(agent.ID)
 			assertTextContainsClauses(t, string(agent.ID), content, boundedReviewRequiredClausesFor(agent.ID))
 			if agent.ID == model.AgentPi {
-				if strings.Contains(content, "gentle-ai review status") {
+				if strings.Contains(content, "atomwright review status") {
 					t.Fatal("Pi lifecycle exposes raw STATUS")
 				}
 			}
@@ -489,8 +489,8 @@ func TestPreservedSharedOrchestratorLeavesRetiredWorkCommandsUntouched(t *testin
 	t.Parallel()
 
 	retired := []string{
-		"gentle-ai work-capabilities --cwd <repo> --contract gentle-ai.work-capabilities/v2 --json",
-		"gentle-ai work-start --cwd <repo> --contract gentle-ai.work-start/v1 --json",
+		"atomwright work-capabilities --cwd <repo> --contract gentle-ai.work-capabilities/v2 --json",
+		"atomwright work-start --cwd <repo> --contract gentle-ai.work-start/v1 --json",
 	}
 	rendered := renderPreservedOpenCodeOrchestratorPrompt(
 		strings.Join(retired, "\n"),
@@ -538,14 +538,14 @@ func TestRenderedReviewersAreReadOnlyAndSingleResult(t *testing.T) {
 							t.Errorf("%s missing Claude transport clause %q", path, want)
 						}
 					}
-					for _, forbidden := range []string{"OpenCode tasks begin", "gentle-ai review inspect-candidate"} {
+					for _, forbidden := range []string{"OpenCode tasks begin", "atomwright review inspect-candidate"} {
 						if strings.Contains(content, forbidden) {
 							t.Errorf("%s retains provider-only instruction %q", path, forbidden)
 						}
 					}
 					return
 				}
-				for _, want := range []string{"GENTLE_AI_REVIEW_CONTEXT", "sole source of artifact_subject", "gentle-ai review inspect-candidate", "--operation name-status", "--operation numstat", "--operation stat --path-index", "--operation patch --path-index", "--operation object --path-index", "--side base", "--side candidate", "provider binding", "zero-based changed_path_manifest index", "never pass --binary"} {
+				for _, want := range []string{"GENTLE_AI_REVIEW_CONTEXT", "sole source of artifact_subject", "atomwright review inspect-candidate", "--operation name-status", "--operation numstat", "--operation stat --path-index", "--operation patch --path-index", "--operation object --path-index", "--side base", "--side candidate", "provider binding", "zero-based changed_path_manifest index", "never pass --binary"} {
 					if !strings.Contains(content, want) {
 						t.Errorf("%s missing provider transport clause %q", path, want)
 					}
@@ -713,10 +713,10 @@ func TestOpenCodeAndClaudeApplyCommandsUseTheAtomicLifecycle(t *testing.T) {
 			if !strings.Contains(content, "canonical initial STATUS above") {
 				t.Fatalf("%s does not reference the canonical initial STATUS", path)
 			}
-			if strings.Contains(content, "gentle-ai review status --cwd <repo>") {
+			if strings.Contains(content, "atomwright review status --cwd <repo>") {
 				t.Fatalf("%s duplicates the canonical STATUS command", path)
 			}
-			for _, forbidden := range []string{"runs `gentle-ai review start --cwd <repo>`", "Reuse a valid receipt", "reviewGate.result: allow"} {
+			for _, forbidden := range []string{"runs `atomwright review start --cwd <repo>`", "Reuse a valid receipt", "reviewGate.result: allow"} {
 				if strings.Contains(content, forbidden) {
 					t.Fatalf("%s retains obsolete review routing %q", path, forbidden)
 				}

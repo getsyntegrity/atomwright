@@ -47,7 +47,7 @@ func TestExhaustedBudgetAsksInsteadOfDeadEnding(t *testing.T) {
 	// The grant has to be runnable verbatim, not described. The whole defect
 	// being fixed is a human being told to assemble a six-flag reset by hand.
 	grant := envelope.Choices[0].Invocation
-	for _, want := range []string{"gentle-ai sdd-attempt reset", "--cwd", "--change", "--expected-revision", "sha256:" + strings.Repeat("a", 64)} {
+	for _, want := range []string{"atomwright sdd-attempt reset", "--cwd", "--change", "--expected-revision", "sha256:" + strings.Repeat("a", 64)} {
 		if !strings.Contains(grant, want) {
 			t.Fatalf("the grant invocation is not runnable verbatim (missing %q):\n%s", want, grant)
 		}
@@ -170,7 +170,7 @@ func TestExhaustedBudgetSurfacesTheQuestionEndToEnd(t *testing.T) {
 	if !scoped.Consent.Blocking || len(scoped.Consent.Choices) != 2 {
 		t.Fatalf("consent = %#v, want a blocking two-choice question", scoped.Consent)
 	}
-	if !strings.Contains(scoped.Consent.Choices[0].Invocation, "gentle-ai sdd-attempt reset") ||
+	if !strings.Contains(scoped.Consent.Choices[0].Invocation, "atomwright sdd-attempt reset") ||
 		!strings.Contains(scoped.Consent.Choices[0].Invocation, scoped.Revision) {
 		t.Fatalf("the grant is not runnable verbatim against this exact ledger revision:\n%s", scoped.Consent.Choices[0].Invocation)
 	}

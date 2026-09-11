@@ -19,7 +19,7 @@ import (
 // EventSchema identifies the JSON POST body sent to the collector.
 const EventSchema = "gentle-ai.telemetry-event/v1"
 
-// StatusSchema identifies the `gentle-ai telemetry status` projection.
+// StatusSchema identifies the `atomwright telemetry status` projection.
 const StatusSchema = "gentle-ai.telemetry-status/v1"
 
 // EventInstall and EventHeartbeat are the two event kinds the contract

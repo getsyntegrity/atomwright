@@ -110,7 +110,7 @@ func TestSanctionedRecoveryExitNamesMaintainerPathForInteriorReconciliationAnoma
 	if l2Exit.Operation != "" {
 		t.Fatalf("l2 exit = %#v, want no automatic operation for an interior reconciliation anomaly", *l2Exit)
 	}
-	if !strings.Contains(l2Exit.Blocked, "gentle-ai review mode disable") {
+	if !strings.Contains(l2Exit.Blocked, "atomwright review mode disable") {
 		t.Fatalf("l2 exit Blocked = %q, want a literal runnable gentle-ai invocation naming the maintainer path", l2Exit.Blocked)
 	}
 }

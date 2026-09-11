@@ -362,7 +362,7 @@ func TestConsentFollowUpPrintedPathFlagsRoundTripWindowsNativePaths(t *testing.T
 	}
 }
 
-// Issue #2895: intended-untracked refusals named `gentle-ai review status
+// Issue #2895: intended-untracked refusals named `atomwright review status
 // --next-transition`, which the parser refuses without a negotiated contract
 // and runtime identity. The named continuation is extracted and executed.
 func TestIntendedUntrackedRefusalsNameARunnableStatusInvocation(t *testing.T) {
@@ -378,7 +378,7 @@ func TestIntendedUntrackedRefusalsNameARunnableStatusInvocation(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), "--contract "+ReviewIntegrationContractV2) {
 			t.Fatalf("%s START = %v, want a refusal naming the negotiated STATUS form", name, err)
 		}
-		start := strings.Index(err.Error(), "`gentle-ai review status")
+		start := strings.Index(err.Error(), "`atomwright review status")
 		rest := err.Error()[start+1:]
 		tokens := strings.Fields(rest[:strings.IndexByte(rest, '`')])[2:]
 		for index, token := range tokens {
@@ -386,7 +386,7 @@ func TestIntendedUntrackedRefusalsNameARunnableStatusInvocation(t *testing.T) {
 		}
 		var output bytes.Buffer
 		if runErr := RunReview(tokens, &output); runErr != nil {
-			t.Fatalf("%s refusal named `gentle-ai review %s`, which the parser refuses: %v\n%s", name, strings.Join(tokens, " "), runErr, output.String())
+			t.Fatalf("%s refusal named `atomwright review %s`, which the parser refuses: %v\n%s", name, strings.Join(tokens, " "), runErr, output.String())
 		}
 		// Issue #4040: naming a command that only PARSES is not enough — the
 		// recovery route must publish a digest the same refusal's required

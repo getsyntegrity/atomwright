@@ -101,8 +101,8 @@ func TestRuntimeLedgerRefusesNewerRecordSchemaByName(t *testing.T) {
 		return bytes.Replace(payload, []byte(runtimeRecordSchema), []byte("gentle-ai.sdd-runtime-record/v2"), 1)
 	})
 	_, err := store.Status()
-	if err == nil || !strings.Contains(err.Error(), `"schema"`) || !strings.Contains(err.Error(), "gentle-ai update") {
-		t.Fatalf("newer schema status error = %v, want it to name the schema field and `gentle-ai update`", err)
+	if err == nil || !strings.Contains(err.Error(), `"schema"`) || !strings.Contains(err.Error(), "atomwright update") {
+		t.Fatalf("newer schema status error = %v, want it to name the schema field and `atomwright update`", err)
 	}
 }
 
@@ -110,7 +110,7 @@ func TestRuntimeLedgerRefusesNewerRecordSchemaByName(t *testing.T) {
 // refusal must name the exit instead of leaking `git rev-parse`.
 func TestOpenRuntimeStoreOutsideGitRepositoryNamesGitInit(t *testing.T) {
 	_, err := OpenRuntimeStore(context.Background(), t.TempDir(), "no-repo")
-	if err == nil || !strings.Contains(err.Error(), "git init") || !strings.Contains(err.Error(), "gentle-ai sdd-attempt") || strings.Contains(err.Error(), "rev-parse") {
+	if err == nil || !strings.Contains(err.Error(), "git init") || !strings.Contains(err.Error(), "atomwright sdd-attempt") || strings.Contains(err.Error(), "rev-parse") {
 		t.Fatalf("open outside Git = %v, want a refusal naming `git init` and the sdd-attempt rerun", err)
 	}
 }

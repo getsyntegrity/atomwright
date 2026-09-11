@@ -51,12 +51,19 @@ const (
 
 // reviewNextTransitionRefreshCommand is the single wording source for the
 // exact command that refreshes the canonical native next transition. The
-// capabilities bootstrap advertisement below and the opaque
-// repository-context capture-binding mismatch refusal in review_artifact.go
-// both name this same runnable command instead of only describing the
-// concept, so they cannot drift from each other.
-const reviewNextTransitionRefreshCommand = "gentle-ai review status --cwd <repo> --contract " + ReviewIntegrationContractV1 + " --next-transition"
-const reviewNextTransitionRefreshCommandV21 = "gentle-ai review status --cwd <repo> --contract " + ReviewIntegrationContractV2 + " --next-transition"
+// opaque repository-context capture-binding mismatch refusal in
+// review_artifact.go and every other human-facing remediation hint name this
+// same runnable command instead of only describing the concept, so they
+// cannot drift from each other.
+const reviewNextTransitionRefreshCommand = "atomwright review status --cwd <repo> --contract " + ReviewIntegrationContractV1 + " --next-transition"
+const reviewNextTransitionRefreshCommandV21 = "atomwright review status --cwd <repo> --contract " + ReviewIntegrationContractV2 + " --next-transition"
+
+// reviewCapabilitiesBootstrapCommand is contract-pinned: the published
+// review-integration capabilities schemas fix `bootstrap.command` to this
+// exact literal, so it keeps the `gentle-ai` tool token no matter what the
+// binary is named on disk. It is a payload value, not an instruction.
+const reviewCapabilitiesBootstrapCommand = "gentle-ai review status --cwd <repo> --contract " + ReviewIntegrationContractV1 + " --next-transition"
+const reviewCapabilitiesBootstrapCommandV21 = "gentle-ai review status --cwd <repo> --contract " + ReviewIntegrationContractV2 + " --next-transition"
 
 var reviewCapabilitiesBuildInfoReader = debug.ReadBuildInfo
 var reviewCapabilitiesExecutablePath = os.Executable
@@ -173,7 +180,7 @@ func RunReviewCapabilities(args []string, stdout io.Writer) error {
 
 func validateReviewIntegrationContract(contract string) error {
 	if contract != ReviewIntegrationContractV1 && contract != ReviewIntegrationContractV2 {
-		return fmt.Errorf("unsupported review integration contract %q; retry with gentle-ai review capabilities --contract %s or gentle-ai review capabilities --contract %s", contract, ReviewIntegrationContractV1, ReviewIntegrationContractV2)
+		return fmt.Errorf("unsupported review integration contract %q; retry with atomwright review capabilities --contract %s or atomwright review capabilities --contract %s", contract, ReviewIntegrationContractV1, ReviewIntegrationContractV2)
 	}
 	return nil
 }
@@ -269,7 +276,7 @@ func reviewCapabilitiesStaticSurface(contracts ...string) ReviewCapabilitiesResu
 			},
 		},
 		Bootstrap: &ReviewCapabilitiesBootstrap{
-			Command: reviewNextTransitionRefreshCommand,
+			Command: reviewCapabilitiesBootstrapCommand,
 			TargetSelectorVariants: []ReviewCapabilitiesTargetSelector{
 				{TargetType: "staged", Arguments: []string{"--projection", "staged"}},
 				{TargetType: "base_ref", Arguments: []string{"--base-ref", "<ref>"}},
@@ -324,7 +331,7 @@ func reviewCapabilitiesStaticSurface(contracts ...string) ReviewCapabilitiesResu
 			Name: "provider_submission_descriptors", Supported: true,
 			Requires: []string{"native_next_transition", "opaque_repository_context", "provider_targeted_validation_request"},
 		})
-		result.Bootstrap.Command = reviewNextTransitionRefreshCommandV21
+		result.Bootstrap.Command = reviewCapabilitiesBootstrapCommandV21
 		result.Compatibility.MinimumProtocolMajor, result.Compatibility.MaximumProtocolMajor = 2, 2
 		result.Compatibility.AdditiveMinorPolicy = "optional-fields-only"
 	}

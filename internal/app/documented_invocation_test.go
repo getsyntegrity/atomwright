@@ -226,7 +226,7 @@ func classifyWords(words []string, safeVerbs map[string]bool, repo string) ([]st
 			// A placeholder is only substitutable where a value belongs: in a
 			// --flag word or as the value of the bare flag before it. In a
 			// verb or positional slot the command's own identity is
-			// templated ("gentle-ai review <verb>"), a reference to a family
+			// templated ("atomwright review <verb>"), a reference to a family
 			// of commands rather than a runnable claim.
 			bareFlagBefore := index > 0 && strings.HasPrefix(words[index-1], "--") && !strings.Contains(words[index-1], "=")
 			if !strings.HasPrefix(word, "--") && !bareFlagBefore {

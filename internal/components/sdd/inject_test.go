@@ -1072,7 +1072,7 @@ func TestInjectOpenCodePreservesExistingOrchestratorPromptWhenRequested(t *testi
 		"explicit request or accepted proposal",
 		"Per-action rule",
 		"Authority rule",
-		"selectorless `gentle-ai review status`",
+		"selectorless `atomwright review status`",
 		"exact START",
 		"Gates are informational only",
 	} {
@@ -1300,7 +1300,7 @@ func TestInjectOpenCodeMigratesPreservedLegacyOrchestratorPromptReferences(t *te
 		"Authority rule",
 		"Semantic guard",
 		"execution, not delegation",
-		"selectorless `gentle-ai review status`",
+		"selectorless `atomwright review status`",
 		"exact START",
 		"Gates are informational only",
 	} {
@@ -1391,7 +1391,7 @@ func TestInjectOpenCodeUpgradesPromptOwnedLensRouter(t *testing.T) {
 		"Optional SDD rule",
 		"explicit request or accepted proposal",
 		"Authority rule",
-		"selectorless `gentle-ai review status`",
+		"selectorless `atomwright review status`",
 		"exact START",
 		"Gates are informational only",
 	} {
@@ -1434,7 +1434,7 @@ func TestEnsurePreservedOpenCodeDelegationHardGatesMigratesToNativeTransition(t 
 	legacy := "### Mandatory Delegation Triggers (Non-Skippable)\n\n" +
 		"before commit, push, or PR after code changes, run the concrete review lens(es) selected by Review Lens Selection unless the diff is trivial (tier 1)"
 	got := ensurePreservedOpenCodeDelegationHardGates(legacy)
-	for _, want := range []string{"selectorless `gentle-ai review status`", "exact START", "lineage, revision, and target", "Gates are informational only"} {
+	for _, want := range []string{"selectorless `atomwright review status`", "exact START", "lineage, revision, and target", "Gates are informational only"} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("migrated delegation gates missing native review authority clause %q:\n%s", want, got)
 		}
@@ -1489,7 +1489,7 @@ const retiredWorkRoutingAuthorityRule = "7. **Authority rule**: when a WorkRun e
 
 // The replacement rule 7 retains one current-worktree transaction binding and
 // never lets compatibility gates decide delivery.
-const nativeReviewAuthorityRuleText = "7. **Authority rule**: use selectorless `gentle-ai review status` only to preflight the current worktree" +
+const nativeReviewAuthorityRuleText = "7. **Authority rule**: use selectorless `atomwright review status` only to preflight the current worktree" +
 	" and execute its exact START; retain that transaction's lineage, revision, and target for every later lifecycle call." +
 	" Gates are informational only. Never select lenses, synthesize transitions, infer PASS, or authorize delivery from prose."
 
@@ -3531,7 +3531,7 @@ func TestInjectOpenCodeReviewValidatorHasBoundedInspectionPermissions(t *testing
 		"edit":  "deny",
 		"task":  "deny",
 		"bash": map[string]any{
-			"gentle-ai review inspect-candidate --purpose targeted-validation *": "allow",
+			"atomwright review inspect-candidate --purpose targeted-validation *": "allow",
 			"*": "deny",
 		},
 	}
@@ -7701,7 +7701,7 @@ func TestEnsureClaudeSkillRegistryHookAppendsIdempotently(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(data)
-	if strings.Count(text, "gentle-ai skill-registry refresh") != 1 {
+	if strings.Count(text, "atomwright skill-registry refresh") != 1 {
 		t.Fatalf("hook command count mismatch:\n%s", text)
 	}
 	if !strings.Contains(text, "echo keep") || !strings.Contains(text, "echo existing") {
@@ -7819,7 +7819,7 @@ func TestEnsureClaudeReviewStopHookAppendsIdempotently(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(data)
-	if strings.Count(text, "gentle-ai review stop-hook --agent claude-code") != 2 {
+	if strings.Count(text, "atomwright review stop-hook --agent claude-code") != 2 {
 		t.Fatalf("hook command count mismatch, want one Stop entry and one SessionStart entry:\n%s", text)
 	}
 	if !strings.Contains(text, `"matcher": "startup|resume|clear|compact"`) {
@@ -7852,7 +7852,7 @@ func TestEnsureClaudeTelemetryHooksAppendsIdempotently(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(data)
-	if strings.Count(text, "gentle-ai telemetry runtime claude --json") != 2 || strings.Count(text, `"async": true`) != 2 || !strings.Contains(text, "echo keep") {
+	if strings.Count(text, "atomwright telemetry runtime claude --json") != 2 || strings.Count(text, `"async": true`) != 2 || !strings.Contains(text, "echo keep") {
 		t.Fatalf("hooks not merged idempotently:\n%s", text)
 	}
 }
@@ -7900,10 +7900,10 @@ func TestInject_ClaudeCodeInstallsReviewStopHook(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(data)
-	if !strings.Contains(text, "gentle-ai skill-registry refresh") {
+	if !strings.Contains(text, "atomwright skill-registry refresh") {
 		t.Fatalf("Claude settings.json missing skill-registry hook:\n%s", text)
 	}
-	if strings.Count(text, "gentle-ai review stop-hook --agent claude-code") != 2 {
+	if strings.Count(text, "atomwright review stop-hook --agent claude-code") != 2 {
 		t.Fatalf("Claude settings.json missing review stop-hook Stop+SessionStart entries:\n%s", text)
 	}
 	if !strings.Contains(text, `"matcher": "startup|resume|clear|compact"`) {
@@ -7953,10 +7953,10 @@ func TestEnsureCodexSkillRegistryHookWritesSessionStartHookIdempotently(t *testi
 		t.Fatal(err)
 	}
 	text := string(data)
-	if strings.Count(text, "gentle-ai skill-registry refresh") != 1 {
+	if strings.Count(text, "atomwright skill-registry refresh") != 1 {
 		t.Fatalf("hook command count mismatch:\n%s", text)
 	}
-	if strings.Count(text, "gentle-ai telemetry runtime codex --json") != 2 {
+	if strings.Count(text, "atomwright telemetry runtime codex --json") != 2 {
 		t.Fatalf("Codex telemetry hook must cover SubagentStop and Stop exactly once:\n%s", text)
 	}
 	if strings.Count(text, `"async": true`) != 2 {
@@ -8135,10 +8135,10 @@ func TestInject_CodexInstallsSkillRegistryHook(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(data), "gentle-ai skill-registry refresh") {
+	if !strings.Contains(string(data), "atomwright skill-registry refresh") {
 		t.Fatalf("Codex hooks.json missing skill-registry refresh:\n%s", data)
 	}
-	if strings.Count(string(data), "gentle-ai telemetry runtime codex --json") != 2 {
+	if strings.Count(string(data), "atomwright telemetry runtime codex --json") != 2 {
 		t.Fatalf("Codex hooks.json missing telemetry Stop hooks:\n%s", data)
 	}
 }

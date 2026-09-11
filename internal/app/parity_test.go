@@ -241,7 +241,7 @@ func TestRunArgsSyncHelpIncludesBackgroundFlag(t *testing.T) {
 	}
 }
 
-// TestRunArgsSyncNoAgentsIsNoOp verifies that `gentle-ai sync` with no
+// TestRunArgsSyncNoAgentsIsNoOp verifies that `atomwright sync` with no
 // agents flag and an empty home dir (no config dirs) completes as a no-op
 // and does NOT return an error.
 func TestRunArgsSyncNoAgentsIsNoOp(t *testing.T) {

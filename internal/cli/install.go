@@ -29,7 +29,7 @@ const installChannelHelp = "Gentle AI channel: stable (default), beta, or nightl
 
 func PrintInstallHelp(w io.Writer) {
 	fmt.Fprint(w, `USAGE
-  gentle-ai install [flags]
+  atomwright install [flags]
 
 FLAGS
   --agent, --agents <list>           Agents to install

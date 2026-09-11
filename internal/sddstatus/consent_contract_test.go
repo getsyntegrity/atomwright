@@ -154,7 +154,7 @@ func TestSDDIntegrationConsentValidateRejectsIncompleteEnvelopes(t *testing.T) {
 			result.Choices[0].Invocation = "gentle-ai sdd-attempt grant --cwd /workspace/planning --change multi-repo-rollout --root /workspace/service-a --root /workspace/service-b --actor maintainer --reason rollout --request-id grant-1"
 		}},
 		{name: "decline invocation is not status re-entry", mutate: func(result *SDDIntegrationConsentResult) {
-			result.Choices[1].Invocation = "gentle-ai review status"
+			result.Choices[1].Invocation = "atomwright review status"
 		}},
 		{name: "empty choice effect", mutate: func(result *SDDIntegrationConsentResult) { result.Choices[1].Effect = "" }},
 		{name: "off path outside status", mutate: func(result *SDDIntegrationConsentResult) { result.OffPath.Command = "rm -rf tasks.md" }},

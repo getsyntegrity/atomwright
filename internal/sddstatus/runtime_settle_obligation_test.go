@@ -346,7 +346,7 @@ func TestRescopeIndependentPersistsReplaysAndSuppresses(t *testing.T) {
 	if _, err := store.Rescope(ctx, RescopeObjectiveRequest{
 		ExpectedRevision: failedA.Revision, RequestID: "rescope-invalid", WorkUnit: "b", EvidenceGoal: "goal-b",
 		MaxAttempts: 2, MaxChangedLines: 10, Reason: "narrow", Actor: "m", Relation: "bogus",
-	}); err == nil || !strings.Contains(err.Error(), "gentle-ai sdd-attempt rescope") {
+	}); err == nil || !strings.Contains(err.Error(), "atomwright sdd-attempt rescope") {
 		t.Fatalf("invalid objective_relation on rescope = %v, want a refusal naming its resolution", err)
 	}
 	rescoped, err := store.Rescope(ctx, RescopeObjectiveRequest{

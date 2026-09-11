@@ -10,7 +10,7 @@ import (
 	"github.com/pablogore/atomwright/v2/internal/reviewtransaction"
 )
 
-// ReviewAssessmentSchema is the typed envelope gentle-ai review assess prints
+// ReviewAssessmentSchema is the typed envelope atomwright review assess prints
 // with --json. It is a read-only projection of the same candidate risk
 // assessment START uses to choose lenses (reviewtransaction.AssessSnapshotRisk),
 // so a host can gate delegated verification on it before deciding whether to
@@ -67,7 +67,7 @@ func reviewAssessPublicRisk(level reviewtransaction.RiskLevel) (string, error) {
 	case reviewtransaction.RiskHigh:
 		return "high", nil
 	default:
-		return "", fmt.Errorf("review assess computed an unsupported risk level %q; this is a defect in gentle-ai itself, not a request error -- file it and retry with gentle-ai review assess --help", level)
+		return "", fmt.Errorf("review assess computed an unsupported risk level %q; this is a defect in gentle-ai itself, not a request error -- file it and retry with atomwright review assess --help", level)
 	}
 }
 
@@ -91,7 +91,7 @@ func reviewAssessmentReasons(reasons []reviewtransaction.RiskReason) []ReviewAss
 	return public
 }
 
-// RunReviewAssess is the read-only `gentle-ai review assess` command. It
+// RunReviewAssess is the read-only `atomwright review assess` command. It
 // builds the exact same candidate review start would (current changes, or a
 // named --base-ref comparison), runs the shared risk assessment, and prints
 // it: no authority, no lineage, no store mutation, and no lock beyond an
@@ -100,7 +100,7 @@ func reviewAssessmentReasons(reasons []reviewtransaction.RiskReason) []ReviewAss
 // result before ever calling review start (issue #4295).
 //
 // When the candidate cannot be built or assessed, this command fails closed:
-// every returned error names a runnable `gentle-ai review assess ...`
+// every returned error names a runnable `atomwright review assess ...`
 // continuation (or an unambiguous %w propagation of the underlying native
 // failure). Hosts that cannot resolve the named continuation should treat the
 // failure exactly as they would treat a "high" result.
@@ -125,7 +125,7 @@ func RunReviewAssess(args []string, stdout io.Writer) error {
 		return nil
 	}
 	if flags.NArg() != 0 {
-		return reviewPreflightError(fmt.Errorf("unexpected review assess argument %q; run `gentle-ai review assess --help` for the closed command form", flags.Arg(0)))
+		return reviewPreflightError(fmt.Errorf("unexpected review assess argument %q; run `atomwright review assess --help` for the closed command form", flags.Arg(0)))
 	}
 
 	root, err := reviewtransaction.PrepareReviewRepositoryRoot(ctx, *cwd)
@@ -148,33 +148,33 @@ func RunReviewAssess(args []string, stdout io.Writer) error {
 		}
 		if dirtyTracked && !*committedOnly {
 			return reviewPreflightError(fmt.Errorf(
-				"review assess with --base-ref omits dirty tracked changes; rerun `gentle-ai review assess --base-ref %s --committed-only` to acknowledge committed-only scope",
+				"review assess with --base-ref omits dirty tracked changes; rerun `atomwright review assess --base-ref %s --committed-only` to acknowledge committed-only scope",
 				trimmedBaseRef))
 		}
 	}
 
 	intendedScope, err := intendedUntrackedScopeForTarget(ctx, builder, untrackedScope, intendedUntracked, expectedUntrackedInventory,
-		reviewIntendedUntrackedInventoryCommand, "gentle-ai review assess")
+		reviewIntendedUntrackedInventoryCommand, "atomwright review assess")
 	if err != nil {
 		return reviewPreflightError(err)
 	}
 	if intendedScope.NeedsSelection {
-		return reviewPreflightError(intendedUntrackedSelectionRequired(intendedScope, reviewIntendedUntrackedInventoryCommand, "gentle-ai review assess"))
+		return reviewPreflightError(intendedUntrackedSelectionRequired(intendedScope, reviewIntendedUntrackedInventoryCommand, "atomwright review assess"))
 	}
 	target.IntendedUntracked = intendedScope.Intended
 
 	snapshot, err := builder.Build(ctx, target)
 	if err != nil {
-		return fmt.Errorf("review assess could not build the candidate; correct --cwd or --base-ref and retry with `gentle-ai review assess --help`: %w", err)
+		return fmt.Errorf("review assess could not build the candidate; correct --cwd or --base-ref and retry with `atomwright review assess --help`: %w", err)
 	}
 	if reviewStartEmptyCandidateScope(snapshot) {
 		return reviewPreflightError(errors.New(
-			"the review assess candidate has no pending changes; already-committed work can be assessed by rerunning `gentle-ai review assess --base-ref <commit>` naming the base to compare against"))
+			"the review assess candidate has no pending changes; already-committed work can be assessed by rerunning `atomwright review assess --base-ref <commit>` naming the base to compare against"))
 	}
 
 	assessment, err := builder.AssessSnapshotRisk(ctx, snapshot)
 	if err != nil {
-		return fmt.Errorf("review assess could not classify the candidate; retry with `gentle-ai review assess --help` or a narrower --base-ref: %w", err)
+		return fmt.Errorf("review assess could not classify the candidate; retry with `atomwright review assess --help` or a narrower --base-ref: %w", err)
 	}
 	publicRisk, err := reviewAssessPublicRisk(assessment.Level)
 	if err != nil {

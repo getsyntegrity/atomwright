@@ -176,7 +176,7 @@ type bootstrapper interface {
 //  3. Weak marker (package.json only) — record as candidate but keep walking
 //     upward, since a monorepo marker may exist higher up.
 //
-// Walking upward means users can run gentle-ai from any subdirectory of their
+// Walking upward means users can run atomwright from any subdirectory of their
 // project (e.g. repo/packages/app) and still detect the correct workspace root.
 // In a JS/TS monorepo, every package has package.json, so we must not stop at
 // the first one — we keep walking to find the highest ancestor with package.json
@@ -1357,7 +1357,7 @@ func expandOpenCodeBoundedReviewAgents(agentsMap map[string]any, usePermissions 
 				"edit":  "deny",
 				"task":  "deny",
 				"bash": map[string]any{
-					"gentle-ai review inspect-candidate --purpose targeted-validation *": "allow",
+					"atomwright review inspect-candidate --purpose targeted-validation *": "allow",
 					"*": "deny",
 				},
 			}
@@ -1515,7 +1515,7 @@ func removeLegacyOpenCodePlainChatPreflightLines(prompt string) string {
 // replaces a rule that pointed at retired work-routing contracts. The current
 // lifecycle starts only from current-worktree preflight, retains the explicit
 // transaction binding, and leaves delivery to the user rather than a gate.
-const nativeReviewAuthorityRule = "7. **Authority rule**: use selectorless `gentle-ai review status` only to preflight the current worktree" +
+const nativeReviewAuthorityRule = "7. **Authority rule**: use selectorless `atomwright review status` only to preflight the current worktree" +
 	" and execute its exact START; retain that transaction's lineage, revision, and target for every later lifecycle call." +
 	" Gates are informational only. Never select lenses, synthesize transitions, infer PASS, or authorize delivery from prose."
 
@@ -1821,7 +1821,7 @@ func ensureCodexSkillRegistryHook(hooksPath string) (bool, error) {
 		return false, err
 	}
 
-	const command = `gentle-ai skill-registry refresh --quiet --no-gitignore --cwd "$PWD" || true`
+	const command = `atomwright skill-registry refresh --quiet --no-gitignore --cwd "$PWD" || true`
 	hooksRaw, hasHooks := root["hooks"]
 	hooksMap, _ := hooksRaw.(map[string]any)
 	if hasHooks && hooksMap == nil {
@@ -1853,7 +1853,7 @@ func ensureCodexSkillRegistryHook(hooksPath string) (bool, error) {
 		changed = true
 	}
 
-	const telemetryCommand = `gentle-ai telemetry runtime codex --json`
+	const telemetryCommand = `atomwright telemetry runtime codex --json`
 	for _, event := range []string{"SubagentStop", "Stop"} {
 		if hookCommandExists(hooksMap, event, telemetryCommand) {
 			continue
@@ -1921,7 +1921,7 @@ func ensureClaudeSkillRegistryHook(settingsPath string) (bool, error) {
 		return false, err
 	}
 
-	const command = `gentle-ai skill-registry refresh --quiet --no-gitignore --cwd "${CLAUDE_PROJECT_DIR:-$PWD}" || true`
+	const command = `atomwright skill-registry refresh --quiet --no-gitignore --cwd "${CLAUDE_PROJECT_DIR:-$PWD}" || true`
 	if claudeHookExists(root, command) {
 		return false, nil
 	}
@@ -1966,7 +1966,7 @@ func ensureClaudeSkillRegistryHook(settingsPath string) (bool, error) {
 // ensureClaudeReviewStopHook appends the managed review preflight commands to
 // hooks.Stop and hooks.SessionStart in the Claude Code settings file. The
 // pair makes the review preflight deterministic across a Claude turn.
-// `gentle-ai review stop-hook --agent <agentID>` reads `hook_event_name` from
+// `atomwright review stop-hook --agent <agentID>` reads `hook_event_name` from
 // the payload on stdin: at SessionStart it records the session's starting
 // candidate as the per-session baseline, and at Stop it prints a block
 // decision only when RDD is enabled and the session has produced an
@@ -1984,7 +1984,7 @@ func ensureClaudeReviewStopHook(settingsPath string, agentID model.AgentID) (boo
 		return false, err
 	}
 
-	command := fmt.Sprintf("gentle-ai review stop-hook --agent %s", agentID)
+	command := fmt.Sprintf("atomwright review stop-hook --agent %s", agentID)
 
 	hooksRaw, hasHooks := root["hooks"]
 	hooksMap, _ := hooksRaw.(map[string]any)
@@ -2080,7 +2080,7 @@ func ensureClaudeTelemetryHooks(settingsPath string) (bool, error) {
 	if hooksMap == nil {
 		hooksMap = map[string]any{}
 	}
-	const command = "gentle-ai telemetry runtime claude --json"
+	const command = "atomwright telemetry runtime claude --json"
 	changed := false
 	for _, hookKey := range []string{"SubagentStop", "Stop"} {
 		added, err := appendClaudeReviewStopHookEntry(hooksMap, hookKey, settingsPath, command, map[string]any{

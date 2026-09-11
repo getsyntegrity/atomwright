@@ -113,7 +113,7 @@ func TestReviewCaptureResultMaterializeIsEligibleWithoutRelayHandshake(t *testin
 	if !strings.Contains(err.Error(), "materialize subject hash does not match") {
 		t.Fatalf("mismatched binding refusal = %v, want the subject hash mismatch cause", err)
 	}
-	if !strings.Contains(err.Error(), "gentle-ai review status") {
+	if !strings.Contains(err.Error(), "atomwright review status") {
 		t.Fatalf("mismatched binding refusal does not carry a gentle-ai continuation: %v", err)
 	}
 }

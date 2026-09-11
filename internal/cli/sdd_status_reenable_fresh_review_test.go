@@ -30,7 +30,7 @@ func dispatchReviewStart(t *testing.T, repo, lineage string, extra ...string) Re
 	args = append(args, extra...)
 	var output bytes.Buffer
 	if err := RunReview(args, &output); err != nil {
-		t.Fatalf("fresh review start %q exits non-zero: gentle-ai review %v: %v\n%s", lineage, args, err, output.String())
+		t.Fatalf("fresh review start %q exits non-zero: atomwright review %v: %v\n%s", lineage, args, err, output.String())
 	}
 	var started ReviewFacadeStartResult
 	decodeStrictReviewJSON(t, output.Bytes(), &started)
@@ -141,7 +141,7 @@ func TestSDDStatusArchiveNeverTreatsAnEmptyCandidateReviewAsCoverage(t *testing.
 // Unmanaged Ordinary Archive"): a change at its archive decision with no
 // review authority anywhere is decline-by-absence-of-action, not a stop --
 // the offer is an invitation, never a gate. Superseded (documented, not
-// silently dropped): this test previously required naming `gentle-ai review
+// silently dropped): this test previously required naming `atomwright review
 // start` as a runnable exit from a blocked state; there is no blocked state
 // to exit from anymore for this exact fixture.
 func TestSDDStatusEnabledMissingReceiptIsDeclineNotAStop(t *testing.T) {

@@ -69,7 +69,7 @@ docker run --rm -it gentle-ai-e2e-ubuntu /bin/bash
 1. Create `e2e/Dockerfile.<platform>` following the existing pattern
 2. Add the entry to `PLATFORMS` array in `docker-test.sh`
 3. Ensure the Dockerfile creates `testuser` with NOPASSWD sudo
-4. Build the `gentle-ai` binary for `linux/amd64`
+4. Build the `atomwright` binary for `linux/amd64`
 
 ## Adding new test cases
 

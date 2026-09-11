@@ -62,7 +62,7 @@ func TestRuntimeLedgerRescopeRecoversZeroDriftDeadlock(t *testing.T) {
 	if !errors.Is(err, ErrRuntimeObjectiveChange) {
 		t.Fatalf("narrower begin error = %v, want ErrRuntimeObjectiveChange", err)
 	}
-	if !strings.Contains(err.Error(), "gentle-ai sdd-attempt rescope") || strings.Contains(err.Error(), "gentle-ai sdd-attempt reset") {
+	if !strings.Contains(err.Error(), "atomwright sdd-attempt rescope") || strings.Contains(err.Error(), "atomwright sdd-attempt reset") {
 		t.Fatalf("dead-end refusal does not name rescope (and only rescope): %v", err)
 	}
 
@@ -921,7 +921,7 @@ func TestRuntimeLedgerZeroDriftResetRefusalNamesBothExits(t *testing.T) {
 		t.Fatalf("zero-drift reset error = %v, want ErrRuntimeResetNotAllowed", resetErr)
 	}
 	for _, want := range []string{
-		"gentle-ai sdd-attempt rescope",
+		"atomwright sdd-attempt rescope",
 		"--expected-revision " + strconv.Quote(failed.Revision),
 		"at most 40",
 		"decision-required",
@@ -1060,7 +1060,7 @@ func TestRuntimeLedgerWidenedRescopeRefusalNamesTheExhaustRoute(t *testing.T) {
 	if !errors.Is(widenErr, ErrRuntimeRescopeWidened) {
 		t.Fatalf("widened rescope error = %v, want ErrRuntimeRescopeWidened", widenErr)
 	}
-	for _, want := range []string{"1 remaining attempt", "decision-required", "gentle-ai sdd-attempt reset"} {
+	for _, want := range []string{"1 remaining attempt", "decision-required", "atomwright sdd-attempt reset"} {
 		if !strings.Contains(widenErr.Error(), want) {
 			t.Fatalf("widened rescope refusal does not name %q: %v", want, widenErr)
 		}
@@ -1148,7 +1148,7 @@ func TestRuntimeLedgerCompleteObjectiveRefusalNamesTheSuccessor(t *testing.T) {
 	if !errors.Is(doneErr, ErrRuntimeObjectiveDone) {
 		t.Fatalf("repeated begin error = %v, want ErrRuntimeObjectiveDone", doneErr)
 	}
-	for _, want := range []string{"--work-unit", "advance", "gentle-ai sdd-attempt reset"} {
+	for _, want := range []string{"--work-unit", "advance", "atomwright sdd-attempt reset"} {
 		if !strings.Contains(doneErr.Error(), want) {
 			t.Fatalf("complete-objective refusal does not name %q: %v", want, doneErr)
 		}

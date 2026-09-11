@@ -205,7 +205,7 @@ func TestProviderCaptureRefusesAfterTwoRejectedResultsAndPreservesBoth(t *testin
 			t.Fatalf("unexpected preserved attempt %#v", envelope)
 		}
 	}
-	for _, want := range []string{`unknown field "lens"`, "no complete JSON object", "gentle-ai review status"} {
+	for _, want := range []string{`unknown field "lens"`, "no complete JSON object", "atomwright review status"} {
 		if !strings.Contains(err.Error(), want) {
 			t.Fatalf("refusal lacks %q: %v", want, err)
 		}
@@ -251,7 +251,7 @@ func TestProviderCaptureSkipsCorrectionOverBudgetAndClassifiesAsRefused(t *testi
 		return "", errors.New(strings.Repeat("x", reviewLensContextByteBudget))
 	}
 	preserve := func(_ context.Context, _ int, _ error, _ []byte) string { return "preserved-clause" }
-	continuation := func() string { return "gentle-ai review status --next-transition" }
+	continuation := func() string { return "atomwright review status --next-transition" }
 	reviewCalls := 0
 	adapter := providerTestAdapterFunc(func(_ context.Context, _ reviewerprovider.Invocation) ([]byte, error) {
 		reviewCalls++

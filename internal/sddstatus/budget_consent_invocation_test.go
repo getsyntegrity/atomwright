@@ -118,7 +118,7 @@ func TestDeclineInvocationStaysReadOnly(t *testing.T) {
 		if choice.Answer != sddBudgetConsentDeclined {
 			continue
 		}
-		if !strings.HasPrefix(choice.Invocation, "gentle-ai sdd-attempt status ") {
+		if !strings.HasPrefix(choice.Invocation, "atomwright sdd-attempt status ") {
 			t.Fatalf("decline no longer re-enters through read-only status: %s", choice.Invocation)
 		}
 		if strings.Contains(choice.Invocation, "reset") || strings.Contains(choice.Invocation, "<") {

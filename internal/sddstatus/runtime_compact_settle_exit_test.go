@@ -16,7 +16,7 @@ func TestSettleWithoutActiveAttemptNamesAcquire(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertSettleBlockedExit(t, result, "nothing to settle", "`gentle-ai sdd-attempt acquire --cwd <repo> --change <change>")
+	assertSettleBlockedExit(t, result, "nothing to settle", "`atomwright sdd-attempt acquire --cwd <repo> --change <change>")
 }
 
 func TestSettlePassedWithoutRemediatesNamesTheChainEvidence(t *testing.T) {
@@ -68,8 +68,8 @@ func TestCompleteExitNamesEachSuccessorPrecondition(t *testing.T) {
 	}{
 		{name: "no work unit", last: passed, want: []string{"(slice-1) is complete", "--work-unit \"<a different label>\""}},
 		{name: "same label", last: passed, workUnit: "slice-1", want: []string{"--work-unit \"slice-1\" restates the completed objective; choose a different label"}},
-		{name: "budget exceeded", last: exceeded, workUnit: "slice-2", want: []string{"exceeded its changed-line budget", "`gentle-ai sdd-attempt reset --cwd <repo> --change <change>"}},
-		{name: "older binary", last: unbound, workUnit: "slice-2", want: []string{"no finish candidate identity", "older binary", "`gentle-ai sdd-attempt reset --cwd <repo> --change <change>"}},
+		{name: "budget exceeded", last: exceeded, workUnit: "slice-2", want: []string{"exceeded its changed-line budget", "`atomwright sdd-attempt reset --cwd <repo> --change <change>"}},
+		{name: "older binary", last: unbound, workUnit: "slice-2", want: []string{"no finish candidate identity", "older binary", "`atomwright sdd-attempt reset --cwd <repo> --change <change>"}},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			status := RuntimeStatus{Complete: true, Objective: objective, Attempts: []RuntimeAttempt{tt.last}}
@@ -117,7 +117,7 @@ func assertSettleBlockedExit(t *testing.T, result CompactAttemptResult, wants ..
 	if result.State != CompactStateBlocked || result.Reason != CompactBlockInvalidContinuation || result.Detail != result.Exit {
 		t.Fatalf("settle = %#v, want blocked(invalid_continuation) with detail mirroring exit", result)
 	}
-	for _, want := range append(wants, "`gentle-ai sdd-attempt status --cwd <repo> --change <change>`") {
+	for _, want := range append(wants, "`atomwright sdd-attempt status --cwd <repo> --change <change>`") {
 		if !strings.Contains(result.Exit, want) {
 			t.Fatalf("settle exit does not name %q:\n%s", want, result.Exit)
 		}

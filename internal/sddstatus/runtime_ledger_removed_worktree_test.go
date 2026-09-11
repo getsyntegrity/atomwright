@@ -64,7 +64,7 @@ func TestRuntimeLedgerRemovedWorktreeSettlesInterruptedFromMainWorktree(t *testi
 		if tt.sentinel != nil && !errors.Is(tt.err, tt.sentinel) {
 			t.Fatalf("%s error = %v, want %v", tt.label, tt.err, tt.sentinel)
 		}
-		for _, want := range []string{"no longer exists", "--outcome interrupted", "`gentle-ai sdd-attempt settle --cwd"} {
+		for _, want := range []string{"no longer exists", "--outcome interrupted", "`atomwright sdd-attempt settle --cwd"} {
 			if !strings.Contains(tt.err.Error(), want) {
 				t.Fatalf("%s refusal does not name %q:\n%s", tt.label, want, tt.err.Error())
 			}

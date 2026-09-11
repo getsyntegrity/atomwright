@@ -76,7 +76,7 @@ func runReviewCommandNamedBy(t *testing.T, message string) map[string]any {
 	t.Helper()
 	named := []string{}
 	for _, line := range strings.Split(message, "\n") {
-		if strings.HasPrefix(strings.TrimSpace(line), "gentle-ai review ") {
+		if strings.HasPrefix(strings.TrimSpace(line), "atomwright review ") {
 			named = append(named, strings.TrimSpace(line))
 		}
 	}

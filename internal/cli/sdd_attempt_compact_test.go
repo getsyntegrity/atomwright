@@ -205,7 +205,7 @@ func TestCompactHandoffRefusalPreservesTypedDetailAndRunnableExit(t *testing.T) 
 	if result.State != "blocked" || result.Reason != "invalid_continuation" || result.Detail == "" || result.Exit != result.Detail {
 		t.Fatalf("foreign compact handoff = %#v", result)
 	}
-	wantExit := "gentle-ai sdd-attempt status --cwd \"" + repo + "\" --change \"" + change + "\""
+	wantExit := "atomwright sdd-attempt status --cwd \"" + repo + "\" --change \"" + change + "\""
 	if !strings.Contains(result.Exit, wantExit) {
 		t.Fatalf("handoff exit = %q, want runnable %q", result.Exit, wantExit)
 	}
@@ -217,8 +217,8 @@ func TestCompactHandoffRefusalPreservesTypedDetailAndRunnableExit(t *testing.T) 
 
 // TestActiveAttemptBlockedExitNamesAGenuinelyRunnableCommand is the
 // execution-based RED-first proof for adversarial finding F2: the
-// active_attempt Exit text used to print `gentle-ai sdd-attempt acquire
-// --token <t>` and `gentle-ai sdd-attempt settle --token <t>` as if those
+// active_attempt Exit text used to print `atomwright sdd-attempt acquire
+// --token <t>` and `atomwright sdd-attempt settle --token <t>` as if those
 // were complete commands, when both actually require five more required
 // flags each (--cwd, --change, then either --request-id/--work-unit/
 // --evidence-goal for acquire or --request-id/--outcome/--evidence-revision/
@@ -245,8 +245,8 @@ func TestActiveAttemptBlockedExitNamesAGenuinelyRunnableCommand(t *testing.T) {
 	// The text must never claim the bare acquire/settle forms are complete:
 	// that is exactly the class of defect this test exists to catch.
 	for _, incomplete := range []string{
-		"run `gentle-ai sdd-attempt acquire --token",
-		"run `gentle-ai sdd-attempt settle --token",
+		"run `atomwright sdd-attempt acquire --token",
+		"run `atomwright sdd-attempt settle --token",
 	} {
 		if strings.Contains(blocked.Exit, incomplete) {
 			t.Fatalf("active_attempt Exit still claims an incomplete command is runnable as printed (%q): %q", incomplete, blocked.Exit)
@@ -256,7 +256,7 @@ func TestActiveAttemptBlockedExitNamesAGenuinelyRunnableCommand(t *testing.T) {
 	// The one command the text is allowed to print as complete must
 	// actually run. Extract it with real placeholder substitution and
 	// execute it through RunSDDAttempt -- not just parse its flags.
-	const wantCommand = "gentle-ai sdd-attempt status --cwd <repo> --change <change>"
+	const wantCommand = "atomwright sdd-attempt status --cwd <repo> --change <change>"
 	if !strings.Contains(blocked.Exit, wantCommand) {
 		t.Fatalf("active_attempt Exit does not name %q: %q", wantCommand, blocked.Exit)
 	}

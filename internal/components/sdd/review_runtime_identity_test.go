@@ -97,7 +97,7 @@ func TestGeneratedOrchestratorInstructionsNameTheExecutingRuntime(t *testing.T) 
 			content := renderSDDOrchestratorAsset(agent.ID)
 			if expectedReviewLifecycleRuntime(agent.ID) {
 				if agent.ID == model.AgentPi {
-					if !strings.Contains(content, "`gentle_review` with {\"operation\":\"inspect\"}") || strings.Contains(content, "gentle-ai review status") {
+					if !strings.Contains(content, "`gentle_review` with {\"operation\":\"inspect\"}") || strings.Contains(content, "atomwright review status") {
 						t.Fatal("Pi orchestrator did not render its facade-only lifecycle")
 					}
 					return
@@ -105,7 +105,7 @@ func TestGeneratedOrchestratorInstructionsNameTheExecutingRuntime(t *testing.T) 
 				assertReviewInstructionsBindRuntime(t, agent.ID, "orchestrator", content)
 				return
 			}
-			if strings.Contains(content, "gentle-ai review status --cwd <repo> --contract gentle-ai.review-integration/v2") {
+			if strings.Contains(content, "atomwright review status --cwd <repo> --contract gentle-ai.review-integration/v2") {
 				t.Fatal("non-RDD runtime received negotiated review lifecycle instructions")
 			}
 			if !strings.Contains(content, "## SDD Workflow") {
@@ -135,7 +135,7 @@ func TestAdvertisedRenderedReviewProtocolsBindRuntimeOnce(t *testing.T) {
 		t.Run(string(agent.ID), func(t *testing.T) {
 			content := renderSDDOrchestratorAsset(agent.ID)
 			if agent.ID == model.AgentPi {
-				if strings.Contains(content, "gentle-ai review status") {
+				if strings.Contains(content, "atomwright review status") {
 					t.Fatal("Pi rendered raw STATUS")
 				}
 				return
@@ -148,7 +148,7 @@ func TestAdvertisedRenderedReviewProtocolsBindRuntimeOnce(t *testing.T) {
 				t.Fatalf("rendered review protocol binds %q, want %q", bindings[0], "--agent "+string(agent.ID))
 			}
 
-			status := "gentle-ai review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + string(agent.ID) + " --next-transition"
+			status := "atomwright review status --cwd <repo> --contract gentle-ai.review-integration/v2 --agent " + string(agent.ID) + " --next-transition"
 			if got := strings.Count(content, status); got != 1 {
 				t.Fatalf("rendered review protocol contains %d canonical STATUS commands, want exactly one", got)
 			}

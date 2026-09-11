@@ -49,7 +49,7 @@ var (
 	// ErrRDDDisabled reports that the user kill switch keeps receipt-driven
 	// development off. It is a stop, never a fallback signal.
 	//
-	// refusal:by-design human-authority: a sentinel, not a user-facing message. Callers wrap it with the deciding scope and the exact `gentle-ai review mode enable` invocation; naming a command here would offer to undo a choice only the operator may reverse.
+	// refusal:by-design human-authority: a sentinel, not a user-facing message. Callers wrap it with the deciding scope and the exact `atomwright review mode enable` invocation; naming a command here would offer to undo a choice only the operator may reverse.
 	ErrRDDDisabled = errors.New("receipt-driven development is disabled")
 
 	// ErrRDDModeUnknown reports an unrecognised mode value. Callers that ignore
@@ -238,7 +238,7 @@ func rddOperationSubject(operation RDDOperation) string {
 	return string(operation)
 }
 
-// reviewModeEnableForSource names the exact `gentle-ai review mode enable`
+// reviewModeEnableForSource names the exact `atomwright review mode enable`
 // commands that turn reviews on. Receipt-driven development is opt-in, so the
 // default source is not an absence of a decision the operator can act on: it is
 // the ordinary state of an install nobody configured, and it resolves the same
@@ -251,7 +251,7 @@ func rddOperationSubject(operation RDDOperation) string {
 // it only lands on the global source, which an opt-in install has no reason to
 // have turned on -- so naming that scope alone was a dead end.
 func reviewModeEnableForSource(source RDDModeSource) string {
-	const enable = "gentle-ai review mode enable --scope="
+	const enable = "atomwright review mode enable --scope="
 	if source == RDDModeSourceCloneLocal {
 		return enable + "global then " + enable + "clone"
 	}
@@ -281,7 +281,7 @@ func (err *RDDModePartialApplyError) Error() string {
 		decision, verb = "disables", "disable"
 	}
 	return fmt.Sprintf(
-		"%v: this clone %s receipt-driven development for this gentle-ai, but publishing the same decision under gentle-ai/%s/%s/%s/%s failed, so a gentle-ai installed before the switch moved still reads the value it already has there and keeps enforcing it: %v; rerun `gentle-ai review mode %s --scope clone` to publish it in both places",
+		"%v: this clone %s receipt-driven development for this gentle-ai, but publishing the same decision under gentle-ai/%s/%s/%s/%s failed, so a gentle-ai installed before the switch moved still reads the value it already has there and keeps enforcing it: %v; rerun `atomwright review mode %s --scope clone` to publish it in both places",
 		ErrRDDModePartiallyApplied,
 		decision,
 		rddModeLegacySwitchDirectory,

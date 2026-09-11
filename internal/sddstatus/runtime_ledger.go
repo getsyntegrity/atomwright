@@ -69,7 +69,7 @@ const (
 	// includes --cwd/--change placeholders because the bare form is rejected
 	// by the CLI for missing required flags (internal/cli/sdd_attempt.go); a
 	// continuation that fails when pasted is worse than none.
-	runtimeLedgerStatusPointer = "run `gentle-ai sdd-attempt status --cwd <repo> --change <change>` — its next_action names the continuation"
+	runtimeLedgerStatusPointer = "run `atomwright sdd-attempt status --cwd <repo> --change <change>` — its next_action names the continuation"
 )
 
 var (
@@ -90,7 +90,7 @@ var (
 	// objective continues through acquire with a different --work-unit, and
 	// rescope refuses it, so pointing at status alone left callers circling.
 	ErrRuntimeObjectiveDone = errors.New("SDD runtime objective is complete; it continues through a successor objective, so run " +
-		"`gentle-ai sdd-attempt acquire --cwd <repo> --change <change> --request-id \"<unique-request-id>\" --work-unit \"<a different label>\" " +
+		"`atomwright sdd-attempt acquire --cwd <repo> --change <change> --request-id \"<unique-request-id>\" --work-unit \"<a different label>\" " +
 		"--evidence-goal \"<stable-goal>\" --max-attempts <count> --max-changed-lines <count>` with a different --work-unit (rescope applies only " +
 		"to an objective that is not complete); " + runtimeLedgerStatusPointer)
 	ErrRuntimeNoObjective = errors.New("SDD runtime ledger has no objective to reset; " + runtimeLedgerStatusPointer)
@@ -907,7 +907,7 @@ type runtimeReplay struct {
 
 func OpenRuntimeStore(ctx context.Context, repo, change string) (RuntimeStore, error) {
 	if !validRuntimeChange(change) {
-		return RuntimeStore{}, fmt.Errorf("invalid SDD change name %q; want a non-empty identity of at most 96 characters with no control characters, backslash, colon, or \".\"/\"..\" path segment; run `gentle-ai sdd-status --cwd <repo> --json` to read the resolved changeName", change)
+		return RuntimeStore{}, fmt.Errorf("invalid SDD change name %q; want a non-empty identity of at most 96 characters with no control characters, backslash, colon, or \".\"/\"..\" path segment; run `atomwright sdd-status --cwd <repo> --json` to read the resolved changeName", change)
 	}
 	root, err := (reviewtransaction.SnapshotBuilder{Repo: repo}).ResolveRepositoryRoot(ctx)
 	if err != nil {
@@ -942,7 +942,7 @@ type RuntimeRepositoryRequiredError struct {
 }
 
 func (err *RuntimeRepositoryRequiredError) Error() string {
-	return fmt.Sprintf("the SDD runtime attempt ledger needs a Git repository because its authority lives in the Git common directory, and %s is not inside one; run `git init` in that workspace (or run from the repository that contains it), then rerun the same `gentle-ai sdd-attempt` command", err.Workspace)
+	return fmt.Sprintf("the SDD runtime attempt ledger needs a Git repository because its authority lives in the Git common directory, and %s is not inside one; run `git init` in that workspace (or run from the repository that contains it), then rerun the same `atomwright sdd-attempt` command", err.Workspace)
 }
 
 func (err *RuntimeRepositoryRequiredError) Unwrap() error { return err.Cause }
@@ -1152,7 +1152,7 @@ func (store RuntimeStore) Finish(ctx context.Context, request FinishAttemptReque
 		// interrupted record. New interrupted requests are rejected below, after
 		// that idempotency check.
 		if request.Outcome == AttemptInterrupted && request.EvidenceRevision != "" {
-			return runtimeRecord{}, errors.New("interrupted attempts must omit evidence_revision; rerun `gentle-ai sdd-attempt finish` or `gentle-ai sdd-attempt settle` with --outcome interrupted and without --evidence-revision")
+			return runtimeRecord{}, errors.New("interrupted attempts must omit evidence_revision; rerun `atomwright sdd-attempt finish` or `atomwright sdd-attempt settle` with --outcome interrupted and without --evidence-revision")
 		}
 		// Check the effective binding before candidate capture or line charging.
 		// A vanished bound worktree (#2661) admits only an interrupted settle.
@@ -1178,7 +1178,7 @@ func (store RuntimeStore) Finish(ctx context.Context, request FinishAttemptReque
 				if discharged, ordinal, ok := runtimeDischargedFailure(status.Attempts, request.RemediatesEvidenceRevision); ok {
 					return runtimeRecord{}, runtimeDischargedFailureRefusal(discharged, ordinal)
 				}
-				return runtimeRecord{}, errors.New("this correction names failed verification " + request.RemediatesEvidenceRevision + ", but the attempt chain records no failed verification at all; run `gentle-ai sdd-attempt status --cwd <repo> --change <change>` to read the chain, then settle without --remediates-evidence-revision if nothing is being repaired")
+				return runtimeRecord{}, errors.New("this correction names failed verification " + request.RemediatesEvidenceRevision + ", but the attempt chain records no failed verification at all; run `atomwright sdd-attempt status --cwd <repo> --change <change>` to read the chain, then settle without --remediates-evidence-revision if nothing is being repaired")
 			}
 			if chainFailedEvidence != request.RemediatesEvidenceRevision {
 				return runtimeRecord{}, errors.New("this correction names failed verification " + request.RemediatesEvidenceRevision + ", but the chain's unremediated failure is " + chainFailedEvidence + "; settle with --remediates-evidence-revision \"" + chainFailedEvidence + "\", or without the flag if this work unit repairs nothing")
@@ -1302,7 +1302,7 @@ func (store RuntimeStore) settlementUntrackedSelection(ctx context.Context, acti
 		// what the caller saw, so no decision can honestly be demanded of them
 		// now and none may be accepted either.
 		if request.IntendedUntracked != nil {
-			return nil, "", fmt.Errorf("%w: this attempt began before settle-time untracked declarations existed, so it has no inventory to declare against; rerun `gentle-ai sdd-attempt finish` or `gentle-ai sdd-attempt settle` without --untracked-scope", ErrRuntimeUndeclaredUntracked)
+			return nil, "", fmt.Errorf("%w: this attempt began before settle-time untracked declarations existed, so it has no inventory to declare against; rerun `atomwright sdd-attempt finish` or `atomwright sdd-attempt settle` without --untracked-scope", ErrRuntimeUndeclaredUntracked)
 		}
 		return active.IntendedUntracked, "", nil
 	}
@@ -1326,12 +1326,12 @@ func (store RuntimeStore) settlementUntrackedSelection(ctx context.Context, acti
 		return nil, "", runtimeBornDuringUntrackedRefusal(undecided, digest)
 	}
 	if request.ExpectedUntrackedInventory != digest {
-		return nil, "", fmt.Errorf("%w: this declaration was made against untracked inventory %s but the workspace now holds %s; rerun `gentle-ai review status --next-transition` for the current inventory, then rerun `gentle-ai sdd-attempt finish` or `gentle-ai sdd-attempt settle` with --expected-untracked-inventory=%s", ErrRuntimeUndeclaredUntracked, request.ExpectedUntrackedInventory, digest, digest)
+		return nil, "", fmt.Errorf("%w: this declaration was made against untracked inventory %s but the workspace now holds %s; rerun `atomwright review status --next-transition` for the current inventory, then rerun `atomwright sdd-attempt finish` or `atomwright sdd-attempt settle` with --expected-untracked-inventory=%s", ErrRuntimeUndeclaredUntracked, request.ExpectedUntrackedInventory, digest, digest)
 	}
 	selection := *request.IntendedUntracked
 	for _, path := range selection {
 		if !slices.Contains(inventory, path) {
-			return nil, "", fmt.Errorf("%w: intended-untracked path %q is not in the current eligible inventory; rerun `gentle-ai review status --next-transition` to see what is eligible, then rerun `gentle-ai sdd-attempt finish` or `gentle-ai sdd-attempt settle` with only those paths", ErrRuntimeUndeclaredUntracked, path)
+			return nil, "", fmt.Errorf("%w: intended-untracked path %q is not in the current eligible inventory; rerun `atomwright review status --next-transition` to see what is eligible, then rerun `atomwright sdd-attempt finish` or `atomwright sdd-attempt settle` with only those paths", ErrRuntimeUndeclaredUntracked, path)
 		}
 	}
 	// A path selected at begin is already in the begin tree. Dropping it here
@@ -1339,7 +1339,7 @@ func (store RuntimeStore) settlementUntrackedSelection(ctx context.Context, acti
 	// settlement may widen the selection but never narrow it.
 	for _, path := range active.IntendedUntracked {
 		if slices.Contains(inventory, path) && !slices.Contains(selection, path) {
-			return nil, "", fmt.Errorf("%w: this attempt began with %q in its candidate, and a settlement cannot take it back out; rerun `gentle-ai sdd-attempt finish` or `gentle-ai sdd-attempt settle` with --intended-untracked=%s included", ErrRuntimeUndeclaredUntracked, path, path)
+			return nil, "", fmt.Errorf("%w: this attempt began with %q in its candidate, and a settlement cannot take it back out; rerun `atomwright sdd-attempt finish` or `atomwright sdd-attempt settle` with --intended-untracked=%s included", ErrRuntimeUndeclaredUntracked, path, path)
 		}
 	}
 	return selection, digest, nil
@@ -1356,7 +1356,7 @@ func runtimeBornDuringUntrackedRefusal(undecided []string, digest string) error 
 		remainder = fmt.Sprintf(" and %d more", len(listed)-runtimeUndeclaredUntrackedListLimit)
 		listed = listed[:runtimeUndeclaredUntrackedListLimit]
 	}
-	return fmt.Errorf("%w: this attempt left eligible untracked files its candidate does not include, so settling now would record them as no change at all: %s%s; rerun `gentle-ai sdd-attempt finish` or `gentle-ai sdd-attempt settle` with --untracked-scope=select --intended-untracked=<repo-relative-path> --expected-untracked-inventory=%s to account them, or --untracked-scope=exclude --expected-untracked-inventory=%s to leave them out on the record", ErrRuntimeUndeclaredUntracked, strings.Join(listed, ", "), remainder, digest, digest)
+	return fmt.Errorf("%w: this attempt left eligible untracked files its candidate does not include, so settling now would record them as no change at all: %s%s; rerun `atomwright sdd-attempt finish` or `atomwright sdd-attempt settle` with --untracked-scope=select --intended-untracked=<repo-relative-path> --expected-untracked-inventory=%s to account them, or --untracked-scope=exclude --expected-untracked-inventory=%s to leave them out on the record", ErrRuntimeUndeclaredUntracked, strings.Join(listed, ", "), remainder, digest, digest)
 }
 
 // captureFinalVerifyReport derives the final verification attestation from the
@@ -1508,7 +1508,7 @@ func (store RuntimeStore) Handoff(ctx context.Context, request HandoffAttemptReq
 func (store RuntimeStore) runtimeZeroDriftResetRefusal(status RuntimeStatus) error {
 	objective := status.Objective
 	return fmt.Errorf(
-		"%w: this objective's candidate has not drifted and it still has attempts left, so resetting it now would launder the per-objective budget. If the failed evidence proves this OBJECTIVE is wrong rather than under-attempted, a maintainer may open a narrower successor scope instead — `gentle-ai sdd-attempt rescope --cwd %q --change %q --expected-revision %q --request-id \"<unique-request-id>\" --work-unit \"<narrower-work-unit>\" --evidence-goal \"<narrower-evidence-goal>\" --max-attempts \"<n, at most %d>\" --max-changed-lines \"<n, at most %d>\" --reason \"<why-the-objective-is-narrowing>\" --actor \"<actor>\"`; rescope carries cumulative_attempts and cumulative_changed_lines forward unchanged and never widens a budget, so if the successor needs MORE than %d changed lines, spend this objective's remaining attempts first: the run that exhausts them reaches decision-required, where this reset is admitted",
+		"%w: this objective's candidate has not drifted and it still has attempts left, so resetting it now would launder the per-objective budget. If the failed evidence proves this OBJECTIVE is wrong rather than under-attempted, a maintainer may open a narrower successor scope instead — `atomwright sdd-attempt rescope --cwd %q --change %q --expected-revision %q --request-id \"<unique-request-id>\" --work-unit \"<narrower-work-unit>\" --evidence-goal \"<narrower-evidence-goal>\" --max-attempts \"<n, at most %d>\" --max-changed-lines \"<n, at most %d>\" --reason \"<why-the-objective-is-narrowing>\" --actor \"<actor>\"`; rescope carries cumulative_attempts and cumulative_changed_lines forward unchanged and never widens a budget, so if the successor needs MORE than %d changed lines, spend this objective's remaining attempts first: the run that exhausts them reaches decision-required, where this reset is admitted",
 		ErrRuntimeResetNotAllowed, store.Workspace, store.Change, status.Revision,
 		objective.MaxAttempts, objective.MaxChangedLines, objective.MaxChangedLines)
 }
@@ -1528,7 +1528,7 @@ func (store RuntimeStore) runtimeZeroDriftResetRefusal(status RuntimeStatus) err
 func (store RuntimeStore) runtimeRescopeWidenedRefusal(status RuntimeStatus, flag string, requested, allowed int) error {
 	remaining := status.Objective.MaxAttempts - status.CumulativeAttempts
 	return fmt.Errorf(
-		"%w: received %s %d, the current objective allows %d. A wider successor scope is reached by finishing this objective rather than by rescoping it: spend its %d remaining attempt(s), and the run that exhausts them reaches decision-required, where `gentle-ai sdd-attempt reset --cwd %q --change %q --expected-revision \"<revision-from-status>\" --request-id \"<unique-request-id>\" --reason \"<why-the-objective-changed>\" --actor \"<actor>\"` opens a fresh budget of any size",
+		"%w: received %s %d, the current objective allows %d. A wider successor scope is reached by finishing this objective rather than by rescoping it: spend its %d remaining attempt(s), and the run that exhausts them reaches decision-required, where `atomwright sdd-attempt reset --cwd %q --change %q --expected-revision \"<revision-from-status>\" --request-id \"<unique-request-id>\" --reason \"<why-the-objective-changed>\" --actor \"<actor>\"` opens a fresh budget of any size",
 		ErrRuntimeRescopeWidened, flag, requested, allowed, remaining, store.Workspace, store.Change)
 }
 
@@ -1561,7 +1561,7 @@ func (store RuntimeStore) runtimeRescopeExhaustedRefusal(flag string, requested,
 // for a caller who means to discard this scope rather than succeed it.
 func (store RuntimeStore) runtimeObjectiveCompleteRefusal(status RuntimeStatus) error {
 	return fmt.Errorf(
-		"%w: it passed within budget, so this change continues through a SUCCESSOR objective, not a repeat of this one — re-run this begin with a different --work-unit (everything else may stay as it is) and it is admitted as an advance that carries this objective's evidence forward. To discard this scope instead of succeeding it, run `gentle-ai sdd-attempt reset --cwd %q --change %q --expected-revision %q --request-id \"<unique-request-id>\" --reason \"<why-the-objective-changed>\" --actor \"<actor>\"`",
+		"%w: it passed within budget, so this change continues through a SUCCESSOR objective, not a repeat of this one — re-run this begin with a different --work-unit (everything else may stay as it is) and it is admitted as an advance that carries this objective's evidence forward. To discard this scope instead of succeeding it, run `atomwright sdd-attempt reset --cwd %q --change %q --expected-revision %q --request-id \"<unique-request-id>\" --reason \"<why-the-objective-changed>\" --actor \"<actor>\"`",
 		ErrRuntimeObjectiveDone, store.Workspace, store.Change, status.Revision)
 }
 
@@ -1602,10 +1602,10 @@ func runtimeBoundWorktree(active RuntimeAttempt) (string, bool) {
 // rendered so the compact readiness surface can pass placeholders.
 func runtimeMissingWorktreeExit(active RuntimeAttempt, bound, cwd, change, token string) string {
 	return fmt.Sprintf("attempt %d is bound to worktree %s, which no longer exists on disk, so its passed or failed evidence cannot be measured; "+
-		"settle it as interrupted from any worktree of this repository with `gentle-ai sdd-attempt settle --cwd %s --change %s --token %s "+
+		"settle it as interrupted from any worktree of this repository with `atomwright sdd-attempt settle --cwd %s --change %s --token %s "+
 		"--request-id \"<unique-request-id>\" --outcome interrupted --diagnosis \"<why-the-worktree-is-gone>\" --harness-disposition invalidated "+
 		"--cleanup-evidence \"<evidence>\" --process-evidence \"<evidence>\"`, then follow the ledger's next_action, or have a maintainer discard "+
-		"the objective with `gentle-ai sdd-attempt reset --cwd %s --change %s --expected-revision <the revision that status prints> "+
+		"the objective with `atomwright sdd-attempt reset --cwd %s --change %s --expected-revision <the revision that status prints> "+
 		"--request-id \"<unique-request-id>\" --reason \"<why-the-objective-changed>\" --actor \"<actor>\"`",
 		active.Ordinal, pathquote.Quote(bound), cwd, change, token, cwd, change)
 }
@@ -1628,7 +1628,7 @@ func (store RuntimeStore) runtimeAttemptActiveRefusal(active RuntimeAttempt) err
 // begin or reset measures drift against the worktree it runs from, as before.
 func runtimeMissingWorktreeInterruptedRecord(status RuntimeStatus, active RuntimeAttempt, request FinishAttemptRequest) (runtimeRecord, error) {
 	if request.IntendedUntracked != nil {
-		return runtimeRecord{}, fmt.Errorf("%w: the bound worktree no longer exists, so no untracked inventory can be declared against it; rerun `gentle-ai sdd-attempt settle` with --outcome interrupted and without --untracked-scope", ErrRuntimeUndeclaredUntracked)
+		return runtimeRecord{}, fmt.Errorf("%w: the bound worktree no longer exists, so no untracked inventory can be declared against it; rerun `atomwright sdd-attempt settle` with --outcome interrupted and without --untracked-scope", ErrRuntimeUndeclaredUntracked)
 	}
 	intended := slices.Clone(active.IntendedUntracked)
 	return runtimeRecord{Operation: runtimeOperationFinish, Finish: &runtimeFinishEvent{
@@ -1672,12 +1672,12 @@ func (store RuntimeStore) runtimeObjectiveChangeRefusal(ctx context.Context, sta
 	// route on errors.Is must keep working no matter which exit is named.
 	if store.runtimeObjectiveResetAdmissible(ctx, status) {
 		return fmt.Errorf(
-			"%w: reset the objective, then begin again — `gentle-ai sdd-attempt reset --cwd %s --change %q --expected-revision %q --request-id \"<unique-request-id>\" --reason \"<why-the-objective-changed>\" --actor \"<actor>\"`; the reset publishes a new ledger revision, so take the begin's --expected-revision from `gentle-ai sdd-attempt status --cwd %s --change %q` after it commits",
+			"%w: reset the objective, then begin again — `atomwright sdd-attempt reset --cwd %s --change %q --expected-revision %q --request-id \"<unique-request-id>\" --reason \"<why-the-objective-changed>\" --actor \"<actor>\"`; the reset publishes a new ledger revision, so take the begin's --expected-revision from `atomwright sdd-attempt status --cwd %s --change %q` after it commits",
 			ErrRuntimeObjectiveChange, pathquote.Quote(store.Workspace), store.Change, status.Revision, pathquote.Quote(store.Workspace), store.Change)
 	}
 	if store.runtimeObjectiveRescopeAdmissible(ctx, status) {
 		objective := status.Objective
-		return fmt.Errorf("%w: maintainer choice is required: use `gentle-ai sdd-attempt rescope --cwd %s --change %q --expected-revision %q --request-id \"<unique-request-id>\" --work-unit \"<narrower-work-unit>\" --evidence-goal \"<narrower-evidence-goal>\" --max-attempts \"<n, at most %d>\" --max-changed-lines \"<n, at most %d>\" --reason \"<why-the-objective-is-narrowing>\" --actor \"<actor>\"` only for a genuinely narrower successor, or `gentle-ai sdd-attempt supersede --cwd %s --change %q --expected-revision %q --request-id \"<unique-request-id>\" --work-unit \"<distinct-successor-work-unit>\" --evidence-goal \"<distinct-successor-evidence-goal>\" --max-attempts <count> --max-changed-lines <count> --reason \"<why-distinct>\" --actor \"<actor>\"` for distinct/non-narrowing work; both preserve cumulative and lifetime charges", ErrRuntimeObjectiveChange, pathquote.Quote(store.Workspace), store.Change, status.Revision, objective.MaxAttempts, objective.MaxChangedLines, pathquote.Quote(store.Workspace), store.Change, status.Revision)
+		return fmt.Errorf("%w: maintainer choice is required: use `atomwright sdd-attempt rescope --cwd %s --change %q --expected-revision %q --request-id \"<unique-request-id>\" --work-unit \"<narrower-work-unit>\" --evidence-goal \"<narrower-evidence-goal>\" --max-attempts \"<n, at most %d>\" --max-changed-lines \"<n, at most %d>\" --reason \"<why-the-objective-is-narrowing>\" --actor \"<actor>\"` only for a genuinely narrower successor, or `atomwright sdd-attempt supersede --cwd %s --change %q --expected-revision %q --request-id \"<unique-request-id>\" --work-unit \"<distinct-successor-work-unit>\" --evidence-goal \"<distinct-successor-evidence-goal>\" --max-attempts <count> --max-changed-lines <count> --reason \"<why-distinct>\" --actor \"<actor>\"` for distinct/non-narrowing work; both preserve cumulative and lifetime charges", ErrRuntimeObjectiveChange, pathquote.Quote(store.Workspace), store.Change, status.Revision, objective.MaxAttempts, objective.MaxChangedLines, pathquote.Quote(store.Workspace), store.Change, status.Revision)
 	}
 	objective := status.Objective
 	if objective == nil {
@@ -1687,7 +1687,7 @@ func (store RuntimeStore) runtimeObjectiveChangeRefusal(ctx context.Context, sta
 		return ErrRuntimeObjectiveChange
 	}
 	return fmt.Errorf(
-		"%w: this objective is still open on its recorded scope and its candidate has not moved, so resetting it is refused as an elective budget reset; begin against the scope the ledger holds — `gentle-ai sdd-attempt begin --cwd %s --change %q --expected-revision %q --request-id \"<unique-request-id>\" --work-unit %q --evidence-goal %q --max-attempts %d --max-changed-lines %d`; `sdd-attempt status` publishes those four as objective.work_unit, objective.evidence_goal, objective.max_attempts, and objective.max_changed_lines",
+		"%w: this objective is still open on its recorded scope and its candidate has not moved, so resetting it is refused as an elective budget reset; begin against the scope the ledger holds — `atomwright sdd-attempt begin --cwd %s --change %q --expected-revision %q --request-id \"<unique-request-id>\" --work-unit %q --evidence-goal %q --max-attempts %d --max-changed-lines %d`; `sdd-attempt status` publishes those four as objective.work_unit, objective.evidence_goal, objective.max_attempts, and objective.max_changed_lines",
 		ErrRuntimeObjectiveChange, pathquote.Quote(store.Workspace), store.Change, status.Revision,
 		objective.WorkUnit, objective.EvidenceGoal, objective.MaxAttempts, objective.MaxChangedLines)
 }
@@ -1999,11 +1999,11 @@ func (store RuntimeStore) rescope(ctx context.Context, request RescopeObjectiveR
 			selection, validateErr := (reviewtransaction.SnapshotBuilder{Repo: store.Repo}).
 				ValidateIntendedUntrackedSelection(ctx, request.ExpectedUntrackedInventory, *request.IntendedUntracked)
 			if validateErr != nil {
-				return runtimeRecord{}, fmt.Errorf("%w: %v; rerun `gentle-ai review status --next-transition` for the current inventory, then rerun `gentle-ai sdd-attempt %s`", ErrRuntimeUndeclaredUntracked, validateErr, operation)
+				return runtimeRecord{}, fmt.Errorf("%w: %v; rerun `atomwright review status --next-transition` for the current inventory, then rerun `atomwright sdd-attempt %s`", ErrRuntimeUndeclaredUntracked, validateErr, operation)
 			}
 			for _, path := range intended {
 				if !slices.Contains(selection, path) {
-					return runtimeRecord{}, fmt.Errorf("%w: this objective's terminal candidate already includes %q, and %s cannot take it back out; rerun `gentle-ai sdd-attempt %s` with --intended-untracked=%s included", ErrRuntimeUndeclaredUntracked, path, operation, operation, path)
+					return runtimeRecord{}, fmt.Errorf("%w: this objective's terminal candidate already includes %q, and %s cannot take it back out; rerun `atomwright sdd-attempt %s` with --intended-untracked=%s included", ErrRuntimeUndeclaredUntracked, path, operation, operation, path)
 				}
 			}
 			successorIntended, declaredInventory = selection, request.ExpectedUntrackedInventory
@@ -3285,13 +3285,13 @@ func canonicalRuntimeIntendedUntracked(paths []string) ([]string, error) {
 		return []string{}, nil
 	}
 	if len(canonical) > maximumRuntimeIntendedUntracked {
-		return nil, fmt.Errorf("intended_untracked must name at most %d paths; `git add` the excess born-during paths so they are tracked (tracked changes and the index are always captured, uncapped) and declare only the remaining untracked paths, or declare none with --untracked-scope=exclude if every born-during path is now tracked; rerun `gentle-ai sdd-attempt acquire`, `gentle-ai sdd-attempt begin`, `gentle-ai sdd-attempt settle`, or `gentle-ai sdd-attempt finish` with that selection", maximumRuntimeIntendedUntracked)
+		return nil, fmt.Errorf("intended_untracked must name at most %d paths; `git add` the excess born-during paths so they are tracked (tracked changes and the index are always captured, uncapped) and declare only the remaining untracked paths, or declare none with --untracked-scope=exclude if every born-during path is now tracked; rerun `atomwright sdd-attempt acquire`, `atomwright sdd-attempt begin`, `atomwright sdd-attempt settle`, or `atomwright sdd-attempt finish` with that selection", maximumRuntimeIntendedUntracked)
 	}
 	slices.Sort(canonical)
 	for index, path := range canonical {
 		if validateRuntimeText(path, 4096) != nil || filepath.IsAbs(path) || filepath.ToSlash(filepath.Clean(path)) != path ||
 			path == "." || path == ".." || strings.HasPrefix(path, "../") || (index > 0 && path == canonical[index-1]) {
-			return nil, errors.New("intended_untracked must be canonical unique repository-relative paths; rerun `gentle-ai sdd-attempt acquire` or `gentle-ai sdd-attempt begin` with the inventory-validated --untracked-scope and --intended-untracked flags")
+			return nil, errors.New("intended_untracked must be canonical unique repository-relative paths; rerun `atomwright sdd-attempt acquire` or `atomwright sdd-attempt begin` with the inventory-validated --untracked-scope and --intended-untracked flags")
 		}
 	}
 	return canonical, nil
@@ -3329,11 +3329,11 @@ func normalizeFinishAttemptRequest(request FinishAttemptRequest) (FinishAttemptR
 		return FinishAttemptRequest{}, errors.New("outcome must be failed, interrupted, or passed")
 	}
 	if request.Outcome == AttemptInterrupted && request.EvidenceRevision != "" && !runtimeRevisionPattern.MatchString(request.EvidenceRevision) {
-		return FinishAttemptRequest{}, errors.New("interrupted evidence_revision must be empty or a canonical legacy sha256 revision; rerun `gentle-ai sdd-attempt finish` or `gentle-ai sdd-attempt settle` with --outcome interrupted and without --evidence-revision")
+		return FinishAttemptRequest{}, errors.New("interrupted evidence_revision must be empty or a canonical legacy sha256 revision; rerun `atomwright sdd-attempt finish` or `atomwright sdd-attempt settle` with --outcome interrupted and without --evidence-revision")
 	}
 	if request.Outcome != AttemptInterrupted && !runtimeRevisionPattern.MatchString(request.EvidenceRevision) {
 		return FinishAttemptRequest{}, fmt.Errorf(
-			"evidence_revision must be sha256:<64-lowercase-hex> (%s); rerun `gentle-ai sdd-attempt finish` or `gentle-ai sdd-attempt settle` with --evidence-revision sha256:<64-lowercase-hex>",
+			"evidence_revision must be sha256:<64-lowercase-hex> (%s); rerun `atomwright sdd-attempt finish` or `atomwright sdd-attempt settle` with --evidence-revision sha256:<64-lowercase-hex>",
 			runtimeRevisionShapeObservation(request.EvidenceRevision),
 		)
 	}
@@ -3350,10 +3350,10 @@ func normalizeFinishAttemptRequest(request FinishAttemptRequest) (FinishAttemptR
 		return FinishAttemptRequest{}, fmt.Errorf("invalid process_evidence: %w", err)
 	}
 	if (request.IntendedUntracked == nil) != (request.ExpectedUntrackedInventory == "") {
-		return FinishAttemptRequest{}, errors.New("an untracked declaration needs both its selection and the inventory digest it was made against; rerun `gentle-ai sdd-attempt finish` or `gentle-ai sdd-attempt settle` with --untracked-scope and --expected-untracked-inventory together")
+		return FinishAttemptRequest{}, errors.New("an untracked declaration needs both its selection and the inventory digest it was made against; rerun `atomwright sdd-attempt finish` or `atomwright sdd-attempt settle` with --untracked-scope and --expected-untracked-inventory together")
 	}
 	if request.ExpectedUntrackedInventory != "" && !runtimeRevisionPattern.MatchString(request.ExpectedUntrackedInventory) {
-		return FinishAttemptRequest{}, errors.New("expected_untracked_inventory must be sha256:<64-lowercase-hex>; rerun `gentle-ai sdd-attempt finish` or `gentle-ai sdd-attempt settle` with the digest `gentle-ai review status --next-transition` publishes")
+		return FinishAttemptRequest{}, errors.New("expected_untracked_inventory must be sha256:<64-lowercase-hex>; rerun `atomwright sdd-attempt finish` or `atomwright sdd-attempt settle` with the digest `atomwright review status --next-transition` publishes")
 	}
 	if request.IntendedUntracked != nil {
 		canonical, canonicalErr := canonicalRuntimeIntendedUntracked(*request.IntendedUntracked)
@@ -3370,7 +3370,7 @@ func normalizeFinishAttemptRequest(request FinishAttemptRequest) (FinishAttemptR
 		// here; outcome-specific demands live in Finish and its replay twin.
 		if !runtimeRevisionPattern.MatchString(request.RemediatesEvidenceRevision) {
 			return FinishAttemptRequest{}, fmt.Errorf(
-				"remediates_evidence_revision must be sha256:<64-lowercase-hex> (%s); rerun `gentle-ai sdd-attempt finish` with --remediates-evidence-revision sha256:<64-lowercase-hex>",
+				"remediates_evidence_revision must be sha256:<64-lowercase-hex> (%s); rerun `atomwright sdd-attempt finish` with --remediates-evidence-revision sha256:<64-lowercase-hex>",
 				runtimeRevisionShapeObservation(request.RemediatesEvidenceRevision),
 			)
 		}
@@ -3410,7 +3410,7 @@ func normalizeResetObjectiveRequest(request ResetObjectiveRequest) (ResetObjecti
 		return ResetObjectiveRequest{}, fmt.Errorf("invalid reset actor: %w", err)
 	}
 	if !validRuntimeObjectiveRelation(request.Relation) {
-		return ResetObjectiveRequest{}, errors.New("objective_relation must be remediation or independent; rerun `gentle-ai sdd-attempt reset` with --objective-relation remediation or --objective-relation independent, or omit the flag for the remediation default")
+		return ResetObjectiveRequest{}, errors.New("objective_relation must be remediation or independent; rerun `atomwright sdd-attempt reset` with --objective-relation remediation or --objective-relation independent, or omit the flag for the remediation default")
 	}
 	return request, nil
 }
@@ -3516,7 +3516,7 @@ func normalizeRescopeObjectiveRequest(request RescopeObjectiveRequest) (RescopeO
 		return RescopeObjectiveRequest{}, fmt.Errorf("invalid rescope actor: %w", err)
 	}
 	if !validRuntimeObjectiveRelation(request.Relation) {
-		return RescopeObjectiveRequest{}, errors.New("objective_relation must be remediation or independent; rerun `gentle-ai sdd-attempt rescope` with --objective-relation remediation or --objective-relation independent, or omit the flag for the remediation default")
+		return RescopeObjectiveRequest{}, errors.New("objective_relation must be remediation or independent; rerun `atomwright sdd-attempt rescope` with --objective-relation remediation or --objective-relation independent, or omit the flag for the remediation default")
 	}
 	// Mirrors normalizeFinishAttemptRequest's untracked-declaration shape
 	// validation exactly (#4195): a declaration needs both its selection and
@@ -3525,10 +3525,10 @@ func normalizeRescopeObjectiveRequest(request RescopeObjectiveRequest) (RescopeO
 	// check happens in Rescope, against the repository, the same division of
 	// labor Finish already uses.
 	if (request.IntendedUntracked == nil) != (request.ExpectedUntrackedInventory == "") {
-		return RescopeObjectiveRequest{}, errors.New("an untracked declaration needs both its selection and the inventory digest it was made against; rerun `gentle-ai sdd-attempt rescope` with --untracked-scope and --expected-untracked-inventory together")
+		return RescopeObjectiveRequest{}, errors.New("an untracked declaration needs both its selection and the inventory digest it was made against; rerun `atomwright sdd-attempt rescope` with --untracked-scope and --expected-untracked-inventory together")
 	}
 	if request.ExpectedUntrackedInventory != "" && !runtimeRevisionPattern.MatchString(request.ExpectedUntrackedInventory) {
-		return RescopeObjectiveRequest{}, errors.New("expected_untracked_inventory must be sha256:<64-lowercase-hex>; rerun `gentle-ai sdd-attempt rescope` with the digest `gentle-ai review status --next-transition` publishes")
+		return RescopeObjectiveRequest{}, errors.New("expected_untracked_inventory must be sha256:<64-lowercase-hex>; rerun `atomwright sdd-attempt rescope` with the digest `atomwright review status --next-transition` publishes")
 	}
 	if request.IntendedUntracked != nil {
 		canonical, canonicalErr := canonicalRuntimeIntendedUntracked(*request.IntendedUntracked)
@@ -3669,7 +3669,7 @@ func canonicalRuntimeHandoffPath(path string) (string, error) {
 }
 
 func (store RuntimeStore) runtimeHandoffStatusExit() string {
-	return fmt.Sprintf("run `gentle-ai sdd-attempt status --cwd %s --change %q` to read the active attempt and its current execution worktree", pathquote.Quote(store.Workspace), store.Change)
+	return fmt.Sprintf("run `atomwright sdd-attempt status --cwd %s --change %q` to read the active attempt and its current execution worktree", pathquote.Quote(store.Workspace), store.Change)
 }
 
 func (store RuntimeStore) runtimeHandoffSourceRefusal(active RuntimeAttempt) error {
@@ -4206,7 +4206,7 @@ type RuntimeRecordSchemaUnsupportedError struct {
 }
 
 func (err *RuntimeRecordSchemaUnsupportedError) Error() string {
-	return fmt.Sprintf("SDD runtime revision %s declares \"schema\" %s, newer than this binary supports (%s); run `gentle-ai update` to install a build that reads it, then rerun the same `gentle-ai sdd-attempt` command", err.Revision, err.Schema, runtimeRecordSchema)
+	return fmt.Sprintf("SDD runtime revision %s declares \"schema\" %s, newer than this binary supports (%s); run `atomwright update` to install a build that reads it, then rerun the same `atomwright sdd-attempt` command", err.Revision, err.Schema, runtimeRecordSchema)
 }
 
 func readBoundedRuntimeFile(path string) ([]byte, error) {

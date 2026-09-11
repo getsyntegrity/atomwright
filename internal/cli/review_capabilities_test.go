@@ -97,7 +97,7 @@ func TestReviewCapabilitiesV23ArtifactRemainsReadable(t *testing.T) {
 		t.Fatalf("v2.3 capability bootstrap must not declare an unavailable runtime identity: %#v", got.Bootstrap)
 	}
 	if got.Schema != ReviewIntegrationCapabilitiesSchemaV23 || got.Protocol != (ReviewCapabilitiesProtocol{Major: 2, Minor: 3}) ||
-		got.Bootstrap == nil || got.Bootstrap.Command != reviewNextTransitionRefreshCommandV21 {
+		got.Bootstrap == nil || got.Bootstrap.Command != reviewCapabilitiesBootstrapCommandV21 {
 		t.Fatalf("v2.3 capabilities artifact surface = %#v", got)
 	}
 	if !slices.Contains(got.Schemas, ReviewIntegrationStartSchemaV4) || slices.Contains(got.Schemas, ReviewIntegrationStartSchemaV3) {

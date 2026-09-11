@@ -265,7 +265,7 @@ func RunInstall(args []string, detection system.DetectionResult) (InstallResult,
 		agentIDs = append(agentIDs, string(a))
 	}
 
-	// When the user ran `gentle-ai install --agent X` (explicit agent flag),
+	// When the user ran `atomwright install --agent X` (explicit agent flag),
 	// merge into the existing state so that previously installed agents and
 	// model assignments are preserved. A full install (no --agent flag) keeps
 	// overwrite semantics so the TUI selection is the source of truth.
@@ -465,7 +465,7 @@ func withReadyAgentRunNote(report verify.Report, resolved planner.ResolvedPlan) 
 
 // withFailedVerificationNote replaces the generic verify.VerificationIssuesMessage
 // with one naming the concrete command that retries the install for the
-// agents that were actually resolved this run: `gentle-ai install --agent
+// agents that were actually resolved this run: `atomwright install --agent
 // <agent1>,<agent2>`. There is no `repair` case in the CLI dispatcher
 // (internal/app/app.go), so the old generic text named a command that could
 // never succeed -- a false continuation worse than no note at all.
@@ -484,7 +484,7 @@ func withFailedVerificationNote(report verify.Report, resolved planner.ResolvedP
 	for i, agent := range resolved.Agents {
 		names[i] = string(agent)
 	}
-	report.FinalNote = verify.VerificationIssuesMessageForCommand("gentle-ai install --agent " + strings.Join(names, ","))
+	report.FinalNote = verify.VerificationIssuesMessageForCommand("atomwright install --agent " + strings.Join(names, ","))
 	return report
 }
 
@@ -2788,7 +2788,7 @@ func runPostApplyVerification(input postApplyVerificationInput) verify.Report {
 						}
 						return err
 					}
-					return fmt.Errorf("retired managed file still exists; rerun `gentle-ai sync` to finish retiring it")
+					return fmt.Errorf("retired managed file still exists; rerun `atomwright sync` to finish retiring it")
 				},
 			})
 			continue
@@ -2916,7 +2916,7 @@ func engramHealthChecks(state *runtimeState, agentIDs []model.AgentID) []verify.
 // engramInstallCommand names the install continuation for a missing engram
 // binary so the warning that reports it is actionable on its own.
 func engramInstallCommand(agentIDs []model.AgentID) string {
-	return fmt.Sprintf("gentle-ai install --agent %s --components engram", joinAgentIDs(agentIDs))
+	return fmt.Sprintf("atomwright install --agent %s --components engram", joinAgentIDs(agentIDs))
 }
 
 // antigravityCollisionCheck returns a soft verify check that warns the user

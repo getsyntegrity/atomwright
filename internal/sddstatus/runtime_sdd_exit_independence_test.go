@@ -9,7 +9,7 @@ import (
 // reproduction, stated as a property.
 //
 // The reporter hit an exhausted attempt budget, got blocked(maintainer_decision),
-// and was told to run `gentle-ai review mode disable --scope clone`. They ran
+// and was told to run `atomwright review mode disable --scope clone`. They ran
 // it. It SUCCEEDED. Effective mode went to off, decided by clone_local. Then
 // SDD status returned the same blocker and instructed them to disable the
 // already-disabled mode again.
@@ -50,7 +50,7 @@ func TestSDDAttemptBlockersNeverNameTheReviewKillSwitchAsTheirExit(t *testing.T)
 			if strings.Contains(exit, "review mode disable") {
 				t.Fatalf("SDD blocker %q offers `review mode disable` as its exit:\n%s\n\nThat command succeeds and leaves this block exactly where it was (#2913). Receipt-driven review governs delivery of a finished change, not whether an SDD work unit may open.", reason, exit)
 			}
-			if strings.Contains(exit, "gentle-ai review ") {
+			if strings.Contains(exit, "atomwright review ") {
 				t.Fatalf("SDD blocker %q routes to a receipt-driven review command:\n%s", reason, exit)
 			}
 		})
@@ -62,7 +62,7 @@ func TestSDDAttemptBlockersNeverNameTheReviewKillSwitchAsTheirExit(t *testing.T)
 // the operator can run.
 func TestMaintainerDecisionExitNamesTheOperationThatClearsIt(t *testing.T) {
 	exit := compactBlockedExitText(CompactBlockMaintainerDecision, "")
-	for _, want := range []string{"gentle-ai sdd-attempt status", "sdd-attempt reset"} {
+	for _, want := range []string{"atomwright sdd-attempt status", "sdd-attempt reset"} {
 		if !strings.Contains(exit, want) {
 			t.Fatalf("maintainer_decision exit does not name %q:\n%s", want, exit)
 		}

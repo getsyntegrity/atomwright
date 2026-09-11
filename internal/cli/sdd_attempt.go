@@ -127,12 +127,12 @@ func runSDDAttempt(ctx context.Context, args []string, stdout io.Writer) error {
 			}
 		}
 		if !inheritsRescopeSelection {
-			scope, scopeErr := intendedUntrackedScopeForTarget(ctx, reviewtransaction.SnapshotBuilder{Repo: *cwd}, untrackedScope, intendedUntracked, expectedUntrackedInventory, reviewIntendedUntrackedInventoryCommand, "gentle-ai sdd-attempt "+operation)
+			scope, scopeErr := intendedUntrackedScopeForTarget(ctx, reviewtransaction.SnapshotBuilder{Repo: *cwd}, untrackedScope, intendedUntracked, expectedUntrackedInventory, reviewIntendedUntrackedInventoryCommand, "atomwright sdd-attempt "+operation)
 			if scopeErr != nil {
 				return scopeErr
 			}
 			if scope.NeedsSelection {
-				return intendedUntrackedSelectionRequired(scope, reviewIntendedUntrackedInventoryCommand, "gentle-ai sdd-attempt "+operation)
+				return intendedUntrackedSelectionRequired(scope, reviewIntendedUntrackedInventoryCommand, "atomwright sdd-attempt "+operation)
 			}
 			intended = scope.Intended
 		}
@@ -156,7 +156,7 @@ func runSDDAttempt(ctx context.Context, args []string, stdout io.Writer) error {
 	var settlementUntracked *[]string
 	settlementInventory := ""
 	if (operation == "finish" || operation == "settle" || operation == "rescope" || operation == "supersede") && declaredUntracked {
-		if shapeErr := intendedUntrackedDeclarationShape(untrackedScope, intendedUntracked, expectedUntrackedInventory, expectedUntrackedInventory.value, reviewIntendedUntrackedInventoryCommand, "gentle-ai sdd-attempt "+operation); shapeErr != nil {
+		if shapeErr := intendedUntrackedDeclarationShape(untrackedScope, intendedUntracked, expectedUntrackedInventory, expectedUntrackedInventory.value, reviewIntendedUntrackedInventoryCommand, "atomwright sdd-attempt "+operation); shapeErr != nil {
 			return shapeErr
 		}
 		switch untrackedScope.value {
@@ -548,7 +548,7 @@ func renderSDDAttemptHelp(operation string, stdout io.Writer) error {
 		for _, definition := range sddAttemptOperationDefinitions {
 			_, _ = fmt.Fprintf(stdout, "  %-7s %s\n", definition.name, definition.purpose)
 		}
-		_, _ = fmt.Fprintf(stdout, "\nUse gentle-ai sdd-attempt <operation> %s for flags, required inputs, defaults, and limits.\n", strings.Join(sddAttemptHelpAliases, " or "))
+		_, _ = fmt.Fprintf(stdout, "\nUse atomwright sdd-attempt <operation> %s for flags, required inputs, defaults, and limits.\n", strings.Join(sddAttemptHelpAliases, " or "))
 		return nil
 	}
 	definition, _ := sddAttemptOperationDefinition(operation)
@@ -698,7 +698,7 @@ func missingSDDAttemptOperationError(operation string, missing []string) error {
 	message := fmt.Sprintf("sdd-attempt %s requires %s", operation, strings.Join(missing, ", "))
 	switch operation {
 	case "acquire", "settle", "handoff", "grant":
-		message += fmt.Sprintf("; rerun `gentle-ai sdd-attempt %s` with those missing flags", operation)
+		message += fmt.Sprintf("; rerun `atomwright sdd-attempt %s` with those missing flags", operation)
 	}
 	return errors.New(message)
 }

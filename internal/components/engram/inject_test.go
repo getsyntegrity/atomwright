@@ -854,7 +854,7 @@ func TestInjectClaudePreservesAbsoluteCommandFromEngramSetup(t *testing.T) {
 }
 
 // TestInjectClaudeSkipsMCPServersEngramWhenPluginEnabled reproduces issue
-// #4188: gentle-ai sync must not add mcpServers.engram to ~/.claude.json
+// #4188: atomwright sync must not add mcpServers.engram to ~/.claude.json
 // when the Engram plugin is already enabled via
 // ~/.claude/settings.json's enabledPlugins["engram@engram"], because the
 // plugin already exposes the same 18 tools under a different prefix.

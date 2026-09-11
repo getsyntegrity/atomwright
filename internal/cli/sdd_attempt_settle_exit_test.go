@@ -17,7 +17,7 @@ func TestSettleRefusesReusedAcquireRequestIDAndNamesTheExit(t *testing.T) {
 	if reused.State != "blocked" || reused.Reason != "invalid_continuation" || reused.Detail != reused.Exit {
 		t.Fatalf("reused-request-id settle = %#v", reused)
 	}
-	assertExitNames(t, reused.Exit, "distinct --request-id", "unit-1", "`gentle-ai sdd-attempt status --cwd <repo> --change <change>`")
+	assertExitNames(t, reused.Exit, "distinct --request-id", "unit-1", "`atomwright sdd-attempt status --cwd <repo> --change <change>`")
 	settled, _ := runCompactSDDAttempt(t, compactSettleArgs(repo, change, acquired.Token, "unit-1-settle", "passed"))
 	if settled.State != "complete" || !strings.Contains(settled.Exit, "--work-unit \"<a different label>\"") {
 		t.Fatalf("distinct-request-id settle = %#v, want complete naming the successor", settled)
@@ -39,7 +39,7 @@ func TestSettleNamesMalformedTokenWithoutMentioningFinish(t *testing.T) {
 	if strings.Contains(err.Error(), "expected runtime revision") {
 		t.Fatalf("malformed token settle named finish's flag: %v", err)
 	}
-	assertExitNames(t, err.Error(), "--token", "`gentle-ai sdd-attempt status --cwd <repo> --change <change>`", "`gentle-ai sdd-attempt settle`")
+	assertExitNames(t, err.Error(), "--token", "`atomwright sdd-attempt status --cwd <repo> --change <change>`", "`atomwright sdd-attempt settle`")
 }
 
 // TestCompleteNamesTheSuccessorWorkUnit is #3884: a completed objective
@@ -57,7 +57,7 @@ func TestCompleteNamesTheSuccessorWorkUnit(t *testing.T) {
 	if repeated.State != "complete" || repeated.Detail != repeated.Exit {
 		t.Fatalf("repeated acquire = %#v, want complete with detail mirroring exit", repeated)
 	}
-	assertExitNames(t, repeated.Exit, "different label", "slice-1", "`gentle-ai sdd-attempt acquire --cwd <repo> --change <change>")
+	assertExitNames(t, repeated.Exit, "different label", "slice-1", "`atomwright sdd-attempt acquire --cwd <repo> --change <change>")
 	assertCompactPayloadKeys(t, payload, "state", "exit", "detail")
 
 	status := runSDDAttemptStatus(t, []string{
@@ -77,7 +77,7 @@ func TestCompleteNamesTheSuccessorWorkUnit(t *testing.T) {
 	if err == nil {
 		t.Fatalf("rescope of a completed objective succeeded: %s", output.String())
 	}
-	assertExitNames(t, err.Error(), "different --work-unit", "`gentle-ai sdd-attempt acquire --cwd <repo> --change <change>")
+	assertExitNames(t, err.Error(), "different --work-unit", "`atomwright sdd-attempt acquire --cwd <repo> --change <change>")
 
 	successor, _ := runCompactSDDAttempt(t, compactWorkUnitAcquireArgs(repo, change, "slice-2-acquire", "slice-2"))
 	if successor.State != "proceed" || successor.Token == "" {

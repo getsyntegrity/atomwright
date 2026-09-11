@@ -1733,7 +1733,7 @@ func TestComponentOperationsSDD_ClaudeRemovesSkillRegistryHook(t *testing.T) {
       {
         "matcher": "",
         "hooks": [
-          {"type": "command", "command": "gentle-ai skill-registry refresh --quiet --no-gitignore --cwd \"${CLAUDE_PROJECT_DIR:-$PWD}\" || true"},
+          {"type": "command", "command": "atomwright skill-registry refresh --quiet --no-gitignore --cwd \"${CLAUDE_PROJECT_DIR:-$PWD}\" || true"},
           {"type": "command", "command": "echo keep"}
         ]
       }
@@ -1747,7 +1747,7 @@ func TestComponentOperationsSDD_ClaudeRemovesSkillRegistryHook(t *testing.T) {
     "SubagentStop": [
       {
         "hooks": [
-          {"type": "command", "command": "gentle-ai telemetry runtime codex --json", "async": true},
+          {"type": "command", "command": "atomwright telemetry runtime codex --json", "async": true},
           {"type": "command", "command": "echo subagent keep"}
         ]
       }
@@ -1755,7 +1755,7 @@ func TestComponentOperationsSDD_ClaudeRemovesSkillRegistryHook(t *testing.T) {
     "Stop": [
       {
         "hooks": [
-          {"type": "command", "command": "gentle-ai telemetry runtime codex --json", "async": true},
+          {"type": "command", "command": "atomwright telemetry runtime codex --json", "async": true},
           {"type": "command", "command": "echo stop keep"}
         ]
       }
@@ -1782,7 +1782,7 @@ func TestComponentOperationsSDD_ClaudeRemovesSkillRegistryHook(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(raw)
-	if strings.Contains(text, "gentle-ai skill-registry refresh") || strings.Contains(text, "gentle-ai telemetry runtime codex") {
+	if strings.Contains(text, "atomwright skill-registry refresh") || strings.Contains(text, "atomwright telemetry runtime codex") {
 		t.Fatalf("managed hook should be removed:\n%s", text)
 	}
 	if !strings.Contains(text, "echo keep") || !strings.Contains(text, "echo pre") || !strings.Contains(text, "echo subagent keep") || !strings.Contains(text, "echo stop keep") {
@@ -1812,7 +1812,7 @@ func TestComponentOperationsSDD_ClaudeRemovesReviewStopHook(t *testing.T) {
       {
         "matcher": "",
         "hooks": [
-          {"type": "command", "command": "gentle-ai review stop-hook --agent claude-code", "timeout": 60},
+          {"type": "command", "command": "atomwright review stop-hook --agent claude-code", "timeout": 60},
           {"type": "command", "command": "echo keep"}
         ]
       }
@@ -1821,7 +1821,7 @@ func TestComponentOperationsSDD_ClaudeRemovesReviewStopHook(t *testing.T) {
       {
         "matcher": "startup|resume|clear|compact",
         "hooks": [
-          {"type": "command", "command": "gentle-ai review stop-hook --agent claude-code", "timeout": 30},
+          {"type": "command", "command": "atomwright review stop-hook --agent claude-code", "timeout": 30},
           {"type": "command", "command": "echo custom session-start"}
         ]
       }
@@ -1854,7 +1854,7 @@ func TestComponentOperationsSDD_ClaudeRemovesReviewStopHook(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(raw)
-	if strings.Contains(text, "gentle-ai review stop-hook") {
+	if strings.Contains(text, "atomwright review stop-hook") {
 		t.Fatalf("managed stop-hook should be removed from both Stop and SessionStart:\n%s", text)
 	}
 	if !strings.Contains(text, "echo keep") || !strings.Contains(text, "echo pre") || !strings.Contains(text, "echo custom session-start") {
@@ -1873,7 +1873,7 @@ func TestComponentOperationsSDD_ClaudeRemovesTelemetryHooks(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(settingsPath), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	initial := `{"hooks":{"Stop":[{"matcher":"","hooks":[{"type":"command","command":"gentle-ai telemetry runtime claude --json","async":true},{"type":"command","command":"echo keep"}]}],"SubagentStop":[{"matcher":"","hooks":[{"type":"command","command":"gentle-ai telemetry runtime claude --json","async":true}]}]}}`
+	initial := `{"hooks":{"Stop":[{"matcher":"","hooks":[{"type":"command","command":"atomwright telemetry runtime claude --json","async":true},{"type":"command","command":"echo keep"}]}],"SubagentStop":[{"matcher":"","hooks":[{"type":"command","command":"atomwright telemetry runtime claude --json","async":true}]}]}}`
 	if err := os.WriteFile(settingsPath, []byte(initial), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -1919,7 +1919,7 @@ func TestComponentOperationsSDD_CodexRemovesSkillRegistryHook(t *testing.T) {
       {
         "matcher": "startup|resume|clear|compact",
         "hooks": [
-          {"type": "command", "command": "gentle-ai skill-registry refresh --quiet --no-gitignore --cwd \"$PWD\" || true"},
+          {"type": "command", "command": "atomwright skill-registry refresh --quiet --no-gitignore --cwd \"$PWD\" || true"},
           {"type": "command", "command": "echo keep"}
         ]
       }
@@ -1952,7 +1952,7 @@ func TestComponentOperationsSDD_CodexRemovesSkillRegistryHook(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(raw)
-	if strings.Contains(text, "gentle-ai skill-registry refresh") {
+	if strings.Contains(text, "atomwright skill-registry refresh") {
 		t.Fatalf("managed hook should be removed:\n%s", text)
 	}
 	if !strings.Contains(text, "echo keep") || !strings.Contains(text, "echo pre") {

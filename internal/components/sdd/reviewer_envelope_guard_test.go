@@ -285,7 +285,7 @@ func TestJudgmentDayPromptsDoNotClaimTheLensEnvelope(t *testing.T) {
 		if field == "findings" || field == "evidence" {
 			continue
 		}
-		if strings.Contains(reference, `"`+field+`"`) && !strings.Contains(reference, "not a `gentle-ai review capture-result`") {
+		if strings.Contains(reference, `"`+field+`"`) && !strings.Contains(reference, "not a `atomwright review capture-result`") {
 			t.Errorf("skills/judgment-day/references/prompts-and-formats.md mentions %q without disclaiming the lens artifact", field)
 		}
 	}

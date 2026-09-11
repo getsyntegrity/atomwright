@@ -49,7 +49,7 @@ func TestOpenCodeReviewValidatorPermissionContract(t *testing.T) {
 		"edit":  "deny",
 		"task":  "deny",
 		"bash": map[string]any{
-			"gentle-ai review inspect-candidate --purpose targeted-validation *": "allow",
+			"atomwright review inspect-candidate --purpose targeted-validation *": "allow",
 			"*": "deny",
 		},
 	}

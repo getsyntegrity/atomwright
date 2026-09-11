@@ -564,7 +564,7 @@ func TestGeneratedOrchestrationEntryCarriesTheBoundPiContract(t *testing.T) {
 			t.Errorf("orchestration/pi.md missing Pi facade route %q", want)
 		}
 	}
-	if strings.Contains(text, "gentle-ai review status") {
+	if strings.Contains(text, "atomwright review status") {
 		t.Fatal("orchestration/pi.md exposes raw STATUS")
 	}
 	if !strings.Contains(text, "## Entry rule") {

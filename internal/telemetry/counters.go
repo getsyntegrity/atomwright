@@ -15,7 +15,7 @@ import "os"
 // locally, an unreadable one fails safe (does nothing), and an opted-out
 // host (env or persisted enabled:false) returns nil without ever calling
 // EnsureState. This makes every call site gated by construction, including
-// ones (e.g. `gentle-ai sync`) that call IncrementCounter directly instead
+// ones (e.g. `atomwright sync`) that call IncrementCounter directly instead
 // of going through a CLI-side gate first.
 func IncrementCounter(homeDir string, mutate func(*Counters)) error {
 	preState, err := loadForDecision(homeDir)
@@ -28,7 +28,7 @@ func IncrementCounter(homeDir string, mutate func(*Counters)) error {
 	return Update(homeDir, func(s *State) { mutate(&s.Counters) })
 }
 
-// IncrementSyncs records one successful `gentle-ai sync` run.
+// IncrementSyncs records one successful `atomwright sync` run.
 func IncrementSyncs(homeDir string) error {
 	return IncrementCounter(homeDir, func(c *Counters) { c.Syncs++ })
 }

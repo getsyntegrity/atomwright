@@ -233,7 +233,7 @@ func applyReviewOfferRouting(ctx context.Context, status *Status, workspaceRoot 
 	}
 	status.ReviewOffer = &ReviewOfferBlock{
 		Available:  offer.Available,
-		Invocation: fmt.Sprintf("gentle-ai review start --cwd %s", pathquote.Quote(workspaceRoot)),
+		Invocation: fmt.Sprintf("atomwright review start --cwd %s", pathquote.Quote(workspaceRoot)),
 	}
 }
 
@@ -320,7 +320,7 @@ func validateStatusContract(contract string) error {
 	if contract == StatusContractV2 {
 		return nil
 	}
-	return fmt.Errorf("unsupported sdd-status contract %q. Start a fresh implementation state and rerun `gentle-ai sdd-status --contract gentle-ai.sdd-status/v2`.", contract)
+	return fmt.Errorf("unsupported sdd-status contract %q. Start a fresh implementation state and rerun `atomwright sdd-status --contract gentle-ai.sdd-status/v2`.", contract)
 }
 
 func listActiveOpenSpecChanges(workspaceRoot string) ([]string, error) {
@@ -573,7 +573,7 @@ func resolveByPreferenceOrder(options ResolveOptions) (Status, error) {
 				return blockedStatus(ArtifactStoreOpenSpec, workspaceRoot, nil, nil, "sdd-new", []string{
 					"No active OpenSpec changes found under openspec/changes.",
 					fmt.Sprintf(
-						"Exploration-only directories are not active changes: %s. Run `gentle-ai sdd-status <change-name> --cwd %s` to inspect one explicitly.",
+						"Exploration-only directories are not active changes: %s. Run `atomwright sdd-status <change-name> --cwd %s` to inspect one explicitly.",
 						strings.Join(activeChanges, ", "), workspaceRoot,
 					),
 				}, options.IncludeInstructions), nil
@@ -826,7 +826,7 @@ func applyNativeRuntimeErrorRouting(status *Status, runtimeErr error) {
 		change = *status.ChangeName
 	}
 	reason := fmt.Sprintf(
-		"native SDD runtime authority is unreadable and execution is blocked: %v; do not launch another actor or edit the Git-common-dir authority manually; the compact attempt path reports blocked(corrupt_authority), and full `gentle-ai sdd-attempt status --cwd %s --change %q` is a maintainer diagnostic only",
+		"native SDD runtime authority is unreadable and execution is blocked: %v; do not launch another actor or edit the Git-common-dir authority manually; the compact attempt path reports blocked(corrupt_authority), and full `atomwright sdd-attempt status --cwd %s --change %q` is a maintainer diagnostic only",
 		runtimeErr, pathquote.Quote(status.ActionContext.WorkspaceRoot), change,
 	)
 	status.Dependencies.Apply = DependencyBlocked
@@ -1442,7 +1442,7 @@ func resolveWorkspaceRoot(options ResolveOptions) (string, error) {
 	// Nothing legitimate is rejected: no project lives at `/` or at `C:\`, so
 	// there is no false positive to weigh against the confusion this prevents.
 	if filepath.Dir(root) == root {
-		return "", fmt.Errorf("workspace root %q is a filesystem root, which never holds an SDD project: whatever produced this call passed the wrong --cwd. Rerun it against the project: `gentle-ai sdd-status --cwd \"<project-directory>\" --json`. If the change is Engram-backed, this dispatcher is blind to it and should not be called at all", root)
+		return "", fmt.Errorf("workspace root %q is a filesystem root, which never holds an SDD project: whatever produced this call passed the wrong --cwd. Rerun it against the project: `atomwright sdd-status --cwd \"<project-directory>\" --json`. If the change is Engram-backed, this dispatcher is blind to it and should not be called at all", root)
 	}
 	return root, nil
 }
@@ -1460,14 +1460,14 @@ func absOrCWD(path string) (string, error) {
 // The markdown dispatcher already spelled these commands out, but --json never
 // reaches it, and --json is what machine consumers read. #2117 step 5 is the
 // cost: the SDD task-failure envelope hands back
-// `gentle-ai sdd-status --cwd <cwd> --json` as its continuation, which lands
+// `atomwright sdd-status --cwd <cwd> --json` as its continuation, which lands
 // here whenever more than one change is active, and the caller found a reason
 // that listed options and named no command. The list stays first because it is
 // what a human scanning the refusal wants; the commands follow because that is
 // what makes the refusal runnable.
 //
 // The selector is positional: ParseCommandArgs has no --change flag, so the
-// emitted spelling must be `gentle-ai sdd-status <change> --cwd <root>`. The
+// emitted spelling must be `atomwright sdd-status <change> --cwd <root>`. The
 // first shipped spelling used `--change` and every emitted command was
 // rejected by the very parser it targets (#3278, #2790), burning the
 // operator's single sanctioned observation on a syntax error. The guard test
@@ -1478,7 +1478,7 @@ func ambiguousChangeSelectionReasons(subject, workspaceRoot string, changes []st
 	reasons = append(reasons, fmt.Sprintf("%s selection is ambiguous: %s.", subject, strings.Join(changes, ", ")))
 	for _, change := range changes {
 		reasons = append(reasons, fmt.Sprintf(
-			"Run `gentle-ai sdd-status %s --cwd %s` to continue with %s.",
+			"Run `atomwright sdd-status %s --cwd %s` to continue with %s.",
 			change, workspaceRoot, change,
 		))
 	}
@@ -2019,19 +2019,19 @@ func renderPhaseInstructions(status Status) PhaseInstructions {
 func nativeRuntimeInstructions(status Status, change string) []string {
 	workspace := status.ActionContext.WorkspaceRoot
 	instructions := []string{
-		fmt.Sprintf("Before any runtime-bearing apply, verify, or remediation launch, run `gentle-ai sdd-attempt acquire --cwd %s --change %q --request-id \"<unique-request-id>\" --work-unit \"<label>\" --evidence-goal \"<stable-goal>\" --max-attempts <count> --max-changed-lines <count>`.", pathquote.Quote(workspace), change),
+		fmt.Sprintf("Before any runtime-bearing apply, verify, or remediation launch, run `atomwright sdd-attempt acquire --cwd %s --change %q --request-id \"<unique-request-id>\" --work-unit \"<label>\" --evidence-goal \"<stable-goal>\" --max-attempts <count> --max-changed-lines <count>`.", pathquote.Quote(workspace), change),
 		"Launch only for state proceed and retain its opaque token. State blocked or complete stops the launch; full runtime status is a diagnostic escape hatch, not normal model context.",
-		fmt.Sprintf("After a failed or passed run, call `gentle-ai sdd-attempt settle --cwd %s --change %q --token \"<acquire-token>\" --request-id \"<unique-request-id>\" --outcome <passed|failed> --evidence-revision <sha256> --diagnosis \"<proven-diagnosis>\" --harness-disposition <reused|invalidated> --cleanup-evidence \"<evidence>\" --process-evidence \"<evidence>\"`.", pathquote.Quote(workspace), change),
-		fmt.Sprintf("After an interrupted run, call `gentle-ai sdd-attempt settle --cwd %s --change %q --token \"<acquire-token>\" --request-id \"<unique-request-id>\" --outcome interrupted --diagnosis \"<proven-diagnosis>\" --harness-disposition <reused|invalidated> --cleanup-evidence \"<evidence>\" --process-evidence \"<evidence>\"` and omit --evidence-revision.", pathquote.Quote(workspace), change),
+		fmt.Sprintf("After a failed or passed run, call `atomwright sdd-attempt settle --cwd %s --change %q --token \"<acquire-token>\" --request-id \"<unique-request-id>\" --outcome <passed|failed> --evidence-revision <sha256> --diagnosis \"<proven-diagnosis>\" --harness-disposition <reused|invalidated> --cleanup-evidence \"<evidence>\" --process-evidence \"<evidence>\"`.", pathquote.Quote(workspace), change),
+		fmt.Sprintf("After an interrupted run, call `atomwright sdd-attempt settle --cwd %s --change %q --token \"<acquire-token>\" --request-id \"<unique-request-id>\" --outcome interrupted --diagnosis \"<proven-diagnosis>\" --harness-disposition <reused|invalidated> --cleanup-evidence \"<evidence>\" --process-evidence \"<evidence>\"` and omit --evidence-revision.", pathquote.Quote(workspace), change),
 		"Treat settle state proceed as permission for another bounded acquire, blocked as a hard stop, and complete as terminal. Reset is exceptional, requires an explicit maintainer scope decision, and is never automatic.",
-		"After a terminal attempt's candidate drifts, run `gentle-ai sdd-attempt status` to obtain the current revision, then have a maintainer record that drift with an audited `gentle-ai sdd-attempt reset --expected-revision <the revision that status prints> --request-id \"<unique-request-id>\" --reason \"<why-the-candidate-drifted>\" --actor \"<actor>\"` before reacquire. Use `sdd-attempt rescope` only when its narrower-successor contract applies.",
+		"After a terminal attempt's candidate drifts, run `atomwright sdd-attempt status` to obtain the current revision, then have a maintainer record that drift with an audited `atomwright sdd-attempt reset --expected-revision <the revision that status prints> --request-id \"<unique-request-id>\" --reason \"<why-the-candidate-drifted>\" --actor \"<actor>\"` before reacquire. Use `sdd-attempt rescope` only when its narrower-successor contract applies.",
 	}
 	if status.RemediationState.Required && status.RuntimeStatus != nil && status.RuntimeStatus.Objective != nil {
 		evidence, found := runtimeChainFailedEvidence(status.RuntimeStatus.Attempts)
 		if found {
 			objective := status.RuntimeStatus.Objective
 			instructions = append(instructions,
-				fmt.Sprintf("For failed SDD evidence %s, run `gentle-ai sdd-attempt acquire --cwd %s --change %q --request-id \"<unique-request-id>\" --work-unit %q --evidence-goal %q --max-attempts %d --max-changed-lines %d --remediates-evidence-revision %s`.", evidence, pathquote.Quote(workspace), change, objective.WorkUnit, objective.EvidenceGoal, objective.MaxAttempts, objective.MaxChangedLines, evidence),
+				fmt.Sprintf("For failed SDD evidence %s, run `atomwright sdd-attempt acquire --cwd %s --change %q --request-id \"<unique-request-id>\" --work-unit %q --evidence-goal %q --max-attempts %d --max-changed-lines %d --remediates-evidence-revision %s`.", evidence, pathquote.Quote(workspace), change, objective.WorkUnit, objective.EvidenceGoal, objective.MaxAttempts, objective.MaxChangedLines, evidence),
 				fmt.Sprintf("Correct the candidate before acquire. After a terminal candidate drift, run status and then the audited reset above before reissuing this acquire; use rescope only when its narrower-successor contract applies. After the candidate changes, settle that token with `--remediates-evidence-revision %s`; fresh independent verification is required before archive.", evidence),
 			)
 		}
@@ -2069,7 +2069,7 @@ func nonPhaseRoutingInstructions(status Status) ([]string, bool) {
 		return []string{
 			"",
 			"### Next Selection Operation",
-			fmt.Sprintf("- Rerun with an explicit change name from Blocked Reasons above: `gentle-ai sdd-status --cwd %s <change-name>` or `gentle-ai sdd-continue --cwd %s <change-name>`.", pathquote.Quote(status.ActionContext.WorkspaceRoot), pathquote.Quote(status.ActionContext.WorkspaceRoot)),
+			fmt.Sprintf("- Rerun with an explicit change name from Blocked Reasons above: `atomwright sdd-status --cwd %s <change-name>` or `atomwright sdd-continue --cwd %s <change-name>`.", pathquote.Quote(status.ActionContext.WorkspaceRoot), pathquote.Quote(status.ActionContext.WorkspaceRoot)),
 		}, true
 	case "archived":
 		location := ""
@@ -2080,7 +2080,7 @@ func nonPhaseRoutingInstructions(status Status) ([]string, bool) {
 			"",
 			"### Archived Change",
 			fmt.Sprintf("- This change is already archived%s; no phase remains and nothing is blocked.", location),
-			fmt.Sprintf("- Start new work with a fresh change: `gentle-ai sdd-status --cwd %s` lists what is active.", pathquote.Quote(status.ActionContext.WorkspaceRoot)),
+			fmt.Sprintf("- Start new work with a fresh change: `atomwright sdd-status --cwd %s` lists what is active.", pathquote.Quote(status.ActionContext.WorkspaceRoot)),
 		}, true
 	default:
 		return nil, false

@@ -29,7 +29,7 @@ func TestRunSDDAttemptAcquireRefusesUndeclaredEligibleUntrackedScopeBeforeToken(
 	if err == nil {
 		t.Fatalf("undeclared eligible untracked scope issued authority: %s", output.String())
 	}
-	if !strings.Contains(err.Error(), reviewIntendedUntrackedInventoryCommand) || !strings.Contains(err.Error(), "gentle-ai sdd-attempt acquire") {
+	if !strings.Contains(err.Error(), reviewIntendedUntrackedInventoryCommand) || !strings.Contains(err.Error(), "atomwright sdd-attempt acquire") {
 		t.Fatalf("undeclared scope guidance = %q, want inventory then acquire commands", err)
 	}
 	status, statusErr := store.Status()

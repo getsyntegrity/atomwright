@@ -28,7 +28,7 @@ import (
 //
 //  1. Every gentle-ai.*/vN schema identifier literal docs/review-integration.md
 //     quotes in backticks (Guard A).
-//  2. Every `gentle-ai review <verb>` command docs/review-integration.md names
+//  2. Every `atomwright review <verb>` command docs/review-integration.md names
 //     as required (Guard B).
 //  3. The mode-completeness rule: every command that branches on negotiated
 //     --contract (found via the reviewIntegrationNegotiation call sites, not
@@ -51,7 +51,7 @@ var reviewIntegrationDocSchemaIDRegexp = regexp.MustCompile("`(gentle-ai\\.[a-z0
 //
 // The invocation a human types is `atomwright review <verb>`. That is separate
 // from the `command` string inside an emitted next_transition payload, which
-// the published v2 schemas still pin to the `gentle-ai review ...` spelling;
+// the published v2 schemas still pin to the `atomwright review ...` spelling;
 // changing that is a contract version bump, not a rename.
 var reviewIntegrationDocCommandVerbRegexp = regexp.MustCompile(`atomwright review ([a-z][a-z-]*)`)
 
@@ -119,7 +119,7 @@ func TestEveryDocumentedReviewCommandIsReal(t *testing.T) {
 	dispatched := reviewDispatchableReviewVerbs(t)
 	for verb := range documented {
 		if !dispatched[verb] {
-			t.Errorf("docs/review-integration.md requires `gentle-ai review %s`, but no dispatch reaches it from the facade switches or the app pre-dispatch", verb)
+			t.Errorf("docs/review-integration.md requires `atomwright review %s`, but no dispatch reaches it from the facade switches or the app pre-dispatch", verb)
 		}
 	}
 }
@@ -231,7 +231,7 @@ func reviewIntegrationProductionSources(t *testing.T) []string {
 
 // reviewCommandDispatchVerbs mechanically extracts every case label inside
 // runReviewCommandContext and runReviewCommand in review_facade.go -- the two
-// switches RunReview ultimately dispatches every `gentle-ai review <verb>`
+// switches RunReview ultimately dispatches every `atomwright review <verb>`
 // invocation through. It parses the source and reads only the top-level
 // `switch args[0]` in each function, so multiline labels and nested switches
 // cannot alter the set.

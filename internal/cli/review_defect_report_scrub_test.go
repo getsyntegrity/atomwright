@@ -8,7 +8,7 @@ import "testing"
 // file URLs, emails, and every other environment assignment (#3443).
 func TestReviewScrubDefectReportFieldKeepsPublicIdentifiersAndRedactsTheRest(t *testing.T) {
 	cases := []struct{ name, in, want string }{
-		{"contract id survives", "run gentle-ai review status --contract gentle-ai.review-integration/v2 --agent pi", "run gentle-ai review status --contract gentle-ai.review-integration/v2 --agent pi"},
+		{"contract id survives", "run atomwright review status --contract gentle-ai.review-integration/v2 --agent pi", "run atomwright review status --contract gentle-ai.review-integration/v2 --agent pi"},
 		{"schema id survives", "schema gentle-ai.review-integration.status/v7 required", "schema gentle-ai.review-integration.status/v7 required"},
 		{"relay contract survives", "declares gentle-pi.review-relay/v1 exactly", "declares gentle-pi.review-relay/v1 exactly"},
 		{"exact relay handshake survives", "export GENTLE_PI_REVIEW_RELAY_CONTRACT=gentle-pi.review-relay/v1 and re-run", "export GENTLE_PI_REVIEW_RELAY_CONTRACT=gentle-pi.review-relay/v1 and re-run"},

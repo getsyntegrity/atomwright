@@ -1171,7 +1171,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Err != nil {
 			m.Progress.AppendLog("FAILED: save global RDD mode — %s", msg.Err)
 			m.Execution.ManualActions = append(m.Execution.ManualActions,
-				"RDD mode was not saved. Retry with `gentle-ai review mode enable --scope global` or `gentle-ai review mode disable --scope global`.")
+				"RDD mode was not saved. Retry with `atomwright review mode enable --scope global` or `atomwright review mode disable --scope global`.")
 		}
 		return m, nil
 	case ReviewStoreResetDoneMsg:

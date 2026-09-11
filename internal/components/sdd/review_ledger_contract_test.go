@@ -343,7 +343,7 @@ func TestReviewerBashPromptIsNativeAndWindowsPortable(t *testing.T) {
 		}
 	}
 	for _, operation := range []string{"name-status", "numstat", "stat", "patch", "object"} {
-		if !strings.Contains(prompt, "gentle-ai review inspect-candidate") || !strings.Contains(prompt, "--operation "+operation) {
+		if !strings.Contains(prompt, "atomwright review inspect-candidate") || !strings.Contains(prompt, "--operation "+operation) {
 			t.Errorf("review prompt omits native %s inspection recipe", operation)
 		}
 	}
@@ -372,7 +372,7 @@ func TestKilocodeReviewSettingsMatchCurrentMainBaseline(t *testing.T) {
 	// stopped telling the orchestrator to surface a bare `reason_code`
 	// ("never from status prose") and gained the embedded "Continue after a
 	// stop reason code" table (16 rows, one per reviewStopTransition code,
-	// each naming its real continuation and `gentle-ai review mode disable`
+	// each naming its real continuation and `atomwright review mode disable`
 	// as the self-service fallback where no more specific exit exists).
 	// Kilocode embeds the same shared contract, so its rendered settings hash
 	// moved again. Deliberate, not drift.
@@ -505,7 +505,10 @@ func TestKilocodeReviewSettingsMatchCurrentMainBaseline(t *testing.T) {
 	// Kilocode inherits that metadata, not additional native RDD support.
 	// #4324 appends canonical remote authorization to managed executor prompts;
 	// native permissions and the primary orchestrator remain unchanged.
-	const want = "d2f4aad13b3930df018219bd91ea56ef8ddac3bc3978cd0374b1857e2a1c5944"
+	// The CLI rename retargets the non-pinned `gentle-ai <verb>` commands the
+	// shared assets tell an agent to run at `atomwright <verb>`, so the
+	// baseline is rederived.
+	const want = "8802922dc498700ad0ce3926acfb26b73dea9accaddbf50af5c9fb16879fb714"
 	if got != want {
 		t.Fatalf("Kilocode settings SHA-256 = %s, want current-main baseline %s", got, want)
 	}
@@ -673,7 +676,7 @@ func TestOpenCodeRenderedReviewProtocolCost(t *testing.T) {
 		// continuations (docs/review-integration.md's own table, which docs/ is
 		// never embedded to ship) into dead ends on the one channel a consuming
 		// orchestrator may route from. The table names every reason code's real
-		// continuation plus `gentle-ai review mode disable` as the self-service
+		// continuation plus `atomwright review mode disable` as the self-service
 		// fallback wherever no more specific exit exists. The standard ceiling
 		// moves with it (18,500 -> 21,200) to restore the ~15% margin below; the
 		// full-4R ceiling already had enough headroom and is unchanged.
@@ -764,7 +767,7 @@ func TestOpenCodeRenderedReviewProtocolCost(t *testing.T) {
 		// +107 per case (16_646 -> 16_753 / 28_991 -> 29_098) when #3299/#4170
 		// added the managed_assets_outdated row: STATUS now classifies a
 		// stale managed-asset digest before ever offering START, and the
-		// stop names the exact `gentle-ai sync` continuation instead of
+		// stop names the exact `atomwright sync` continuation instead of
 		// leaving the caller to guess it from prose. Deliberate, not drift.
 		// The ceilings move with it (16_649 -> 16_756 / 30_846 -> 30_953) to
 		// restore the same small headroom each row already had.
@@ -795,8 +798,11 @@ func TestOpenCodeRenderedReviewProtocolCost(t *testing.T) {
 		// headroom each row already had.
 		// #4324 adds 1,354 canonical remote-authorization characters per reviewer.
 		// Preserve the existing absolute ceiling margins (3 and 1,533 characters).
-		{name: "standard", agents: []string{"review-reliability"}, beforeChars: 42_301, wantChars: 18_718, maxCharacters: 18_721},
-		{name: "full-4R", agents: []string{"review-risk", "review-resilience", "review-readability", "review-reliability"}, beforeChars: 106_998, wantChars: 35_125, maxCharacters: 36_658},
+		// The CLI rename adds 1 character per case (`gentle-ai sync` ->
+		// `atomwright sync` in the managed-assets continuation guidance); the
+		// ceilings move with it to keep the same margins.
+		{name: "standard", agents: []string{"review-reliability"}, beforeChars: 42_301, wantChars: 18_719, maxCharacters: 18_722},
+		{name: "full-4R", agents: []string{"review-risk", "review-resilience", "review-readability", "review-reliability"}, beforeChars: 106_998, wantChars: 35_126, maxCharacters: 36_659},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

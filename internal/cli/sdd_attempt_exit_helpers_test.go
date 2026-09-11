@@ -16,7 +16,7 @@ import (
 // still use them.
 
 // namedRunnableGentleCommand extracts the first backtick-delimited
-// `gentle-ai ...` command a refusal names. A refusal that names an internal
+// `atomwright ...` command a refusal names. A refusal that names an internal
 // operation identifier, or names nothing at all, is the defect this file
 // exists to catch: the operator is left with a non-zero exit and no door.
 func namedRunnableGentleCommand(t *testing.T, message string) []string {
@@ -33,12 +33,12 @@ func namedRunnableGentleCommand(t *testing.T, message string) []string {
 			break
 		}
 		span := remainder[:closing]
-		if strings.HasPrefix(span, "gentle-ai ") {
+		if strings.HasPrefix(span, "atomwright ") {
 			return splitNamedCommand(t, span)
 		}
 		rest = remainder[closing+1:]
 	}
-	t.Fatalf("refusal names no runnable `gentle-ai ...` command:\n%s", message)
+	t.Fatalf("refusal names no runnable `atomwright ...` command:\n%s", message)
 	return nil
 }
 

@@ -2267,8 +2267,8 @@ func TestSDDOrchestratorsUseNativeRuntimeAttemptAuthority(t *testing.T) {
 	}
 	required := []string{
 		"Native Runtime Attempt Authority",
-		"gentle-ai sdd-attempt acquire",
-		"gentle-ai sdd-attempt settle",
+		"atomwright sdd-attempt acquire",
+		"atomwright sdd-attempt settle",
 		"state: proceed",
 		"opaque `token`",
 		"--request-id <settle-id>", "distinct from the acquire operation's request ID", "idempotent replay",
@@ -2294,7 +2294,7 @@ func TestSDDOrchestratorsUseNativeRuntimeAttemptAuthority(t *testing.T) {
 			}
 		}
 		if strings.Contains(section, "--successor-lineage") {
-			t.Fatalf("%s names --successor-lineage, which gentle-ai sdd-attempt settle does not define", path)
+			t.Fatalf("%s names --successor-lineage, which atomwright sdd-attempt settle does not define", path)
 		}
 		last := -1
 		for _, label := range []string{
@@ -2313,10 +2313,10 @@ func TestSDDOrchestratorsUseNativeRuntimeAttemptAuthority(t *testing.T) {
 			"gentle-ai.sdd-attempt-ledger/v1",
 			"attempt-ledger-{work-unit}.json",
 			"sdd/{change-name}/attempt-ledger",
-			"gentle-ai sdd-attempt status",
-			"gentle-ai sdd-attempt begin",
-			"gentle-ai sdd-attempt finish",
-			"gentle-ai sdd-attempt reset",
+			"atomwright sdd-attempt status",
+			"atomwright sdd-attempt begin",
+			"atomwright sdd-attempt finish",
+			"atomwright sdd-attempt reset",
 		} {
 			if strings.Contains(section, forbidden) {
 				t.Fatalf("%s still delegates native authority to mutable artifact %q", path, forbidden)
@@ -2954,7 +2954,7 @@ func TestSDDTaskResultArtifactsPluginUsesCoordinatorGuidanceWithoutIdentity(t *t
 	if got := strings.Count(source, "continuation: SDD_TASK_CONTINUATION_GUIDANCE"); got != 2 {
 		t.Fatalf("initial and latched failures must share safe guidance; got %d uses", got)
 	}
-	for _, forbidden := range []string{"gentle-ai sdd-status", "<repo>", "replace <repo>"} {
+	for _, forbidden := range []string{"atomwright sdd-status", "<repo>", "replace <repo>"} {
 		if strings.Contains(source, forbidden) {
 			t.Errorf("SDD task plugin retains an identity-free command or placeholder: %q", forbidden)
 		}

@@ -59,7 +59,7 @@ const targetedValidatorPromptInstruction = "You are the read-only targeted fix v
 	"for every path in `validation_request.correction_paths`. It is authoritative corrected-candidate content read " +
 	"from the immutable trees, not a summary of them, so a verdict reached from it is a verified verdict. " +
 	"When you can run commands, read those same immutable trees yourself with " +
-	"`gentle-ai review inspect-candidate --purpose targeted-validation " +
+	"`atomwright review inspect-candidate --purpose targeted-validation " +
 	"--lineage <validation_request.lineage_id> " +
 	"--expected-revision <validation_request.expected_revision> " +
 	"--target <validation_request.correction_target_identity> " +

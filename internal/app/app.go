@@ -520,7 +520,7 @@ func runUpdate(ctx context.Context, currentVersion string, profile system.Platfo
 	return nil
 }
 
-// runUpgrade handles the `gentle-ai upgrade [--dry-run] [tool...]` command.
+// runUpgrade handles the `atomwright upgrade [--dry-run] [tool...]` command.
 //
 // This command:
 //   - Checks for available updates for managed tools (gentle-ai, engram, gga)

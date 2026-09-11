@@ -241,7 +241,7 @@ func TestReviewProviderArtifactStatusV7ContractsArePinned(t *testing.T) {
 		// issues #3299, #4170: a stale managed-asset digest now fails STATUS's
 		// own preflight, before a START is ever offered, as a typed
 		// managed_assets_outdated "stop" that carries the exact
-		// candidate-preserving `gentle-ai sync` continuation (see
+		// candidate-preserving `atomwright sync` continuation (see
 		// failure.schema.json#/$defs/managed_assets_continuation). Deliberate,
 		// not drift.
 		// issue #3442: next_transition gained a third oneOf branch for the

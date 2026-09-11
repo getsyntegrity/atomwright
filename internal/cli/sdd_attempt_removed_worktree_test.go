@@ -28,7 +28,7 @@ func TestRunSDDAttemptRemovedWorktreeNamesAndAdmitsInterruptedSettle(t *testing.
 		if tt.result.State != "blocked" || tt.result.Reason != tt.reason {
 			t.Fatalf("%s after removal = %#v, want blocked(%s)", tt.label, tt.result, tt.reason)
 		}
-		assertExitNames(t, tt.result.Exit, "no longer exists", "--outcome interrupted", "`gentle-ai sdd-attempt settle --cwd")
+		assertExitNames(t, tt.result.Exit, "no longer exists", "--outcome interrupted", "`atomwright sdd-attempt settle --cwd")
 	}
 	settled, _ := runCompactSDDAttempt(t, compactSettleArgsWithEvidence(repo, change, acquired.Token, "main-settle-interrupted", "interrupted", ""))
 	status := runSDDAttemptStatus(t, []string{"status", "--cwd", repo, "--change", change})

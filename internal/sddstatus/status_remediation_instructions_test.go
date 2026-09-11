@@ -97,8 +97,8 @@ func TestStatusRendersResetRouteWhileRemediationNeedsADecision(t *testing.T) {
 		t.Fatalf("decision-required status still prescribes the blocked correction acquire:\n%s", joined)
 	}
 	if !strings.Contains(joined, "Remediation follows ordinary SDD failed-evidence accounting.") ||
-		!strings.Contains(joined, "gentle-ai sdd-attempt status") ||
-		!strings.Contains(joined, "gentle-ai sdd-attempt reset") ||
+		!strings.Contains(joined, "atomwright sdd-attempt status") ||
+		!strings.Contains(joined, "atomwright sdd-attempt reset") ||
 		!strings.Contains(joined, "--expected-revision <the revision that status prints>") ||
 		!strings.Contains(joined, "rescope` only when its narrower-successor contract applies") {
 		t.Fatalf("decision-required status did not name the audited candidate-drift reset route:\n%s", joined)

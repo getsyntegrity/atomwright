@@ -80,7 +80,7 @@ func TestCompactAcquireRemediationIntentSurvivesAuditedReset(t *testing.T) {
 	if stale.State != CompactStateBlocked || stale.Reason != CompactBlockRemediationUnsatisfiable || stale.Token != "" {
 		t.Fatalf("stale post-reset remediation-intent acquire = %#v, want blocked/%s", stale, CompactBlockRemediationUnsatisfiable)
 	}
-	if !strings.Contains(stale.Exit, "gentle-ai sdd-attempt status") || stale.Detail != stale.Exit {
+	if !strings.Contains(stale.Exit, "atomwright sdd-attempt status") || stale.Detail != stale.Exit {
 		t.Fatalf("remediation-intent refusal broke the Exit/Detail discipline: %#v", stale)
 	}
 	if countRuntimeRecords(t, store.Dir) != before {
