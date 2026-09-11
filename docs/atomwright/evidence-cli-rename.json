@@ -12,8 +12,8 @@
   "commits": {
     "base": "76afba15633fc476471263833b342d8ad91dbda4",
     "branch": "refactor/cli-rename-atomwright",
-    "final": null,
-    "note": "`final` is filled in by the commit that adds this file; a commit cannot record its own hash. See the PR head."
+    "final": "2b201a075ff8a8c15621b0dd1d1d6c2770e6c171",
+    "note": "`final` is the implementation commit. The branch head additionally contains this evidence file, which cannot record its own hash."
   },
   "canonical_identifiers": {
     "executable": "atomwright",
