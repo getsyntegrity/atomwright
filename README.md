@@ -1,22 +1,22 @@
 # Atomwright
 
-**Local-first workflow that turns GitHub issues into atomic, grounded, tested, independently reviewed pull requests using coordinated coding agents.**
+**Local-first workflow that turns work items into atomic, grounded, tested, independently reviewed changes using coordinated coding agents.**
 
 > **Status: pre-alpha / design phase.** Atomwright is being defined and its implementation has not started yet. The workflow below describes the intended product, not currently available functionality.
 
 ## Why Atomwright?
 
-Agentic development can move quickly, but it often creates oversized specifications, duplicated context, unverifiable assumptions, tangled branches, and pull requests that are difficult to review.
+Agentic development can move quickly, but it often creates oversized specifications, duplicated context, unverifiable assumptions, tangled branches, and changes that are difficult to review.
 
 Atomwright is designed around a smaller unit of delivery:
 
-> **One issue → one atomic specification → one isolated worktree → one coding agent → TDD → deterministic verification → independent review → one pull request.**
+> **One work item → one atomic specification → one isolated worktree → one coding agent → TDD → deterministic verification → independent review → one change request.**
 
-An atomic change must be independently mergeable, revertible, testable, and useful. If an issue is too large, Atomwright splits it before implementation begins.
+An atomic change must be independently mergeable, revertible, testable, and useful. If a work item is too large, Atomwright splits it before implementation begins.
 
 ## Core principles
 
-- **Atomic by default** — one independently valuable outcome per issue and pull request.
+- **Atomic by default** — one independently valuable outcome per work item and change request.
 - **Short specifications** — enough context to remove ambiguity, without producing documents larger than the change.
 - **Grounded execution** — repository evidence takes precedence over agent memory or assumptions.
 - **SDD + TDD, always** — behavior is specified first and implemented through red, green, and refactor.
@@ -24,14 +24,16 @@ An atomic change must be independently mergeable, revertible, testable, and usef
 - **Independent review** — the agent that writes the code cannot approve its own work.
 - **Deterministic gates** — tests, linters, type checks, and repository rules decide whether work may advance.
 - **Cost awareness** — retrieve only the context needed for the current decision and avoid repeating work across agents.
-- **Human control** — humans approve implementation, review the final pull request, and decide when to merge.
+- **Human control** — humans approve implementation, review the final change request, and decide when to merge.
+- **Platform-neutral core** — GitHub is the first integration, while issue tracking and code hosting remain replaceable adapters.
+- **Execution-neutral gates** — Shipwright is the first verification engine, while CI/CD execution remains replaceable.
 
 ## Planned workflow
 
 ```mermaid
 flowchart TD
-    A[GitHub issue] --> B{Atomic?}
-    B -- No --> C[Split issue]
+    A[Work item] --> B{Atomic?}
+    B -- No --> C[Split work item]
     C --> A
     B -- Yes --> D[Ground repository facts]
     D --> E[Approve concise spec]
@@ -40,25 +42,51 @@ flowchart TD
     G --> H[Deterministic verification]
     H --> I[Independent review]
     I -- Changes requested --> G
-    I -- Approved --> J[Pull request for human review]
+    I -- Approved --> J[Change request for human review]
 ```
 
 The user interacts with one **Foreman** instead of manually managing multiple coding sessions. The Foreman plans and coordinates the work, while separate worker processes operate in isolated worktrees.
 
-For example, asking Atomwright to use four programmers on four issues should create up to four independent lanes:
+For example, asking Atomwright to use four programmers on four work items should create up to four independent lanes:
 
-| Issue | Agent | Worktree | Branch | Result |
+| Work item | Agent | Worktree | Branch | Result |
 | --- | --- | --- | --- | --- |
-| `#101` | Programmer 1 | Isolated | Dedicated | One PR |
-| `#102` | Programmer 2 | Isolated | Dedicated | One PR |
-| `#103` | Programmer 3 | Isolated | Dedicated | One PR |
-| `#104` | Programmer 4 | Isolated | Dedicated | One PR |
+| `#101` | Programmer 1 | Isolated | Dedicated | One change request |
+| `#102` | Programmer 2 | Isolated | Dedicated | One change request |
+| `#103` | Programmer 3 | Isolated | Dedicated | One change request |
+| `#104` | Programmer 4 | Isolated | Dedicated | One change request |
 
-No two agents share a working directory. A worktree is removed only after its pull request is merged or closed and Atomwright verifies that no uncommitted or unpushed work would be lost.
+No two agents share a working directory. A worktree is removed only after its change request is merged or closed and Atomwright verifies that no uncommitted or unpushed work would be lost.
+
+## Platform integrations
+
+Atomwright separates orchestration from external platforms. Its core works with normalized concepts such as **work item**, **repository**, **branch**, **change request**, **review**, and **status**, rather than embedding GitHub-specific behavior in the workflow.
+
+The first release will target GitHub end to end. Later adapters may connect the same workflow to:
+
+- Jira, Linear, ClickUp, or another system for work-item intake and status;
+- GitLab, Bitbucket, Azure DevOps, or another code host for repositories and change requests;
+- mixed setups, such as a Jira issue producing a GitHub pull request.
+
+Adapters translate provider-specific identifiers and capabilities at the boundary. The atomicity, grounding, TDD, verification, evidence, and review rules remain provider-independent. Supporting a new platform should require an adapter, not a fork of the workflow engine.
+
+## Verification and CI integrations
+
+Atomwright defines verification as a provider-neutral contract: a set of named gates, their inputs, results, evidence, and blocking policy. The workflow engine does not need to know whether those gates run locally or inside a particular CI/CD product.
+
+**Shipwright will be the first and default verification backend.** Later execution adapters may run the same logical gates through:
+
+- native GitHub Actions workflows;
+- Bitbucket Pipelines;
+- GitLab CI/CD;
+- Azure Pipelines;
+- another local or hosted execution engine.
+
+A project can therefore use GitHub for source hosting without being forced to use GitHub Actions, or use Bitbucket for both source hosting and pipelines. Backend-specific features remain inside adapters; Atomwright consumes a normalized gate result and records it in the evidence package.
 
 ## The atomic change package
 
-Each issue produces a compact set of artifacts:
+Each work item produces a compact set of artifacts:
 
 | Artifact | Purpose |
 | --- | --- |
@@ -66,7 +94,7 @@ Each issue produces a compact set of artifacts:
 | `grounding.md` | Records repository-backed facts and labels uncertain claims as verified, inferred, or unknown. |
 | `design.md` | Captures architectural decisions only when APIs, security, concurrency, data, or migrations are affected. |
 | `tasks.md` | Breaks implementation into a small sequence of steps linked to the specification. |
-| `evidence.json` | Machine-generated proof: tests, TDD evidence, checks, commit, pull request, and review result. |
+| `evidence.json` | Machine-generated proof: tests, TDD evidence, checks, commit, change request, and review result. |
 
 Specifications should remain short. Tasks are implementation steps, not separate outcomes. Architecture is documented only when the change actually requires an architectural decision.
 
@@ -106,8 +134,8 @@ Atomwright is intended to be an independent, heavily simplified derivative of [G
 | Git worktrees | Filesystem and branch isolation for parallel programmers. |
 | Engram | Durable decisions and project memory. |
 | CodeGraph | Repository structure and dependency intelligence. |
-| Shipwright | Deterministic verification gates. |
-| GitHub | Issues, branches, pull requests, and human review. |
+| Verification adapters | Execute normalized gates and return evidence. Shipwright ships first and is the default. |
+| Platform adapters | Work items, repositories, change requests, reviews, and status synchronization. GitHub ships first. |
 
 The initial release will deliberately use one agent runtime. Model routing and role-specific models may be added later, after the workflow is reliable and measurable.
 
@@ -118,10 +146,10 @@ Atomwright aims to reduce token consumption without weakening verification:
 - retrieve relevant code instead of loading the whole repository;
 - reuse grounded artifacts across planning, implementation, and review;
 - keep specifications bounded and omit unnecessary design documents;
-- send each programmer only its issue, approved change package, and relevant code context;
+- send each programmer only its work item, approved change package, and relevant code context;
 - run deterministic tools before asking a reviewer model to reason about failures;
 - limit repair cycles and escalate unresolved work to a human;
-- measure token use per issue and pull request.
+- measure token use per work item and change request.
 
 The goal is not the cheapest possible answer. It is the lowest-cost path to a trustworthy, reviewable change.
 
@@ -133,10 +161,14 @@ The goal is not the cheapest possible answer. It is the lowest-cost path to a tr
 - [ ] Add worktree lifecycle management
 - [ ] Connect CCCC worker coordination
 - [ ] Integrate Engram and CodeGraph
-- [ ] Enforce TDD and Shipwright verification
+- [ ] Enforce TDD through provider-neutral verification gates
+- [ ] Ship the first verification adapter: Shipwright
+- [ ] Define adapters for native GitHub Actions, Bitbucket Pipelines, and other CI/CD backends
 - [ ] Generate machine-readable evidence
 - [ ] Add independent review and bounded repair loops
-- [ ] Create draft pull requests and safe cleanup
+- [ ] Ship the first platform adapter: GitHub issues and pull requests
+- [ ] Define the adapter contract for Jira, GitLab, ClickUp, and other platforms
+- [ ] Create draft change requests and safe cleanup
 - [ ] Measure cost, latency, and success per change
 
 ## Non-goals for the first release
@@ -144,6 +176,7 @@ The goal is not the cheapest possible answer. It is the lowest-cost path to a tr
 - A general-purpose multi-agent chat platform
 - Unlimited autonomous execution
 - Supporting every coding agent and model provider
+- Supporting every CI/CD backend in the first release
 - Large planning documents for their own sake
 - Automatic merging without human approval
 - Learning from past runs before the base workflow is dependable
