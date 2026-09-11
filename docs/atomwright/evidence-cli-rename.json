@@ -2,7 +2,7 @@
   "schema": "atomwright.evidence/v1",
   "change": "rename-cli-with-safe-migration",
   "issue": "https://github.com/pablogore/atomwright/issues/4",
-  "pull_request": null,
+  "pull_request": "https://github.com/pablogore/atomwright/pull/5",
   "outcome": "The public CLI installs, invokes, updates and uninstalls as `atomwright`, existing local state migrates without destruction, and no public executable or release asset is named gentle-ai.",
   "repository": {
     "origin": "https://github.com/pablogore/atomwright",
