@@ -2,7 +2,7 @@
   "name": "gentleman-ai-installer",
   "version": "1.0.0",
   "private": true,
-  "description": "Gentle-AI — ecosystem, frameworks, and workflows for AI coding agents.",
+  "description": "Atomwright \u2014 local-first atomic change delivery for coding agents. Forked from Gentle AI.",
   "main": "index.js",
   "directories": {
     "doc": "docs"
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Gentleman-Programming/gentle-ai.git"
+    "url": "git+https://github.com/pablogore/atomwright.git"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/Gentleman-Programming/gentle-ai/issues"
+    "url": "https://github.com/pablogore/atomwright/issues"
   },
-  "homepage": "https://github.com/Gentleman-Programming/gentle-ai#readme"
+  "homepage": "https://github.com/pablogore/atomwright#readme"
 }

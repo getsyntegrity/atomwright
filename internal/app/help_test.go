@@ -132,3 +132,37 @@ func TestHelpCommandsHeadingIsAligned(t *testing.T) {
 		t.Fatalf("help output has inconsistent command indentation:\n%s", buf.String())
 	}
 }
+
+// TestHelpPresentsAtomwrightIdentity pins the user-facing product identity of
+// this fork. The invocation token stays "gentle-ai" on purpose: renaming the
+// binary is a migration (installer, goreleaser, self-update registry), not a
+// branding change. Only the prose brand and the documentation link move.
+func TestHelpPresentsAtomwrightIdentity(t *testing.T) {
+	var buf bytes.Buffer
+	printHelp(&buf, "v1.0.0-test")
+	output := buf.String()
+
+	if !strings.Contains(output, "Atomwright") {
+		t.Errorf("help output does not present the Atomwright product identity:\n%s", output)
+	}
+	if !strings.Contains(output, "https://github.com/pablogore/atomwright") {
+		t.Errorf("help output does not link to the Atomwright repository:\n%s", output)
+	}
+}
+
+// TestHelpPreservesInvocationToken guards the behavior-preservation half of the
+// rename: the command users actually type must not change in this change.
+func TestHelpPreservesInvocationToken(t *testing.T) {
+	var buf bytes.Buffer
+	printHelp(&buf, "v1.0.0-test")
+	output := buf.String()
+
+	for _, invocation := range []string{
+		"gentle-ai <command> [flags]",
+		"Run 'gentle-ai help' for this message.",
+	} {
+		if !strings.Contains(output, invocation) {
+			t.Errorf("help output no longer documents the unchanged invocation %q", invocation)
+		}
+	}
+}

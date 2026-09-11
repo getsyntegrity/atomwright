@@ -1,6 +1,6 @@
-# Contributing to Gentle AI™
+# Contributing to Atomwright
 
-Thank you for your interest in contributing to **Gentle AI** (`gentle-ai`) — a Go CLI/TUI ecosystem configurator for AI coding agents.
+Thank you for your interest in contributing to **Atomwright** (invoked as `gentle-ai`) — a Go CLI/TUI ecosystem configurator for AI coding agents.
 
 Before you dive in, please read this guide fully. We have a structured workflow to keep the project organized and maintainable.
 
@@ -27,7 +27,7 @@ Before you dive in, please read this guide fully. We have a structured workflow 
 
 This project follows a strict issue-first workflow:
 
-1. **Open an issue** using the appropriate template ([Bug Report](https://github.com/Gentleman-Programming/gentle-ai/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/Gentleman-Programming/gentle-ai/issues/new?template=feature_request.yml))
+1. **Open an issue** using the appropriate template ([Bug Report](https://github.com/pablogore/atomwright/issues/new) or [Feature Request](https://github.com/pablogore/atomwright/issues/new))
 2. **Wait for approval** — work may begin only when the issue has `status:approved` under the canonical issue-creation workflow contract. Without a current direct instruction and target-host capability granting the exact action, comment and wait.
 3. **Comment on the issue** to let others know you're working on it
 4. **Open a PR** referencing the approved issue
@@ -40,7 +40,7 @@ PRs that are not linked to an approved issue will be **automatically rejected** 
 
 Start at the **[Community Roadmap](docs/community-roadmap.md)**.
 
-Everything labelled [`up-for-grabs`](https://github.com/Gentleman-Programming/gentle-ai/issues?q=is%3Aissue+is%3Aopen+label%3Aup-for-grabs) is scoped, carries `status:approved` so a PR can be opened, and is unclaimed. Comment that you are taking it and go.
+Everything labelled [`up-for-grabs`](https://github.com/pablogore/atomwright/issues?q=is%3Aissue+is%3Aopen+label%3Aup-for-grabs) is scoped, carries `status:approved` so a PR can be opened, and is unclaimed. Comment that you are taking it and go.
 
 An issue **without** that label is usually waiting on information (`status:needs-info`) or on an architectural decision (`status:needs-design`). Those want discussion first — implementing before the decision lands means the work gets thrown away.
 
@@ -110,8 +110,8 @@ For disclosure boundaries, required details, attribution rules, and reviewer exp
 ### Clone and Build
 
 ```bash
-git clone https://github.com/Gentleman-Programming/gentle-ai.git
-cd gentle-ai
+git clone https://github.com/pablogore/atomwright.git
+cd atomwright
 go build -o gentle-ai ./cmd/gentle-ai
 ```
 
@@ -405,4 +405,4 @@ Violations may result in removal from the project.
 
 ## Questions?
 
-Use [GitHub Discussions](https://github.com/Gentleman-Programming/gentle-ai/discussions) — not issues — for questions, ideas, and general conversation.
+Open an issue. Atomwright does not currently have a separate discussion forum.
