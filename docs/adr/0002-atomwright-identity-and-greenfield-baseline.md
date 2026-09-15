@@ -99,8 +99,39 @@ its `cmd/gentle-ai` coexistence plan are no longer in force.
 - **Editing ADR-0001 in place.** Rejected: accepted decisions are
   superseded by a new record, never rewritten.
 
+## Errata to ADR-0001
+
+ADR-0001's *Accepted now* list states:
+
+> No per-bounded-context `go.mod` (see **Modules**, with the explicit
+> criterion for revisiting it).
+
+ADR-0001 has no **Modules** section. The criterion it points to is real and
+lives in that record's *Rejected / deferred alternatives*:
+
+> Deferred until a bounded context has a genuine, independent
+> lifecycle/build/versioning/distribution need — not for aesthetic
+> separation.
+
+This is a broken cross-reference, not a missing decision. Read that bullet
+as pointing at *Rejected / deferred alternatives*.
+
+Two decisions it is worth restating plainly, because the phrase "modular
+monolith" invites the opposite reading:
+
+- **Modular monolith means one Go module.** The modularity is enforced
+  package boundaries, not separate modules. A `go.mod` per bounded context
+  would end the modular monolith, which is why it is gated on the criterion
+  above rather than on taste.
+- **Out-of-process plugins are decided, not omitted.** ADR-0001 rejects
+  `go-plugin`, gRPC and out-of-process providers for V1 and defers them to
+  #58 ATOM-PLUG, which is itself gated on #18 ATOM-PROV having stable
+  in-process contracts. Nothing here changes that.
+
 ## Related work
 
 - ADR-0001 — Modular-Monolith Skeleton for Atomwright, superseded in part.
 - #63 ATOM-BOOT-003 — scaffolded the surviving package skeletons.
 - #66 ATOM-BOOT-006 — introduces `cmd/atomwright` and the CI baseline.
+- #58 ATOM-PLUG — where out-of-process providers are evaluated, once
+  #18 ATOM-PROV's in-process contracts are stable.
