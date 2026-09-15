@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/pablogore/go-specs/specs"
 )
 
 // Every rule in this package ships with at least one deliberately-violating
@@ -135,71 +137,108 @@ func fixtureCases() []fixtureCase {
 	}
 }
 
-// TestFixturesFailTheRulesTheyTarget is the meta-test: it proves each rule
-// actually fails on the violation it claims to catch.
-func TestFixturesFailTheRulesTheyTarget(t *testing.T) {
-	for _, tc := range fixtureCases() {
-		t.Run(tc.dir, func(t *testing.T) {
-			dir, err := filepath.Abs(filepath.Join("testdata", tc.dir))
-			if err != nil {
-				t.Fatalf("resolving fixture path: %v", err)
-			}
-			g := loadGraph(t, dir, fixtureEnv...)
-			found := checkAll(g)
+// TestFixtures is the meta-suite: it proves each rule actually fails on the
+// violation it claims to catch, and that the claims themselves stay honest.
+//
+// The fixture matrix is enumerated as one generated It per fixture rather than
+// through the go-specs path builder. s.Paths would be the natural fit for a
+// parameter space this shape, but it does not execute under a top-level
+// Describe in the pinned v0.0.9: the library's own
+// TestPathsExecutesAllCombinations is t.Skip'ed with "paths combinatorial
+// execution with top-level Describe deferred to post-v1.0.0", and
+// ctx.Path().Value returns nil there. Generating the specs in a loop is the
+// same enumeration, is deterministic, and names each fixture's claim -- revisit
+// the path builder when go-specs lands that execution mode.
+func TestFixtures(t *testing.T) {
+	specs.Describe(t, "the testdata fixtures that keep the rules honest", func(s *specs.Spec) {
+		s.When("a fixture module is loaded and checked", func(s *specs.Spec) {
+			for _, tc := range fixtureCases() {
+				s.It("proves "+tc.dir+": "+tc.why, func(ctx *specs.Context) {
+					dir, err := filepath.Abs(filepath.Join("testdata", tc.dir))
+					if err != nil {
+						ctx.T.Fatalf("resolving fixture path: %v", err)
+					}
+					found := checkAll(loadGraph(ctx.T, dir, fixtureEnv...))
 
-			gotRules := firedRules(found)
-			wantRules := slices.Clone(tc.wantRules)
-			slices.Sort(wantRules)
-			if !slices.Equal(gotRules, wantRules) {
-				t.Errorf("fixture %s (%s)\nrules fired: %v\nrules wanted: %v\n\nviolations:\n%s",
-					tc.dir, tc.why, gotRules, wantRules, formatViolations(found))
-			}
+					gotRules := firedRules(found)
+					wantRules := slices.Clone(tc.wantRules)
+					slices.Sort(wantRules)
+					if !slices.Equal(gotRules, wantRules) {
+						ctx.T.Errorf("fixture %s (%s)\nrules fired: %v\nrules wanted: %v\n\nviolations:\n%s",
+							tc.dir, tc.why, gotRules, wantRules, formatViolations(found))
+					}
+					ctx.Expect(slices.Equal(gotRules, wantRules)).To(specs.BeTrue())
 
-			for _, want := range tc.wantEdges {
-				if !containsEdge(found, want) {
-					t.Errorf("fixture %s: no violation reported for %s -> %s\n\nviolations:\n%s",
-						tc.dir, want.pkg, want.imports, formatViolations(found))
-				}
+					// Naming the edges is what stops a fixture passing because
+					// the right rule fired for the wrong import.
+					for _, want := range tc.wantEdges {
+						if !containsEdge(found, want) {
+							ctx.T.Errorf("fixture %s: no violation reported for %s -> %s\n\nviolations:\n%s",
+								tc.dir, want.pkg, want.imports, formatViolations(found))
+						}
+						ctx.Expect(containsEdge(found, want)).To(specs.BeTrue())
+					}
+				})
 			}
 		})
-	}
-}
 
-// TestEveryRuleHasANegativeFixture enforces the completeness bar issue #65
-// sets: a rule without a fixture proving it fails is not considered done. Add
-// a rule without a fixture and this test fails, which is the point.
-func TestEveryRuleHasANegativeFixture(t *testing.T) {
-	covered := map[string]string{}
-	for _, tc := range fixtureCases() {
-		for _, name := range tc.wantRules {
-			if _, ok := covered[name]; !ok {
-				covered[name] = tc.dir
-			}
-		}
-	}
+		s.When("the rule set and the fixtures are compared", func(s *specs.Spec) {
+			// The completeness bar issue #65 sets: a rule without a fixture
+			// proving it fails is not considered done. Add a rule without a
+			// fixture and this fails, which is the point.
+			s.It("has a fixture proving every rule fails on the violation it targets", func(ctx *specs.Context) {
+				covered := map[string]string{}
+				for _, tc := range fixtureCases() {
+					for _, name := range tc.wantRules {
+						if _, ok := covered[name]; !ok {
+							covered[name] = tc.dir
+						}
+					}
+				}
 
-	for _, r := range allRules() {
-		if _, ok := covered[r.name()]; !ok {
-			t.Errorf("rule %s has no negative testdata fixture: add one under testdata/ proving the rule fails on the violation it targets", r.name())
-		}
-	}
-}
+				for _, r := range allRules() {
+					_, ok := covered[r.name()]
+					if !ok {
+						ctx.T.Errorf("rule %s has no negative testdata fixture: add one under testdata/ proving the rule fails on the violation it targets", r.name())
+					}
+					ctx.Expect(ok).To(specs.BeTrue())
+				}
+			})
 
-// TestFixtureRuleNamesExist guards the meta-test against its own typo: a
-// fixture expecting a rule name nothing produces would assert nothing.
-func TestFixtureRuleNamesExist(t *testing.T) {
-	known := make([]string, 0, len(allRules()))
-	for _, r := range allRules() {
-		known = append(known, r.name())
-	}
+			// Guards the meta-suite against its own typo: a fixture expecting
+			// a rule name nothing produces would assert nothing at all.
+			s.It("expects no rule name the rule set does not produce", func(ctx *specs.Context) {
+				known := make([]string, 0, len(allRules()))
+				for _, r := range allRules() {
+					known = append(known, r.name())
+				}
 
-	for _, tc := range fixtureCases() {
-		for _, name := range tc.wantRules {
-			if !slices.Contains(known, name) {
-				t.Errorf("fixture %s expects unknown rule %q; known rules: %s", tc.dir, name, strings.Join(known, ", "))
-			}
-		}
-	}
+				for _, tc := range fixtureCases() {
+					for _, name := range tc.wantRules {
+						if !slices.Contains(known, name) {
+							ctx.T.Errorf("fixture %s expects unknown rule %q; known rules: %s", tc.dir, name, strings.Join(known, ", "))
+						}
+						ctx.Expect(slices.Contains(known, name)).To(specs.BeTrue())
+					}
+				}
+			})
+
+			// The generated specs above are named after the fixture
+			// directory, so two cases sharing one directory would read as two
+			// independent claims while proving the same thing once.
+			s.It("registers each fixture directory exactly once", func(ctx *specs.Context) {
+				seen := map[string]bool{}
+				for _, tc := range fixtureCases() {
+					if seen[tc.dir] {
+						ctx.T.Errorf("fixture directory %s is registered more than once", tc.dir)
+					}
+					ctx.Expect(seen[tc.dir]).To(specs.BeFalse())
+					seen[tc.dir] = true
+				}
+				specs.EqualTo(ctx, len(seen), len(fixtureCases()))
+			})
+		})
+	})
 }
 
 func firedRules(found []violation) []string {
