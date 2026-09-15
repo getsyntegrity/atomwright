@@ -37,3 +37,6 @@ dist/
 # Engram local runtime state (project sync chunks are intentionally versioned)
 .engram/engram.db
 .engram/cloud.json
+
+# Claude Code worktrees created inside the repo
+.claude/worktrees/
