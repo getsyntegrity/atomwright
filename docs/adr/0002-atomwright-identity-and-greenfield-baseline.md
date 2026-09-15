@@ -99,8 +99,44 @@ its `cmd/gentle-ai` coexistence plan are no longer in force.
 - **Editing ADR-0001 in place.** Rejected: accepted decisions are
   superseded by a new record, never rewritten.
 
+## Errata to ADR-0001
+
+ADR-0001's *Accepted now* list states:
+
+> No per-bounded-context `go.mod` (see **Modules**, with the explicit
+> criterion for revisiting it).
+
+ADR-0001 has no **Modules** section. The criterion it points to is real and
+lives in that record's *Rejected / deferred alternatives*:
+
+> Deferred until a bounded context has a genuine, independent
+> lifecycle/build/versioning/distribution need — not for aesthetic
+> separation.
+
+This is a broken cross-reference, not a missing decision. Read that bullet
+as pointing at *Rejected / deferred alternatives*.
+
+Two points worth restating plainly, because the missing section is where a
+reader would look for them:
+
+- **The single module is a V1 build-layout choice, not the definition of the
+  architecture.** What makes Atomwright a modular monolith is one deployed
+  process with enforced package boundaries; a modular monolith can span
+  several Go modules and remain one process. So splitting a bounded context
+  into its own module does not end the architecture — it is a build-layout
+  change, which is why it is gated on the criterion above rather than
+  forbidden outright, and why ADR-0001 scopes the single-module decision to
+  V1 and leaves it revisitable.
+- **Out-of-process plugins are decided, not omitted.** ADR-0001 rejects
+  `go-plugin`, gRPC and out-of-process providers for V1 and defers them to
+  #58 ATOM-PLUG, which is itself gated on #18 ATOM-PROV having stable
+  in-process contracts. That is the change that would end the single-process
+  property, and it is deferred, not denied. Nothing here changes it.
+
 ## Related work
 
 - ADR-0001 — Modular-Monolith Skeleton for Atomwright, superseded in part.
 - #63 ATOM-BOOT-003 — scaffolded the surviving package skeletons.
 - #66 ATOM-BOOT-006 — introduces `cmd/atomwright` and the CI baseline.
+- #58 ATOM-PLUG — where out-of-process providers are evaluated, once
+  #18 ATOM-PROV's in-process contracts are stable.
