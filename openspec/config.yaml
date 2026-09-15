@@ -55,14 +55,6 @@ testing:
     integration:
       available: true
       tool: "net/http/httptest (built-in)"
-    e2e:
-      available: true
-      tool: "Docker-based E2E (e2e/docker-test.sh)"
-      note: "Dockerfile.ubuntu, Dockerfile.fedora, Dockerfile.arch — triggered by RUN_FULL_E2E=1"
-    tui:
-      available: true
-      tool: "bubbletea tea.KeyMsg simulation (no teatest — direct model.Update() testing)"
-      note: "TUI tests use direct Bubbletea model updates, not teatest library"
 
   coverage:
     available: true
