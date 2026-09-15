@@ -111,6 +111,21 @@ func fixtureCases() []fixtureCase {
 			wantEdges: []edge{{"internal/domain/execution", "internal/tooling"}},
 		},
 		{
+			// ADR-0003 acceptance criterion 1: the amendment is scoped to
+			// test files, so production code is untouched by it.
+			dir:       "domain_imports_thirdparty",
+			why:       "a third-party import in production code of internal/domain/* is still denied after ADR-0003",
+			wantRules: []string{"moduleDependencyRule"},
+			wantEdges: []edge{{"internal/domain/execution", "example.test/thirdparty"}},
+		},
+		{
+			// ADR-0003 acceptance criterion 2: the permission is pinned by
+			// a fixture rather than by the absence of one.
+			dir:       "domain_test_imports_thirdparty",
+			why:       "a third-party import reached only from a _test.go file is never in the shipped binary, so ADR-0003 permits it",
+			wantRules: nil,
+		},
+		{
 			// The positive control. Without it, a rule set that flagged
 			// everything would pass every negative fixture above.
 			dir:       "allowed_tree",
