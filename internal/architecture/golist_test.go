@@ -18,6 +18,7 @@ package architecture
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -261,32 +262,56 @@ func (e *goListError) Error() string {
 func loadGraph(t *testing.T, dir string, extraEnv ...string) *graph {
 	t.Helper()
 
-	modulePath, err := runGo(dir, extraEnv, "list", "-m")
+	g, err := buildGraph(runGo, stdlibPackages(t), dir, extraEnv)
 	if err != nil {
-		t.Fatalf("resolving module path: %v", err)
+		t.Fatalf("%v", err)
+	}
+	return g
+}
+
+// goRunner executes one go subcommand. Graph loading goes through this
+// indirection rather than calling runGo directly because the Go toolchain is
+// the one real collaborator this package has: every rule is a pure function
+// over a graph, and the only I/O in the package is the three subprocesses that
+// produce it. Standing that boundary in is what makes the failure paths
+// specifiable without a broken Go installation.
+type goRunner func(dir string, extraEnv []string, args ...string) (string, error)
+
+// buildGraph builds the import graph of the module rooted at dir.
+//
+// It reports failures instead of ending the test, which is what separates it
+// from loadGraph: the interesting thing about this function is what it does
+// when the toolchain does not cooperate, and a t.Fatalf cannot be observed.
+func buildGraph(run goRunner, stdlib map[string]bool, dir string, extraEnv []string) (*graph, error) {
+	modulePath, err := run(dir, extraEnv, "list", "-m")
+	if err != nil {
+		return nil, fmt.Errorf("resolving module path: %w", err)
 	}
 
-	listed, err := runGo(dir, extraEnv, "list", "-json", "./...")
+	listed, err := run(dir, extraEnv, "list", "-json", "./...")
 	if err != nil {
-		t.Fatalf("listing packages: %v", err)
+		return nil, fmt.Errorf("listing packages: %w", err)
 	}
 
 	g := &graph{
 		modulePath: strings.TrimSpace(modulePath),
-		stdlib:     stdlibPackages(t),
+		stdlib:     stdlib,
 	}
 	decoder := json.NewDecoder(strings.NewReader(listed))
 	for decoder.More() {
 		var p pkg
 		if err := decoder.Decode(&p); err != nil {
-			t.Fatalf("decoding go list -json output: %v", err)
+			return nil, fmt.Errorf("decoding go list -json output: %w", err)
 		}
 		g.packages = append(g.packages, p)
 	}
+	// An empty package list is the silent-pass hazard this whole package is
+	// built to avoid: every rule reports zero violations over zero packages,
+	// which is indistinguishable from a clean tree. Fail instead.
 	if len(g.packages) == 0 {
-		t.Fatalf("go list -json ./... in %s returned no packages", dir)
+		return nil, fmt.Errorf("go list -json ./... in %s returned no packages", dir)
 	}
-	return g
+	return g, nil
 }
 
 // moduleRoot walks up from the test's working directory to the directory
