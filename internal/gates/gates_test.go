@@ -186,14 +186,12 @@ func TestEveryPullRequestGateRunsNothingButMakeCheck(t *testing.T) {
 	want := "make " + checkTarget
 
 	for _, path := range pullRequestGateWorkflows(t) {
-		commands := workflowRunCommands(t, path)
-
-		if len(commands) == 0 {
-			t.Errorf("%s validates pull requests but runs no command at all; it must run `%s`", path, want)
-			continue
-		}
-
-		for _, command := range commands {
+		// A pull-request workflow that runs no shell command at all --
+		// labelling, triage, assignment -- cannot introduce a gate a
+		// contributor is unable to reproduce, so there is nothing here to
+		// mirror in the Makefile. check.yml running nothing is a different
+		// failure, and TestTheCheckWorkflowRunsTheCheckTarget catches it.
+		for _, command := range workflowRunCommands(t, path) {
 			if command != want {
 				t.Errorf("%s runs %q; every step of a pull-request gate must be `%s` so no gate exists in CI that a contributor cannot run locally", path, command, want)
 			}
@@ -202,19 +200,16 @@ func TestEveryPullRequestGateRunsNothingButMakeCheck(t *testing.T) {
 }
 
 // The mirror of the test above: running nothing but `make check` is also
-// satisfied by running nothing, so each pull-request gate has to actually
-// invoke it.
-func TestEveryPullRequestGateRunsTheCheckTarget(t *testing.T) {
+// satisfied by running nothing, so the workflow that actually gates a PR
+// has to invoke it -- on a pull request, which is what makes it a gate.
+func TestTheCheckWorkflowRunsTheCheckTarget(t *testing.T) {
 	want := "make " + checkTarget
 
-	paths := pullRequestGateWorkflows(t)
-	if !slices.Contains(paths, workflowPath) {
+	if !slices.Contains(pullRequestGateWorkflows(t), workflowPath) {
 		t.Fatalf("%s is missing or no longer runs on a pull request; it is the workflow that gates every PR", workflowPath)
 	}
 
-	for _, path := range paths {
-		if !slices.Contains(workflowRunCommands(t, path), want) {
-			t.Errorf("%s never runs `%s`; the local gate and the PR gate must be the same target", path, want)
-		}
+	if !slices.Contains(workflowRunCommands(t, workflowPath), want) {
+		t.Errorf("%s never runs `%s`; the local gate and the PR gate must be the same target", workflowPath, want)
 	}
 }
