@@ -3,8 +3,9 @@
 Atomwright is an independent fork of Gentle AI; see [`NOTICE.md`](NOTICE.md).
 
 > **Repository status.** The inherited implementation was removed. What remains is
-> seventeen packages holding only a `doc.go`, with no binary and no CI until
-> #66 ATOM-BOOT-006 lands. See
+> the ADR-0001 layers, most of them still holding only a `doc.go`. #66 ATOM-BOOT-006
+> added the `cmd/atomwright` composition root and the `make check` gate; the functional
+> epics are still unimplemented. See
 > [ADR-0002](docs/adr/0002-atomwright-identity-and-greenfield-baseline.md).
 
 ## Table of Contents
@@ -71,23 +72,31 @@ Requires Go 1.25 or newer.
 ```sh
 git clone git@github.com:getsyntegrity/atomwright.git
 cd atomwright
-go build ./...
+make binary
+./atomwright
 ```
 
-There is no binary to run yet. #66 ATOM-BOOT-006 introduces `cmd/atomwright`.
+`cmd/atomwright` is the only composition root and the only binary. It builds and
+runs today, but no functional command is wired to it yet — the epics that add one
+are #9–#19.
 
 ### Verifying a change
 
-There is no CI. Run these yourself and report the real output in your PR:
+One gate, run the same way in both places:
 
 ```sh
-go build ./...
-go vet ./...
-gofmt -l .
-go test ./...
+make check
 ```
 
-`go build` alone is not verification — it compiles without running tests.
+That runs `gofmt`, `go vet`, `go mod tidy -diff`, `go build`, `go test`, and the
+ADR-0001 architecture checks. CI runs the identical `make check` target on every
+pull request, so there is no CI-only or local-only step in either direction — and
+`internal/gates` fails the build if the Makefile and the workflow ever drift apart.
+Report the real output in your PR. `go build` alone is not verification — it
+compiles without running tests.
+
+`make help` lists the individual gates (`fmt`, `vet`, `tidy`, `build`, `test`,
+`arch`) for when you want to run one in isolation while fixing it.
 
 ## Architecture rules
 
@@ -116,9 +125,16 @@ platform/*  ──▶  stdlib, platform/* internals
 ### Module layout
 
 One Go module, `github.com/getsyntegrity/atomwright`, rooted at the repository
-root. `cmd/atomwright` will be the only composition root and links every bounded
+root. `cmd/atomwright` is the only composition root and links every bounded
 context together, so no bounded context has an independent build, test, or
 release lifecycle that would justify a second module.
+
+There is no second entry point. ADR-0001 planned to keep `cmd/gentle-ai` as a
+temporary legacy alias during migration;
+[ADR-0002](docs/adr/0002-atomwright-identity-and-greenfield-baseline.md) removed
+it outright instead, so no retirement plan is outstanding. A second `cmd/*`
+package is allowed only as another thin process shell over `internal/bootstrap`
+— never as a second composition root, which is a direct ADR-0001 violation.
 
 - Never add a `go.mod` under `internal/`, `platform/`, or `adapters/`. The
   commands in [Verifying a change](#verifying-a-change) run from the repository
