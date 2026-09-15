@@ -1,6 +1,5 @@
 <!-- ⚠️ READ BEFORE SUBMITTING
   Every PR must be linked to an issue that has the "status:approved" label.
-  PRs without a linked approved issue will be automatically rejected by CI.
   See CONTRIBUTING.md for the full contribution workflow.
 -->
 
@@ -14,20 +13,18 @@ Closes #
 
 ## 🏷️ PR Type
 
-What kind of change does this PR introduce?
-
 - [ ] `type:bug` — Bug fix (non-breaking change that fixes an issue)
 - [ ] `type:feature` — New feature (non-breaking change that adds functionality)
 - [ ] `type:docs` — Documentation only
 - [ ] `type:refactor` — Code refactoring (no functional changes)
-- [ ] `type:chore` — Build, CI, or tooling changes
-- [ ] `type:breaking-change` — Breaking change (fix or feature that changes existing behavior)
+- [ ] `type:chore` — Build or tooling changes
+- [ ] `type:breaking-change` — Breaking change (changes existing behavior)
 
 ---
 
 ## 📝 Summary
 
-<!-- Provide a clear and concise description of what this PR does and why. -->
+<!-- What this PR does, and why. -->
 
 ---
 
@@ -41,10 +38,10 @@ What kind of change does this PR introduce?
 
 ## 🤖 AI Assistance
 
-Select exactly one option. Do not check both options.
+Select exactly one. Do not check both.
 
 - [ ] **None** — No material AI assistance was used.
-- [ ] **Material assistance used** — Complete all applicable declaration fields below.
+- [ ] **Material assistance used** — Complete the fields below.
 
 **Tool/model (if known):**
 
@@ -52,79 +49,49 @@ Select exactly one option. Do not check both options.
 
 **Verification performed:**
 
-Trivial formatting, spelling, minor autocomplete, search/navigation, and trivial, non-substantive mechanical transformations do not need to be itemized. See [AI_POLICY.md](../AI_POLICY.md) for the canonical policy.
+Trivial formatting, spelling, autocomplete, navigation, and non-substantive
+mechanical transformations do not need to be itemized. See
+[AI_POLICY.md](../AI_POLICY.md) for the canonical policy.
 
 ---
 
 ## 🧪 Test Plan
 
-**Unit Tests**
+There is no CI in this repository. Run these yourself and paste the real output:
+
 ```bash
+go build ./...
+go vet ./...
+gofmt -l .
 go test ./...
 ```
 
-**Go Format**
-```bash
-go run ./internal/gofmtcheck
-```
+- [ ] `go build ./...` passes
+- [ ] `go vet ./...` passes
+- [ ] `gofmt -l .` reports nothing
+- [ ] `go test ./...` passes
+- [ ] Manually verified where automated checks cannot reach
 
-**E2E Tests** (Docker required)
-```bash
-cd e2e && ./docker-test.sh
-```
-
-**Benchmark Validation**
-
-See the [benchmark guide](../bench/README.md). Benchmark validation applies to review-lifecycle, gates, recovery, delivery, benchmark implementation/corpus/classifier, and benchmark-claim changes. For unrelated changes, explain `N/A` in the Test Plan.
-
-- [ ] Unit tests pass (`go test ./...`)
-- [ ] Go format passes (`go run ./internal/gofmtcheck`)
-- [ ] E2E tests pass (`cd e2e && ./docker-test.sh`)
-- [ ] Manually tested locally
-
-<!-- Describe any additional manual testing steps if needed. -->
-
----
-
-## 🤖 Automated Checks
-
-The following checks run automatically on this PR:
-
-| Check | Status | Description |
-|-------|--------|-------------|
-| Check PR Cognitive Load | ⏳ | PR should stay within 400 changed lines (`additions + deletions`) or use `size:exception` |
-| Check Issue Reference | ⏳ | PR body must contain `Closes/Fixes/Resolves #N` |
-| Check Issue Has `status:approved` | ⏳ | Linked issue must have been approved before work began |
-| Check PR Has `type:*` Label | ⏳ | Exactly one `type:*` label must be applied |
-| Unit Tests | ⏳ | `go test ./...` must pass |
-| Go Format | ⏳ | `go run ./internal/gofmtcheck` must pass |
-| E2E Tests | ⏳ | `cd e2e && ./docker-test.sh` must pass |
+<!-- Paste the actual output above. "go build" alone is not verification —
+     it compiles without running tests. -->
 
 ---
 
 ## ✅ Contributor Checklist
 
 - [ ] PR is linked to an issue with `status:approved`
-- [ ] PR stays within 400 changed lines, or I have requested/obtained maintainer-applied `size:exception` with rationale documented
-- [ ] I have added the appropriate `type:*` label to this PR
-- [ ] Unit tests pass (`go test ./...`)
-- [ ] Go format passes (`go run ./internal/gofmtcheck`)
-- [ ] E2E tests pass (`cd e2e && ./docker-test.sh`)
-- [ ] Benchmark validation completed, or this change is not applicable to the benchmark (explain why in the Test Plan).
-- [ ] I have updated documentation if necessary
-- [ ] My commits follow [Conventional Commits](https://www.conventionalcommits.org/) format
+- [ ] PR stays within 400 changed lines, or `size:exception` was applied with a documented rationale
+- [ ] Exactly one `type:*` label is applied
+- [ ] The commands above were run and their real output is in the Test Plan
+- [ ] Nothing contradicts an accepted ADR without a superseding ADR — see [docs/adr](../docs/adr)
+- [ ] The dependency direction holds: `adapters/*` and `platform/*` never reach into `internal/domain/*` except to satisfy a port contract, and `internal/domain/*` imports none of them
+- [ ] Documentation updated if necessary, and no document exceeds 300 lines
+- [ ] Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
+- [ ] Commits do not include `Co-Authored-By` trailers or other AI attribution
 - [ ] I understand, reviewed, and take responsibility for the complete submission
-- [ ] I selected exactly one AI-assistance option and, if material assistance was used, completed all applicable declaration fields
-- [ ] My commits do not include `Co-Authored-By` trailers
 
 ---
 
 ## 💬 Notes for Reviewers
 
-<!-- Optional: anything you want reviewers to pay special attention to. -->
-
-For production Go changes in `internal/cli`, `internal/reviewtransaction`, or `internal/sddstatus`:
-
-- [ ] Identify any qualifying security, integrity, admission, repair, or governance guard and challenge its legitimate input population against real-world evidence.
-- [ ] Confirm its `guard:population` direction and claim are adjacent and accurate, and that `.guard-population-baseline.txt` changed only when the guard contract intentionally changed.
-- [ ] Do not treat a passing declaration/registry check as proof that no qualifying guard was omitted or that the population claim is semantically complete.
+<!-- Optional: anything reviewers should pay special attention to. -->
