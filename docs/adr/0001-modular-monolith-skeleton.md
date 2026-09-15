@@ -36,10 +36,10 @@ Atomwright stays a **single-process, single-module, modular monolith** for V1. T
 
 - **`internal/domain/{orchestration,specification,complexity,curatedcontext,hitl,execution,workflow,provider,verification}`** — one package per bounded context, mapping 1:1 to epics #9, #10, #11, #12, #13, #14, #16, #18, #19. Pure domain logic only: types, invariants, domain errors. No import outside the Go standard library and other `internal/domain/*` packages when a concept is genuinely shared across contexts.
 - **`internal/application`** — application services that orchestrate one or more domain packages on behalf of adapters. This is grounded directly in #15 ATOM-MCP's own stated language: "MCP tools map to application services rather than bypassing the domain." Adapters call into `internal/application`, never into domain internals directly.
-- **`internal/bootstrap`** — the composition-wiring package. It constructs concrete adapters, platform services, and domain/application instances, and wires them together with explicit constructors — no reflection-based DI container. It is the only package, besides `cmd/atomwright` itself, allowed to import concrete implementations from every layer at once.
-- **`cmd/atomwright`** — the single composition-root binary. `main.go` handles arguments and process/signal concerns and calls straight into `internal/bootstrap`. This decision is closed, not open: CORE, MCP, and TUI entry points converge here. `cmd/gentle-ai` keeps existing as a temporary legacy/migration surface — not a second composition root, but a thin, deprecated alias pointing at the same `internal/bootstrap` wiring — until the functional epics have migrated their entry points and it can be retired.
+- **`internal/bootstrap`** — the composition-wiring package. It constructs concrete adapters, platform services, and domain/application instances, and wires them together with explicit constructors — no reflection-based DI container. **It is the only package in the entire codebase allowed to import concrete implementations from every layer at once.** The object graph exists in exactly one place.
+- **`cmd/atomwright`** — the single composition-root binary. `main.go` handles arguments and process/signal concerns and calls straight into `internal/bootstrap`. `cmd/atomwright` does **not** import adapters, application, domain, or platform packages directly — its only in-repo dependency is `internal/bootstrap`; everything else it touches is the Go standard library and process-level concerns (flags, signals, exit codes). This decision is closed, not open: CORE, MCP, and TUI entry points converge here. `cmd/gentle-ai` keeps existing as a temporary legacy/migration surface under the same restriction — not a second composition root, but a thin, deprecated alias that also imports only `internal/bootstrap` — until the functional epics have migrated their entry points and it can be retired.
 - **`platform/*`** — cross-cutting infrastructure, starting with `platform/logging`. Never imports `internal/domain`.
-- **`adapters/*`** — outward-facing implementations: `adapters/mcp` (#15), `adapters/agent/{claudecode,opencode}` and `adapters/vcs/gitworktree` (#14), `adapters/workflowprovider/{direct,openspec}` (#16). Adapters implement ports declared by `internal/domain` or `internal/application`; they are never imported back by domain or application. Today's `internal/tui` is the conceptual predecessor of an eventual `adapters/tui` — whether and when to physically relocate it is deferred (see **Decision classification**).
+- **`adapters/*`** — outward-facing implementations: `adapters/mcp` (#15), `adapters/agent/{claudecode,opencode}` and `adapters/vcs/gitworktree` (#14), `adapters/workflowprovider/{direct,openspec}` (#16). Adapters implement ports (interfaces) declared by `internal/domain` or application services declared by `internal/application`. Implementing a domain-declared port requires importing `internal/domain` — that import is allowed, but **scoped strictly to port interfaces and their contractual types** (the shapes a port's methods take as arguments or return), never to reach into domain internals or call domain logic directly from an adapter. Ports themselves stay declared in `internal/domain`, next to the domain concept they belong to — they are not relocated into `internal/application` merely to keep adapters' import graph one-directional; `internal/application` is an orchestrator of domain behavior, not an artificial owner of every contract the domain exposes. Domain and application are never imported back *by* adapters for anything beyond that port/type surface, and adapters are never imported by domain or application at all. Today's `internal/tui` is the conceptual predecessor of an eventual `adapters/tui` — whether and when to physically relocate it is deferred (see **Decision classification**).
 
 ### Dependency direction
 
@@ -77,16 +77,20 @@ flowchart TB
     Boot -.wires.-> Platform
     Boot -.wires.-> Domain
     Root[cmd/atomwright] --> Boot
-    Legacy["cmd/gentle-ai (temporary alias)"] -.-> Boot
+    Legacy["cmd/gentle-ai (temporary alias)"] --> Boot
 
     Adapters -->|allowed| App
+    Adapters -.->|ports/types only| Domain
     App -->|allowed| Domain
-    Platform -.available to.-> Boot
 
-    Adapters -.forbidden.-> Domain
     Domain -.forbidden.-> Adapters
     Domain -.forbidden.-> Platform
     Domain -.forbidden.-> App
+    App -.forbidden.-> Adapters
+    Root -.forbidden.-> Adapters
+    Root -.forbidden.-> App
+    Root -.forbidden.-> Domain
+    Root -.forbidden.-> Platform
 
     style Adapters fill:#eef,stroke:#66f
     style App fill:#efe,stroke:#6a6
@@ -94,7 +98,26 @@ flowchart TB
     style Platform fill:#eee,stroke:#999
 ```
 
-Rule, stated plainly: `adapters/*` may import `internal/application`; `internal/application` may import `internal/domain/*`; nothing imports upward or sideways into `internal/domain/*` except other domain packages for genuinely shared concepts; `platform/*` is a leaf, usable by `internal/bootstrap` and `internal/application`, never importing `internal/domain`; only `internal/bootstrap` and `cmd/atomwright` (plus, temporarily, `cmd/gentle-ai`) may see concrete implementations from every layer at once.
+Rule, stated as the canonical allowlist (this exact table is what #65 ATOM-BOOT-005 makes executable):
+
+```
+cmd/*             -> internal/bootstrap
+internal/bootstrap -> internal/application, internal/domain/*, adapters/*, platform/*
+adapters/*         -> internal/application
+adapters/*         -> internal/domain/*      [ports and contractual types only]
+internal/application -> internal/domain/*
+platform/*         -> stdlib, platform/* internals
+internal/domain/*  -> stdlib, other internal/domain/* packages (explicitly shared concepts only)
+
+internal/domain/*    -X-> internal/application
+internal/domain/*    -X-> adapters/*
+internal/domain/*    -X-> platform/*
+internal/application -X-> adapters/* (concrete)
+cmd/*                -X-> adapters/* (concrete)
+cmd/*                -X-> internal/application, internal/domain/*, platform/* (directly)
+```
+
+`cmd/atomwright` and `cmd/gentle-ai` see only `internal/bootstrap` plus the Go standard library — never a concrete adapter, application service, domain package, or platform package directly. `internal/bootstrap` is the single package allowed to see concrete implementations from every layer at once. `adapters/*` importing `internal/domain/*` is allowed **only** to implement a port interface or use a type that port's contract requires — never to call domain logic or reach into domain internals; ports stay declared in `internal/domain`, not relocated to `internal/application`.
 
 ### Bounded-context map
 
