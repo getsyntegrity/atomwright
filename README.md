@@ -2,10 +2,12 @@
 
 **Local-first workflow that turns work items into atomic, grounded, tested, independently reviewed changes using coordinated coding agents.**
 
-> **Status: pre-alpha.** Atomwright has been forked from [Gentle AI](https://github.com/Gentleman-Programming/gentle-ai)
-> at the upstream baseline recorded in [`docs/atomwright/upstream-baseline.md`](docs/atomwright/upstream-baseline.md).
+> **Status: pre-alpha.** Atomwright was forked from [Gentle AI](https://github.com/Gentleman-Programming/gentle-ai)
+> and the inherited implementation has since been removed. What remains is the architecture
+> skeleton: seventeen packages holding only a `doc.go`, with no binary and no CI until
+> #66 ATOM-BOOT-006 lands. See
+> [ADR-0002](docs/adr/0002-atomwright-identity-and-greenfield-baseline.md).
 > The atomic-delivery workflow described below is the intended product and is **not** implemented yet.
-> The CLI currently shipped in this repository is still the inherited Gentle AI runtime, invoked as `gentle-ai`.
 
 ## Why Atomwright?
 
@@ -126,7 +128,7 @@ Atomwright treats specification-driven development and test-driven development a
 
 ## Planned architecture
 
-Atomwright is intended to be an independent, heavily simplified derivative of [Gentle AI](https://github.com/Gentleman-Programming/gentle-ai). It will retain the useful installer and orchestration foundations while replacing the broad workflow with a focused atomic-delivery pipeline.
+Atomwright is an independent, heavily simplified derivative of [Gentle AI](https://github.com/Gentleman-Programming/gentle-ai). The inherited runtime was removed rather than adapted; the layer boundaries are recorded in [ADR-0001](docs/adr/0001-modular-monolith-skeleton.md).
 
 | Component | Responsibility |
 | --- | --- |
@@ -159,7 +161,8 @@ The goal is not the cheapest possible answer. It is the lowest-cost path to a tr
 ## Roadmap
 
 - [x] Fork the Gentle AI core at a verified upstream baseline
-- [ ] Prune the inherited Gentle AI core
+- [x] Prune the inherited Gentle AI core
+- [ ] Establish the composition root and CI baseline
 - [ ] Define the atomic OpenSpec schema
 - [ ] Implement grounding and atomicity gates
 - [ ] Add worktree lifecycle management
@@ -197,12 +200,10 @@ fork statement is in [`NOTICE.md`](NOTICE.md).
 The upstream trademark policy is reproduced unchanged in [`TRADEMARKS.md`](TRADEMARKS.md) and governs
 the marks it describes.
 
-Some technical identifiers inherited from Gentle AI — the Go module path, the `gentle-ai` command,
-the `~/.gentle-ai/` configuration directory, `GENTLE_AI_*` environment variables, and injected
-configuration markers — remain temporarily for compatibility, because renaming them requires a
-migration rather than a rename. They must be migrated before Atomwright is publicly distributed.
-See [`NOTICE.md`](NOTICE.md) and
-[`docs/atomwright/upstream-baseline.md`](docs/atomwright/upstream-baseline.md).
+The technical identifiers inherited from Gentle AI have been removed. The Go module path is
+`github.com/getsyntegrity/atomwright`, and the `gentle-ai` command, its configuration directory,
+and its environment variables no longer exist in this repository. See [`NOTICE.md`](NOTICE.md)
+and [ADR-0002](docs/adr/0002-atomwright-identity-and-greenfield-baseline.md).
 
 ## License
 

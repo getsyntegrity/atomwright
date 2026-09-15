@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted
+Accepted; superseded in part by [ADR-0002](0002-atomwright-identity-and-greenfield-baseline.md).
+
+The Non-goals covering the Go module path, and the plan to keep `cmd/gentle-ai` as a temporary
+legacy alias, are no longer in force. Every other decision in this record stands.
 
 ## Date
 
