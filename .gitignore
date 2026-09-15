@@ -1,5 +1,5 @@
 # Binaries
-/gentle-ai
+/atomwright
 *.exe
 *.dll
 *.so
@@ -22,13 +22,10 @@
 .DS_Store
 Thumbs.db
 
-# Docker
+# Build output
 *.tar
-cmd/gentle-ai/main
-cmd/gentle-ai/gentle-ai
+cmd/atomwright/atomwright
 dist/
-.goreleaser-provider-contract/
-.goreleaser-provenance/
 
 # Agent tooling metadata (generated per-user, not product code)
 .atl/
