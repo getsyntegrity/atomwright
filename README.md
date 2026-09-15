@@ -4,8 +4,10 @@
 
 > **Status: pre-alpha.** Atomwright was forked from [Gentle AI](https://github.com/Gentleman-Programming/gentle-ai)
 > and the inherited implementation has since been removed. What remains is the architecture
-> skeleton: seventeen packages holding only a `doc.go`, with no binary and no CI until
-> #66 ATOM-BOOT-006 lands. See
+> skeleton: the ADR-0001 layers, most packages still holding only a `doc.go`, plus the
+> `cmd/atomwright` composition root and the `make check` gate that CI mirrors
+> (#66 ATOM-BOOT-006). The binary builds and runs; no functional command is wired to it
+> yet. See
 > [ADR-0002](docs/adr/0002-atomwright-identity-and-greenfield-baseline.md).
 > The atomic-delivery workflow described below is the intended product and is **not** implemented yet.
 
@@ -162,7 +164,7 @@ The goal is not the cheapest possible answer. It is the lowest-cost path to a tr
 
 - [x] Fork the Gentle AI core at a verified upstream baseline
 - [x] Prune the inherited Gentle AI core
-- [ ] Establish the composition root and CI baseline
+- [x] Establish the composition root and CI baseline
 - [ ] Define the atomic OpenSpec schema
 - [ ] Implement grounding and atomicity gates
 - [ ] Add worktree lifecycle management
