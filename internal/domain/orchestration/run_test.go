@@ -82,15 +82,38 @@ func TestNewRunStartsInReceived(t *testing.T) {
 	}
 }
 
-func TestNewRunRejectsARunWithoutIdentity(t *testing.T) {
-	// The zero RunID is what a caller gets when they ignore NewRunID's error,
-	// so NewRun refuses it rather than creating an untraceable run.
-	run, err := orchestration.NewRun("")
-	if err == nil {
-		t.Fatalf("NewRun(\"\") = %+v, want an error", run)
+func TestNewRunRejectsEveryIdentifierNewRunIDWouldReject(t *testing.T) {
+	// RunID is an exported string type, so a caller can build one by
+	// conversion -- or decode one -- without ever passing through NewRunID.
+	// NewRun is therefore the second place the invariant has to hold, not a
+	// place that may assume it already does. Checking only for the zero value
+	// would let RunID("   ") and RunID(" run-1") open runs whose identifiers
+	// NewRunID explicitly refuses.
+	cases := []struct {
+		name string
+		id   orchestration.RunID
+		want error
+	}{
+		{name: "the zero value", id: "", want: orchestration.ErrEmptyRunID},
+		{name: "only spaces, built by conversion", id: orchestration.RunID("   "), want: orchestration.ErrEmptyRunID},
+		{name: "only a tab, built by conversion", id: orchestration.RunID("\t"), want: orchestration.ErrEmptyRunID},
+		{name: "leading whitespace, built by conversion", id: orchestration.RunID(" run-1"), want: orchestration.ErrInvalidRunID},
+		{name: "trailing whitespace, built by conversion", id: orchestration.RunID("run-1 "), want: orchestration.ErrInvalidRunID},
 	}
-	if !errors.Is(err, orchestration.ErrEmptyRunID) {
-		t.Errorf("error = %v, want it to wrap ErrEmptyRunID", err)
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			run, err := orchestration.NewRun(tc.id)
+			if err == nil {
+				t.Fatalf("NewRun(%q) = %+v, want an error", tc.id, run)
+			}
+			if !errors.Is(err, tc.want) {
+				t.Errorf("NewRun(%q) error = %v, want it to wrap %v", tc.id, err, tc.want)
+			}
+			if run.ID() != "" || run.State() != orchestration.StateUnknown {
+				t.Errorf("NewRun(%q) = %+v, want the zero Run alongside the error", tc.id, run)
+			}
+		})
 	}
 }
 
