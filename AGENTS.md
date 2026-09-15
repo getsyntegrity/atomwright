@@ -1,33 +1,53 @@
-# Atomwright — Agent Skills Index
+# Atomwright — Agent Instructions
 
 > Atomwright is an independent fork of Gentle AI; see [`NOTICE.md`](NOTICE.md). The upstream
 > trademark policy is reproduced unchanged in [`TRADEMARKS.md`](TRADEMARKS.md).
-> Skill identifiers keep their inherited `gentle-ai-*` names because they are installed on disk
-> under those names; renaming them is a migration, not a rename.
 
-When working on this project, load the relevant skill(s) BEFORE writing any code.
+## What this repository currently is
 
-Naming convention: `gentle-ai-*` skills are repo-specific workflow skills. Unprefixed skills are portable writing or work-unit skills and intentionally keep their canonical names.
+A greenfield skeleton. The inherited implementation was removed; see
+[ADR-0002](docs/adr/0002-atomwright-identity-and-greenfield-baseline.md).
 
-## How to Use
+- Module path: `github.com/getsyntegrity/atomwright`
+- Seventeen packages, each holding only a `doc.go`
+- No binary and no CI until #66 ATOM-BOOT-006 lands
 
-1. Check the trigger column to find skills that match your current task
-2. Load the skill by reading the SKILL.md file at the listed path
-3. Follow ALL patterns and rules from the loaded skill
-4. Multiple skills can apply simultaneously
+## Read before writing code
 
-## Skills
+1. [ADR-0001](docs/adr/0001-modular-monolith-skeleton.md) — the layer boundaries and
+   dependency direction. Binding.
+2. [ADR-0002](docs/adr/0002-atomwright-identity-and-greenfield-baseline.md) — what
+   ADR-0001 no longer covers.
+3. The `doc.go` of the package you are touching. It names the issue and epic that own it.
 
-| Skill | Trigger | Path |
-|-------|---------|------|
-| `issue-creation` | When creating a GitHub issue, reporting a bug, or requesting a feature. | [`internal/assets/skills/issue-creation/SKILL.md`](internal/assets/skills/issue-creation/SKILL.md) |
-| `gentle-ai-branch-pr` | When creating a pull request, opening a PR, or preparing changes for review. | [`skills/branch-pr/SKILL.md`](skills/branch-pr/SKILL.md) |
-| `gentle-ai-chained-pr` | When a change is too large for one review, or when creating chained/stacked pull requests. | [`skills/chained-pr/SKILL.md`](skills/chained-pr/SKILL.md) |
-| `cognitive-doc-design` | When writing docs that must reduce cognitive load for readers or reviewers. | [`skills/cognitive-doc-design/SKILL.md`](skills/cognitive-doc-design/SKILL.md) |
-| `comment-writer` | When drafting human comments, PR feedback, issue replies, or async updates. | [`skills/comment-writer/SKILL.md`](skills/comment-writer/SKILL.md) |
-| `work-unit-commits` | When splitting implementation work into deliverable commits or chained PRs. | [`skills/work-unit-commits/SKILL.md`](skills/work-unit-commits/SKILL.md) |
-| `rdd-defect-workflow` | When RDD defects involve receipts, authority, recovery, delivery gates, or kill switches. | [`skills/rdd-defect-workflow/SKILL.md`](skills/rdd-defect-workflow/SKILL.md) |
-| `rdd-advisory-transport` | When changing reviewer transport, adapters, lens prompts/schemas, or transport capability policy. | [`skills/rdd-advisory-transport/SKILL.md`](skills/rdd-advisory-transport/SKILL.md) |
-| `issue-root-resolution` | When auditing backlog roots, proposing cluster fixes, or closing resolved/outdated issues. | [`skills/issue-root-resolution/SKILL.md`](skills/issue-root-resolution/SKILL.md) |
-| `systemic-issue-triage` | When triaging issues, bugs, backlogs, root causes, dead ends, or blocked users. | [`skills/systemic-issue-triage/SKILL.md`](skills/systemic-issue-triage/SKILL.md) |
-| `gentle-ai-bench` | When touching `bench/`, journeys, driven mode, the journey corpus, or bench axes. | [`skills/gentle-ai-bench/SKILL.md`](skills/gentle-ai-bench/SKILL.md) |
+## Dependency direction
+
+```
+adapters/*  ──▶  internal/application  ──▶  internal/domain/*
+platform/*  ──▶  internal/application
+```
+
+- `adapters/*` and `platform/*` must never reach into `internal/domain/*`, except for an
+  adapter implementing a port contract declared there.
+- `internal/domain/*` must never import application, platform, or adapters.
+- Automated enforcement arrives with #65 ATOM-BOOT-005. Until then, review is the gate.
+
+## Verifying a change
+
+There is no CI. Run these yourself and report the real output:
+
+```sh
+go build ./...
+go vet ./...
+gofmt -l .
+go test ./...
+```
+
+`go build` alone is not verification — it compiles without running tests.
+
+## Conventions
+
+- Conventional commits. No AI attribution lines beyond an explicit `Co-Authored-By`.
+- Code, comments, documentation, and commit messages are written in English.
+- Docs: 200 lines is a warning, 250 recommends a split, 300 is a hard limit.
+- Do not change an issue's functional scope to make work fit.
