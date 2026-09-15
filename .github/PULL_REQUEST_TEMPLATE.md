@@ -84,7 +84,9 @@ go test ./...
 - [ ] Exactly one `type:*` label is applied
 - [ ] The commands above were run and their real output is in the Test Plan
 - [ ] Nothing contradicts an accepted ADR without a superseding ADR — see [docs/adr](../docs/adr)
-- [ ] The dependency direction holds: `adapters/*` and `platform/*` never reach into `internal/domain/*` except to satisfy a port contract, and `internal/domain/*` imports none of them
+- [ ] `internal/domain/*` imports no `internal/application`, `platform/*` or `adapters/*` package
+- [ ] `platform/*` imports no `internal/domain/*` package — this rule has no exception
+- [ ] `adapters/*` imports `internal/domain/*` only to implement a port interface declared there, or to use a type that port's contract requires — never to call domain logic
 - [ ] Documentation updated if necessary, and no document exceeds 300 lines
 - [ ] Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
 - [ ] Commits do not include `Co-Authored-By` trailers or other AI attribution
