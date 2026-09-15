@@ -18,8 +18,13 @@ BINARY ?= atomwright
 check: fmt vet tidy build test arch
 
 ## fmt: fail if any file is not gofmt-clean
+#
+# The `|| exit 1` is load-bearing: without it a gofmt that cannot run at
+# all (missing binary, wrong GOROOT) leaves `unformatted` empty and the
+# recipe reports success, which is a formatting gate that is green because
+# it never ran.
 fmt:
-	@unformatted=$$($(GOFMT) -l .); \
+	@unformatted=$$($(GOFMT) -l .) || { echo "gofmt failed to run: $(GOFMT)"; exit 1; }; \
 	if [ -n "$$unformatted" ]; then \
 		echo "gofmt needs to run on:"; \
 		echo "$$unformatted"; \

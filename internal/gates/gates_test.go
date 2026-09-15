@@ -34,7 +34,7 @@ const (
 // requiredGates are the gates #66 requires `make check` to run. They are
 // listed by Makefile target name, which is also how a contributor runs one
 // in isolation.
-var requiredGates = []string{"fmt", "vet", "tidy", "test", "arch"}
+var requiredGates = []string{"fmt", "vet", "tidy", "build", "test", "arch"}
 
 var (
 	targetLine  = regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9_-]*):(.*)$`)
@@ -76,19 +76,41 @@ func makefileTargets(t *testing.T) map[string][]string {
 	return targets
 }
 
-// workflowRunCommands returns every shell command the CI workflow runs.
-func workflowRunCommands(t *testing.T) []string {
+// workflowFiles returns the repository-relative path of every workflow
+// under .github/workflows.
+func workflowFiles(t *testing.T) []string {
+	t.Helper()
+
+	workflowDir := filepath.Join(".github", "workflows")
+	entries, err := os.ReadDir(filepath.Join(repoRoot(t), workflowDir))
+	if err != nil {
+		t.Fatalf("reading %s: %v", workflowDir, err)
+	}
+
+	var paths []string
+	for _, entry := range entries {
+		name := entry.Name()
+		if entry.IsDir() || (!strings.HasSuffix(name, ".yml") && !strings.HasSuffix(name, ".yaml")) {
+			continue
+		}
+		paths = append(paths, filepath.ToSlash(filepath.Join(workflowDir, name)))
+	}
+	return paths
+}
+
+// workflowRunCommands returns every shell command one workflow runs.
+func workflowRunCommands(t *testing.T, path string) []string {
 	t.Helper()
 
 	var commands []string
-	for _, line := range strings.Split(read(t, workflowPath), "\n") {
+	for _, line := range strings.Split(read(t, path), "\n") {
 		match := runStepLine.FindStringSubmatch(line)
 		if match == nil {
 			continue
 		}
 		command := match[1]
 		if command == "|" || command == ">" || strings.HasPrefix(command, "|") || strings.HasPrefix(command, ">") {
-			t.Fatalf("%s uses a multi-line run step (%q); keep every CI step a single `make <target>` call so it stays comparable with the Makefile", workflowPath, command)
+			t.Fatalf("%s uses a multi-line run step (%q); keep every CI step a single `make <target>` call so it stays comparable with the Makefile", path, command)
 		}
 		commands = append(commands, command)
 	}
@@ -105,7 +127,7 @@ func TestCheckRunsEveryRequiredGate(t *testing.T) {
 
 	for _, gate := range requiredGates {
 		if !slices.Contains(prerequisites, gate) {
-			t.Errorf("`make %s` does not run the %q gate (prerequisites: %v); #66 requires lint, vet, tidy, test, and the architecture checks", checkTarget, gate, prerequisites)
+			t.Errorf("`make %s` does not run the %q gate (prerequisites: %v); #66 requires fmt, vet, tidy, build, test, and the architecture checks", checkTarget, gate, prerequisites)
 		}
 	}
 }
@@ -120,47 +142,45 @@ func TestEveryCheckPrerequisiteIsADefinedTarget(t *testing.T) {
 	}
 }
 
+// Every workflow, not just check.yml. A gate that runs in CI but not
+// locally is the drift this package exists to catch, and the cheapest way
+// for it to appear is a second workflow nobody remembers to mirror in the
+// Makefile -- or an extra step bolted onto an existing one. Both are
+// caught by comparing parsed run commands rather than searching the file
+// for a substring, which a workflow running `make check` plus `go test
+// -race ./...` would satisfy while still being a CI-only gate.
 func TestCIRunsNothingButMakeCheck(t *testing.T) {
-	commands := workflowRunCommands(t)
-
-	if len(commands) == 0 {
-		t.Fatalf("%s runs no command at all; CI must run `make %s`", workflowPath, checkTarget)
-	}
-
 	want := "make " + checkTarget
-	for _, command := range commands {
-		if command == want {
+
+	for _, path := range workflowFiles(t) {
+		commands := workflowRunCommands(t, path)
+
+		if len(commands) == 0 {
+			t.Errorf("%s runs no command at all; every workflow must run `%s`", path, want)
 			continue
 		}
-		t.Errorf("%s runs %q; every CI step must be `%s` so no gate exists in CI that a contributor cannot run locally", workflowPath, command, want)
+
+		for _, command := range commands {
+			if command != want {
+				t.Errorf("%s runs %q; every CI step must be `%s` so no gate exists in CI that a contributor cannot run locally", path, command, want)
+			}
+		}
 	}
 }
 
-func TestCIRunsTheCheckTarget(t *testing.T) {
-	if !slices.Contains(workflowRunCommands(t), "make "+checkTarget) {
-		t.Errorf("%s never runs `make %s`; the local gate and the PR gate must be the same target", workflowPath, checkTarget)
-	}
-}
+// The mirror of the test above: running nothing but `make check` is also
+// satisfied by running nothing, so each workflow has to actually invoke it.
+func TestEveryWorkflowRunsTheCheckTarget(t *testing.T) {
+	want := "make " + checkTarget
 
-// A gate that runs in CI but not locally is the drift this package exists
-// to catch, and the cheapest way for it to appear is a second workflow
-// nobody remembers to mirror in the Makefile. Every workflow under
-// .github/workflows must therefore go through `make check` too.
-func TestNoWorkflowBypassesMakeCheck(t *testing.T) {
-	workflowDir := filepath.Join(repoRoot(t), ".github", "workflows")
-	entries, err := os.ReadDir(workflowDir)
-	if err != nil {
-		t.Fatalf("reading %s: %v", workflowDir, err)
+	paths := workflowFiles(t)
+	if !slices.Contains(paths, workflowPath) {
+		t.Fatalf("%s is missing; it is the workflow that gates every PR", workflowPath)
 	}
 
-	for _, entry := range entries {
-		name := entry.Name()
-		if entry.IsDir() || (!strings.HasSuffix(name, ".yml") && !strings.HasSuffix(name, ".yaml")) {
-			continue
-		}
-		content := read(t, filepath.Join(".github", "workflows", name))
-		if !strings.Contains(content, "make "+checkTarget) {
-			t.Errorf(".github/workflows/%s never runs `make %s`; a workflow that gates PRs on anything else is a CI-only gate", name, checkTarget)
+	for _, path := range paths {
+		if !slices.Contains(workflowRunCommands(t, path), want) {
+			t.Errorf("%s never runs `%s`; the local gate and the PR gate must be the same target", path, want)
 		}
 	}
 }
