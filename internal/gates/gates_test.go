@@ -8,10 +8,17 @@
 // nothing blocks a PR that breaks it). Both are silent: the build stays
 // green either way. These tests are what makes them loud.
 //
-// The rule is about the CI that validates a pull request, so that is the
-// scope: workflows triggered by a pull request. A release, publish, or
-// deployment workflow is automation a contributor is not expected to
-// reproduce with `make check`, and nothing here constrains it.
+// The scope is one file: .github/workflows/check.yml, the workflow this
+// repository designates as the gate. It is deliberately not "every
+// workflow that runs on a pull request", because that is not what a
+// required check is. Whether a workflow blocks a merge lives in branch
+// protection, not in the YAML, and plenty of legitimate pull-request
+// automation -- previews, labels, comments, informational reports -- runs
+// its own commands without ever gating anything. Constraining those would
+// forbid the split pipeline this repository wants, so the guard names the
+// gate instead of inferring it. If Atomwright ever grows a second gate,
+// the way to include it is explicit metadata that classifies a workflow as
+// one, not a wider trigger heuristic.
 //
 // Nothing here ships in a binary: every file in this package is a
 // _test.go file. Like internal/architecture it belongs to no ADR-0001
@@ -30,6 +37,9 @@ import (
 
 const (
 	makefilePath = "Makefile"
+
+	// workflowPath is the gate. It is named, not discovered: see the
+	// package comment for why a trigger heuristic is the wrong instrument.
 	workflowPath = ".github/workflows/check.yml"
 
 	// checkTarget is the single gate. CI runs this and only this.
@@ -81,29 +91,7 @@ func makefileTargets(t *testing.T) map[string][]string {
 	return targets
 }
 
-// workflowFiles returns the repository-relative path of every workflow
-// under .github/workflows.
-func workflowFiles(t *testing.T) []string {
-	t.Helper()
-
-	workflowDir := filepath.Join(".github", "workflows")
-	entries, err := os.ReadDir(filepath.Join(repoRoot(t), workflowDir))
-	if err != nil {
-		t.Fatalf("reading %s: %v", workflowDir, err)
-	}
-
-	var paths []string
-	for _, entry := range entries {
-		name := entry.Name()
-		if entry.IsDir() || (!strings.HasSuffix(name, ".yml") && !strings.HasSuffix(name, ".yaml")) {
-			continue
-		}
-		paths = append(paths, filepath.ToSlash(filepath.Join(workflowDir, name)))
-	}
-	return paths
-}
-
-// workflowRunCommands returns every shell command one workflow runs.
+// workflowRunCommands returns every shell command the gate workflow runs.
 func workflowRunCommands(t *testing.T, path string) []string {
 	t.Helper()
 
@@ -147,54 +135,21 @@ func TestEveryCheckPrerequisiteIsADefinedTarget(t *testing.T) {
 	}
 }
 
-// pullRequestGateWorkflows returns every workflow that validates a pull
-// request. These are the workflows #66 constrains: whatever they run has
-// to be reproducible locally. Workflows triggered by anything else --
-// releases, publishing, deployment -- are out of scope and not returned.
-func pullRequestGateWorkflows(t *testing.T) []string {
-	t.Helper()
-
-	var paths []string
-	for _, path := range workflowFiles(t) {
-		if triggersOnPullRequest, _ := pullRequestTrigger(read(t, path)); triggersOnPullRequest {
-			paths = append(paths, path)
-		}
-	}
-	return paths
-}
-
-// The classification above decides which workflows this guard constrains,
-// so a workflow whose triggers cannot be read would silently opt itself
-// out of the gate. That is the same drift by another route, so it fails
-// here rather than being excused.
-func TestEveryWorkflowDeclaresItsTriggers(t *testing.T) {
-	for _, path := range workflowFiles(t) {
-		if _, declared := pullRequestTrigger(read(t, path)); !declared {
-			t.Errorf("%s declares no top-level `on:` triggers, so it cannot be classified; a workflow that validates pull requests must say so", path)
-		}
-	}
-}
-
-// Every pull-request gate, not just check.yml. A gate that runs in CI but
-// not locally is the drift this package exists to catch, and the cheapest
-// way for it to appear is a second PR workflow nobody remembers to mirror
-// in the Makefile -- or an extra step bolted onto an existing one. Both
-// are caught by comparing parsed run commands rather than searching the
-// file for a substring, which a workflow running `make check` plus `go
-// test -race ./...` would satisfy while still being a CI-only gate.
-func TestEveryPullRequestGateRunsNothingButMakeCheck(t *testing.T) {
+// The gate workflow runs `make check` and nothing else. A second step
+// bolted onto it -- `go test -race ./...`, a coverage upload that fails
+// the job -- is a gate that exists in CI and nowhere else, which is the
+// drift this package exists to catch. Comparing parsed run commands rather
+// than searching the file for a substring is what catches it: `make check`
+// is present either way.
+//
+// Only this workflow is constrained. Any other workflow, whatever it
+// triggers on, is free to run whatever it needs.
+func TestTheCheckWorkflowRunsNothingButMakeCheck(t *testing.T) {
 	want := "make " + checkTarget
 
-	for _, path := range pullRequestGateWorkflows(t) {
-		// A pull-request workflow that runs no shell command at all --
-		// labelling, triage, assignment -- cannot introduce a gate a
-		// contributor is unable to reproduce, so there is nothing here to
-		// mirror in the Makefile. check.yml running nothing is a different
-		// failure, and TestTheCheckWorkflowRunsTheCheckTarget catches it.
-		for _, command := range workflowRunCommands(t, path) {
-			if command != want {
-				t.Errorf("%s runs %q; every step of a pull-request gate must be `%s` so no gate exists in CI that a contributor cannot run locally", path, command, want)
-			}
+	for _, command := range workflowRunCommands(t, workflowPath) {
+		if command != want {
+			t.Errorf("%s runs %q; every step of the gate must be `%s` so no gate exists in CI that a contributor cannot run locally", workflowPath, command, want)
 		}
 	}
 }
@@ -202,11 +157,11 @@ func TestEveryPullRequestGateRunsNothingButMakeCheck(t *testing.T) {
 // The mirror of the test above: running nothing but `make check` is also
 // satisfied by running nothing, so the workflow that actually gates a PR
 // has to invoke it -- on a pull request, which is what makes it a gate.
-func TestTheCheckWorkflowRunsTheCheckTarget(t *testing.T) {
+func TestTheCheckWorkflowRunsTheCheckTargetOnAPullRequest(t *testing.T) {
 	want := "make " + checkTarget
 
-	if !slices.Contains(pullRequestGateWorkflows(t), workflowPath) {
-		t.Fatalf("%s is missing or no longer runs on a pull request; it is the workflow that gates every PR", workflowPath)
+	if !pullRequestTrigger(read(t, workflowPath)) {
+		t.Fatalf("%s does not run on a pull request; it is the workflow that gates every PR", workflowPath)
 	}
 
 	if !slices.Contains(workflowRunCommands(t, workflowPath), want) {
