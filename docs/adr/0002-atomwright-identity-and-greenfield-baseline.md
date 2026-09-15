@@ -116,17 +116,22 @@ lives in that record's *Rejected / deferred alternatives*:
 This is a broken cross-reference, not a missing decision. Read that bullet
 as pointing at *Rejected / deferred alternatives*.
 
-Two decisions it is worth restating plainly, because the phrase "modular
-monolith" invites the opposite reading:
+Two points worth restating plainly, because the missing section is where a
+reader would look for them:
 
-- **Modular monolith means one Go module.** The modularity is enforced
-  package boundaries, not separate modules. A `go.mod` per bounded context
-  would end the modular monolith, which is why it is gated on the criterion
-  above rather than on taste.
+- **The single module is a V1 build-layout choice, not the definition of the
+  architecture.** What makes Atomwright a modular monolith is one deployed
+  process with enforced package boundaries; a modular monolith can span
+  several Go modules and remain one process. So splitting a bounded context
+  into its own module does not end the architecture — it is a build-layout
+  change, which is why it is gated on the criterion above rather than
+  forbidden outright, and why ADR-0001 scopes the single-module decision to
+  V1 and leaves it revisitable.
 - **Out-of-process plugins are decided, not omitted.** ADR-0001 rejects
   `go-plugin`, gRPC and out-of-process providers for V1 and defers them to
   #58 ATOM-PLUG, which is itself gated on #18 ATOM-PROV having stable
-  in-process contracts. Nothing here changes that.
+  in-process contracts. That is the change that would end the single-process
+  property, and it is deferred, not denied. Nothing here changes it.
 
 ## Related work
 
