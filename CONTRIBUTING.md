@@ -105,6 +105,22 @@ platform/*  ──▶  internal/application
 - `internal/domain/*` must never import application, platform, or adapters.
 - Automated enforcement arrives with #65 ATOM-BOOT-005. Until then, review is the gate.
 
+### Module layout
+
+One Go module, `github.com/getsyntegrity/atomwright`, rooted at the repository
+root. `cmd/atomwright` will be the only composition root and links every bounded
+context together, so no bounded context has an independent build, test, or
+release lifecycle that would justify a second module.
+
+- Never add a `go.mod` under `internal/`, `platform/`, or `adapters/`. The
+  commands in [Verifying a change](#verifying-a-change) run from the repository
+  root and already cover the whole tree.
+- There is no `go.work`. A workspace file only has an effect across two or more
+  modules; with one module it is a no-op that every contributor still has to
+  read and reason about.
+- Splitting a bounded context into its own module needs an ADR superseding
+  ADR-0001, not a `go.mod` or `go.work` tweak.
+
 ## Commit convention
 
 Conventional commits: `type(scope): subject`.
