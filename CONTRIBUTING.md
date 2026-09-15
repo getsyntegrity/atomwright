@@ -92,21 +92,29 @@ go test ./...
 ## Architecture rules
 
 [ADR-0001](docs/adr/0001-modular-monolith-skeleton.md) is binding, as amended by
-[ADR-0002](docs/adr/0002-atomwright-identity-and-greenfield-baseline.md). Nothing
+[ADR-0002](docs/adr/0002-atomwright-identity-and-greenfield-baseline.md) and
+[ADR-0003](docs/adr/0003-test-only-third-party-imports.md). Nothing
 that contradicts an accepted ADR merges without a superseding ADR.
 
 ```
 cmd/*       ──▶  internal/bootstrap  ──▶  (every layer, wiring only)
 adapters/*  ──▶  internal/application  ──▶  internal/domain/*
 adapters/*  ──▶  internal/domain/*      (ports and contractual types only)
-platform/*  ──▶  stdlib, platform/* internals
+platform/*  ──▶  stdlib, platform/* internals, third-party in test files only
+internal/domain/*  ──▶  stdlib, other internal/domain/* packages,
+                        third-party in test files only
 ```
 
 - `platform/*` is cross-cutting infrastructure. It depends on nothing above it:
   not `internal/application`, and never `internal/domain/*`.
 - `adapters/*` may import `internal/domain/*` only to implement a port contract
   declared there, never to call domain logic.
-- `internal/domain/*` must never import application, platform, or adapters.
+- `internal/domain/*` must never import application, platform, or adapters —
+  from a `_test.go` file either. ADR-0003 relaxes only third-party reach, never
+  a layer edge.
+- `internal/domain/*` and `platform/*` may import a third-party package from a
+  `_test.go` file. Their production imports stay standard library plus their own
+  layer ([ADR-0003](docs/adr/0003-test-only-third-party-imports.md)).
 - `cmd/*` sees `internal/bootstrap` and the standard library only.
 - Enforcement is automated: `internal/architecture` runs the ADR-0001 table as
   tests on every `go test ./...`. The allowlist is default-deny, so a new

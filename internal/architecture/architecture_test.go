@@ -88,6 +88,9 @@ func TestAllowlistIsDefaultDeny(t *testing.T) {
 		if _, ok := externalImportsAllowed[l]; !ok {
 			t.Errorf("layer %s has no third-party import policy: every governed layer must state one explicitly, since a missing entry silently reads as deny", l)
 		}
+		if _, ok := testOnlyExternalImportsAllowed[l]; !ok {
+			t.Errorf("layer %s has no test-only third-party import policy (ADR-0003): every governed layer must state one explicitly, since a missing entry silently reads as deny", l)
+		}
 	}
 }
 

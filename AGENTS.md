@@ -29,7 +29,11 @@ platform/*  ──▶  internal/application
 
 - `adapters/*` and `platform/*` must never reach into `internal/domain/*`, except for an
   adapter implementing a port contract declared there.
-- `internal/domain/*` must never import application, platform, or adapters.
+- `internal/domain/*` must never import application, platform, or adapters — including from a
+  `_test.go` file.
+- `internal/domain/*` and `platform/*` may import a third-party package from a `_test.go` file
+  only; their production imports stay standard library plus their own layer
+  ([ADR-0003](docs/adr/0003-test-only-third-party-imports.md)).
 - Automated enforcement arrives with #65 ATOM-BOOT-005. Until then, review is the gate.
 
 ## Verifying a change
