@@ -61,6 +61,12 @@ func fixtureCases() []fixtureCase {
 			wantEdges: []edge{{"internal/domain/execution", "internal/application"}},
 		},
 		{
+			dir:       "application_imports_adapter",
+			why:       "adapters call application services, never the other way round",
+			wantRules: []string{"dependencyRule", "moduleDependencyRule"},
+			wantEdges: []edge{{"internal/application", "adapters/mcp"}},
+		},
+		{
 			dir:       "platform_imports_domain",
 			why:       "platform is domain-agnostic infrastructure, and is not a permitted importer of the domain",
 			wantRules: []string{"dependencyRule", "restrictedImportRule", "moduleDependencyRule"},
@@ -79,6 +85,30 @@ func fixtureCases() []fixtureCase {
 				{"cmd/second", "internal/application"},
 				{"cmd/second", "internal/domain/execution"},
 			},
+		},
+		{
+			// The importing package belongs to no ADR-0001 layer, so its own
+			// imports are not governed -- but the domain is still protected
+			// as a target. Only restrictedImportRule may fire here.
+			dir:       "foreign_imports_domain",
+			why:       "only bootstrap, application, adapters, and the domain itself may import internal/domain/*",
+			wantRules: []string{"restrictedImportRule"},
+			wantEdges: []edge{{"internal/tooling", "internal/domain/execution"}},
+		},
+		{
+			// Not an ADR-0001 anti-edge, and not in the allowlist either.
+			// This is the fixture that proves the allowlist is default-deny
+			// rather than a list of remembered prohibitions.
+			dir:       "application_imports_platform",
+			why:       "an edge absent from the ADR-0001 table is denied even though no anti-edge names it",
+			wantRules: []string{"moduleDependencyRule"},
+			wantEdges: []edge{{"internal/application", "platform/logging"}},
+		},
+		{
+			dir:       "domain_imports_non_layer",
+			why:       "ADR-0001 confines internal/domain/* to the standard library and other domain packages",
+			wantRules: []string{"moduleDependencyRule"},
+			wantEdges: []edge{{"internal/domain/execution", "internal/tooling"}},
 		},
 		{
 			// The positive control. Without it, a rule set that flagged
