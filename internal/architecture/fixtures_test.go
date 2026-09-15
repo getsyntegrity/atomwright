@@ -1,0 +1,178 @@
+package architecture
+
+import (
+	"path/filepath"
+	"slices"
+	"strings"
+	"testing"
+)
+
+// Every rule in this package ships with at least one deliberately-violating
+// module under testdata/. A rule with no negative fixture is not a rule, it is
+// a hope: a path-based check that silently stopped matching reports zero
+// violations, which is indistinguishable from a clean tree. The fixtures are
+// what make a green run mean something.
+//
+// Each fixture is a self-contained Go module with its own go.mod, so the same
+// go list machinery that inspects the real tree inspects the fixtures too --
+// the rules are never handed a hand-built graph they would not see in
+// production. The testdata/ directory name is what keeps the toolchain from
+// compiling these deliberately-wrong packages as part of the real module.
+//
+// Fixtures are loaded with GOWORK=off so that an inherited workspace file
+// cannot change how they load -- see loadGraph.
+//
+// CONTRIBUTING's module-layout rule (ATOM-BOOT-004) says never to add a go.mod
+// under internal/. These fixture modules are the documented exception, and
+// CONTRIBUTING names it: a testdata/ module is invisible to the toolchain --
+// it is never built, tested, or released with the real module -- and go list
+// needs a module boundary to resolve the deliberately-wrong import graphs at
+// all. The rule is about the production tree, and these are not in it.
+
+// fixtureEnv is the environment every fixture load needs. See above.
+var fixtureEnv = []string{"GOWORK=off"}
+
+// edge is one expected (package, import) pair in a fixture's violations.
+type edge struct {
+	pkg     string
+	imports string
+}
+
+type fixtureCase struct {
+	// dir is the fixture module under testdata/.
+	dir string
+	// why states the violation the fixture exists to prove is caught.
+	why string
+	// wantRules is the EXACT set of rules expected to fire. Exact, not
+	// "at least": a rule firing where it should not is as much a defect as
+	// a rule staying silent where it should not.
+	wantRules []string
+	// wantEdges are violations that must appear by name, so a fixture
+	// cannot pass by failing for some unrelated reason.
+	wantEdges []edge
+}
+
+func fixtureCases() []fixtureCase {
+	return []fixtureCase{
+		{
+			dir:       "domain_imports_application",
+			why:       "the domain is the centre; it must not depend on the layer above it",
+			wantRules: []string{"dependencyRule", "moduleDependencyRule"},
+			wantEdges: []edge{{"internal/domain/execution", "internal/application"}},
+		},
+		{
+			dir:       "platform_imports_domain",
+			why:       "platform is domain-agnostic infrastructure, and is not a permitted importer of the domain",
+			wantRules: []string{"dependencyRule", "restrictedImportRule", "moduleDependencyRule"},
+			wantEdges: []edge{{"platform/logging", "internal/domain/execution"}},
+		},
+		{
+			// Acceptance criterion 5 of issue #65: a cmd/* package reaching
+			// past the composition root into a concrete adapter, platform,
+			// application, or domain package must fail.
+			dir:       "cmd_imports_layers_directly",
+			why:       "cmd/* sees only internal/bootstrap and the standard library; internal/bootstrap is the single composition root",
+			wantRules: []string{"restrictedImportRule", "compositionRootRule", "moduleDependencyRule"},
+			wantEdges: []edge{
+				{"cmd/atomwright", "adapters/vcs/gitworktree"},
+				{"cmd/atomwright", "platform/logging"},
+				{"cmd/second", "internal/application"},
+				{"cmd/second", "internal/domain/execution"},
+			},
+		},
+		{
+			// The positive control. Without it, a rule set that flagged
+			// everything would pass every negative fixture above.
+			dir:       "allowed_tree",
+			why:       "every edge ADR-0001 allows, and nothing else, must produce no violations",
+			wantRules: nil,
+		},
+	}
+}
+
+// TestFixturesFailTheRulesTheyTarget is the meta-test: it proves each rule
+// actually fails on the violation it claims to catch.
+func TestFixturesFailTheRulesTheyTarget(t *testing.T) {
+	for _, tc := range fixtureCases() {
+		t.Run(tc.dir, func(t *testing.T) {
+			dir, err := filepath.Abs(filepath.Join("testdata", tc.dir))
+			if err != nil {
+				t.Fatalf("resolving fixture path: %v", err)
+			}
+			g := loadGraph(t, dir, fixtureEnv...)
+			found := checkAll(g)
+
+			gotRules := firedRules(found)
+			wantRules := slices.Clone(tc.wantRules)
+			slices.Sort(wantRules)
+			if !slices.Equal(gotRules, wantRules) {
+				t.Errorf("fixture %s (%s)\nrules fired: %v\nrules wanted: %v\n\nviolations:\n%s",
+					tc.dir, tc.why, gotRules, wantRules, formatViolations(found))
+			}
+
+			for _, want := range tc.wantEdges {
+				if !containsEdge(found, want) {
+					t.Errorf("fixture %s: no violation reported for %s -> %s\n\nviolations:\n%s",
+						tc.dir, want.pkg, want.imports, formatViolations(found))
+				}
+			}
+		})
+	}
+}
+
+// TestEveryRuleHasANegativeFixture enforces the completeness bar issue #65
+// sets: a rule without a fixture proving it fails is not considered done. Add
+// a rule without a fixture and this test fails, which is the point.
+func TestEveryRuleHasANegativeFixture(t *testing.T) {
+	covered := map[string]string{}
+	for _, tc := range fixtureCases() {
+		for _, name := range tc.wantRules {
+			if _, ok := covered[name]; !ok {
+				covered[name] = tc.dir
+			}
+		}
+	}
+
+	for _, r := range allRules() {
+		if _, ok := covered[r.name()]; !ok {
+			t.Errorf("rule %s has no negative testdata fixture: add one under testdata/ proving the rule fails on the violation it targets", r.name())
+		}
+	}
+}
+
+// TestFixtureRuleNamesExist guards the meta-test against its own typo: a
+// fixture expecting a rule name nothing produces would assert nothing.
+func TestFixtureRuleNamesExist(t *testing.T) {
+	known := make([]string, 0, len(allRules()))
+	for _, r := range allRules() {
+		known = append(known, r.name())
+	}
+
+	for _, tc := range fixtureCases() {
+		for _, name := range tc.wantRules {
+			if !slices.Contains(known, name) {
+				t.Errorf("fixture %s expects unknown rule %q; known rules: %s", tc.dir, name, strings.Join(known, ", "))
+			}
+		}
+	}
+}
+
+func firedRules(found []violation) []string {
+	var names []string
+	for _, v := range found {
+		if !slices.Contains(names, v.rule) {
+			names = append(names, v.rule)
+		}
+	}
+	slices.Sort(names)
+	return names
+}
+
+func containsEdge(found []violation, want edge) bool {
+	for _, v := range found {
+		if v.pkg == want.pkg && v.imports == want.imports {
+			return true
+		}
+	}
+	return false
+}
