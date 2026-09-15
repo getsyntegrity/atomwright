@@ -1,4 +1,7 @@
 // Package bootstrap is the single composition root defined by ADR-0001.
+// It is owned by #66 ATOM-BOOT-006, the issue that introduced it together
+// with cmd/atomwright.
+//
 // It is the one package allowed to see concrete implementations from every
 // layer at once -- internal/application, internal/domain/*, adapters/*,
 // and platform/* -- and it wires them by calling constructors, never

@@ -35,13 +35,21 @@ func TestDependencyDirection(t *testing.T) {
 // module, that is a fact worth failing on rather than a test that passes by
 // checking nothing.
 //
-// internal/bootstrap and cmd/* are deliberately absent from this list: #66
-// ATOM-BOOT-006 introduces them, and their rules are proven by fixtures until
-// then.
+// cmd/* and internal/bootstrap belong in this list now that #66
+// ATOM-BOOT-006 has introduced them. compositionRootRule is the rule most
+// exposed to a silent classifier match: if either package vanished, that rule
+// would report zero violations and read as clean.
 func TestGovernedLayersArePresent(t *testing.T) {
 	g := loadGraph(t, moduleRoot(t))
 
-	want := []layer{layerApplication, layerDomain, layerPlatform, layerAdapters}
+	want := []layer{
+		layerApplication,
+		layerDomain,
+		layerPlatform,
+		layerAdapters,
+		layerCmd,
+		layerBootstrap,
+	}
 
 	seen := map[layer]int{}
 	for _, p := range g.packages {
