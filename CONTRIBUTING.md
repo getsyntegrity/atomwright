@@ -67,7 +67,8 @@ attribution rules.
 
 ## Development setup
 
-Requires Go 1.25 or newer.
+Requires Go 1.26 or newer. The test framework, `github.com/pablogore/go-specs`, declares
+`go 1.26.0`, so the module does too.
 
 ```sh
 git clone git@github.com:getsyntegrity/atomwright.git
