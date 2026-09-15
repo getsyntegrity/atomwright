@@ -8,6 +8,11 @@
 // nothing blocks a PR that breaks it). Both are silent: the build stays
 // green either way. These tests are what makes them loud.
 //
+// The rule is about the CI that validates a pull request, so that is the
+// scope: workflows triggered by a pull request. A release, publish, or
+// deployment workflow is automation a contributor is not expected to
+// reproduce with `make check`, and nothing here constrains it.
+//
 // Nothing here ships in a binary: every file in this package is a
 // _test.go file. Like internal/architecture it belongs to no ADR-0001
 // layer, so no governed package may import it -- moduleDependencyRule
@@ -142,40 +147,69 @@ func TestEveryCheckPrerequisiteIsADefinedTarget(t *testing.T) {
 	}
 }
 
-// Every workflow, not just check.yml. A gate that runs in CI but not
-// locally is the drift this package exists to catch, and the cheapest way
-// for it to appear is a second workflow nobody remembers to mirror in the
-// Makefile -- or an extra step bolted onto an existing one. Both are
-// caught by comparing parsed run commands rather than searching the file
-// for a substring, which a workflow running `make check` plus `go test
-// -race ./...` would satisfy while still being a CI-only gate.
-func TestCIRunsNothingButMakeCheck(t *testing.T) {
+// pullRequestGateWorkflows returns every workflow that validates a pull
+// request. These are the workflows #66 constrains: whatever they run has
+// to be reproducible locally. Workflows triggered by anything else --
+// releases, publishing, deployment -- are out of scope and not returned.
+func pullRequestGateWorkflows(t *testing.T) []string {
+	t.Helper()
+
+	var paths []string
+	for _, path := range workflowFiles(t) {
+		if triggersOnPullRequest, _ := pullRequestTrigger(read(t, path)); triggersOnPullRequest {
+			paths = append(paths, path)
+		}
+	}
+	return paths
+}
+
+// The classification above decides which workflows this guard constrains,
+// so a workflow whose triggers cannot be read would silently opt itself
+// out of the gate. That is the same drift by another route, so it fails
+// here rather than being excused.
+func TestEveryWorkflowDeclaresItsTriggers(t *testing.T) {
+	for _, path := range workflowFiles(t) {
+		if _, declared := pullRequestTrigger(read(t, path)); !declared {
+			t.Errorf("%s declares no top-level `on:` triggers, so it cannot be classified; a workflow that validates pull requests must say so", path)
+		}
+	}
+}
+
+// Every pull-request gate, not just check.yml. A gate that runs in CI but
+// not locally is the drift this package exists to catch, and the cheapest
+// way for it to appear is a second PR workflow nobody remembers to mirror
+// in the Makefile -- or an extra step bolted onto an existing one. Both
+// are caught by comparing parsed run commands rather than searching the
+// file for a substring, which a workflow running `make check` plus `go
+// test -race ./...` would satisfy while still being a CI-only gate.
+func TestEveryPullRequestGateRunsNothingButMakeCheck(t *testing.T) {
 	want := "make " + checkTarget
 
-	for _, path := range workflowFiles(t) {
+	for _, path := range pullRequestGateWorkflows(t) {
 		commands := workflowRunCommands(t, path)
 
 		if len(commands) == 0 {
-			t.Errorf("%s runs no command at all; every workflow must run `%s`", path, want)
+			t.Errorf("%s validates pull requests but runs no command at all; it must run `%s`", path, want)
 			continue
 		}
 
 		for _, command := range commands {
 			if command != want {
-				t.Errorf("%s runs %q; every CI step must be `%s` so no gate exists in CI that a contributor cannot run locally", path, command, want)
+				t.Errorf("%s runs %q; every step of a pull-request gate must be `%s` so no gate exists in CI that a contributor cannot run locally", path, command, want)
 			}
 		}
 	}
 }
 
 // The mirror of the test above: running nothing but `make check` is also
-// satisfied by running nothing, so each workflow has to actually invoke it.
-func TestEveryWorkflowRunsTheCheckTarget(t *testing.T) {
+// satisfied by running nothing, so each pull-request gate has to actually
+// invoke it.
+func TestEveryPullRequestGateRunsTheCheckTarget(t *testing.T) {
 	want := "make " + checkTarget
 
-	paths := workflowFiles(t)
+	paths := pullRequestGateWorkflows(t)
 	if !slices.Contains(paths, workflowPath) {
-		t.Fatalf("%s is missing; it is the workflow that gates every PR", workflowPath)
+		t.Fatalf("%s is missing or no longer runs on a pull request; it is the workflow that gates every PR", workflowPath)
 	}
 
 	for _, path := range paths {
