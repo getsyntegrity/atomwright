@@ -80,6 +80,9 @@ func rejectedSpecs() []rejected {
 		{"rejects a blank acceptance criterion", func(s *spec.Spec) {
 			s.AcceptanceCriteria = []spec.AcceptanceCriterion{" "}
 		}, "acceptanceCriteria[0]", spec.ErrBlank},
+		{"rejects an acceptance criterion padded with surrounding whitespace", func(s *spec.Spec) {
+			s.AcceptanceCriteria = []spec.AcceptanceCriterion{" It validates. "}
+		}, "acceptanceCriteria[0]", spec.ErrBlank},
 		{"rejects an acceptance criterion repeated verbatim", func(s *spec.Spec) {
 			s.AcceptanceCriteria = []spec.AcceptanceCriterion{"It validates.", "It validates."}
 		}, "acceptanceCriteria[1]", spec.ErrDuplicate},

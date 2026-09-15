@@ -101,9 +101,9 @@ func (s Spec) validateAcceptanceCriteria(add func(string, error)) {
 	seen := make(map[string]bool, len(s.AcceptanceCriteria))
 	for i, criterion := range s.AcceptanceCriteria {
 		at := fmt.Sprintf("acceptanceCriteria[%d]", i)
-		text := strings.TrimSpace(string(criterion))
+		text := string(criterion)
 		switch {
-		case text == "":
+		case blank(text):
 			add(at, ErrBlank)
 		case seen[text]:
 			add(at, ErrDuplicate)
@@ -142,10 +142,19 @@ func validateEntries(field string, entries []string, add func(string, error)) {
 		return
 	}
 	for i, entry := range entries {
-		if entry == "" || strings.TrimSpace(entry) != entry {
+		if blank(entry) {
 			add(fmt.Sprintf("%s[%d]", field, i), ErrBlank)
 		}
 	}
+}
+
+// blank reports whether a list entry is unusable. Surrounding whitespace counts
+// as unusable, not as cosmetic: entries are compared for equality, so " X" and
+// "X" would be stored and counted as two different statements. This predicate
+// has one definition on purpose -- it was previously written out once per list,
+// and the copies drifted.
+func blank(value string) bool {
+	return value == "" || strings.TrimSpace(value) != value
 }
 
 // required separates "nothing was supplied" from "something meaningless was
