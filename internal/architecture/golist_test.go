@@ -197,32 +197,40 @@ func (g *graph) display(importPath string) string {
 
 var (
 	stdlibOnce sync.Once
-	stdlibSet  map[string]bool
+	stdlibOut  string
 	stdlibErr  error
 )
 
-// stdlibPackages shells out to `go list std` once per test binary. The result
-// is toolchain truth rather than the "first path segment has no dot"
-// heuristic, which misclassifies vendored and versioned paths.
-func stdlibPackages(t *testing.T) map[string]bool {
-	t.Helper()
-	stdlibOnce.Do(func() {
-		out, err := runGo(".", nil, "list", "std")
-		if err != nil {
-			stdlibErr = err
-			return
+// cachingStdlibRunner memoises `go list std` across the test binary. The
+// standard library is the same for every fixture, and loadGraph runs once per
+// fixture, so without this each one pays for another subprocess.
+//
+// The cache is a decoration of the runner rather than a branch inside
+// buildGraph on purpose. buildGraph issues all three subcommands
+// unconditionally, which is what makes their order observable, and a fake
+// runner handed to a spec is never wrapped -- so a spec sees every call the
+// real one would make.
+func cachingStdlibRunner(run goRunner) goRunner {
+	return func(dir string, extraEnv []string, args ...string) (string, error) {
+		if strings.Join(args, " ") != "list std" {
+			return run(dir, extraEnv, args...)
 		}
-		stdlibSet = make(map[string]bool, 512)
-		for _, line := range strings.Split(strings.TrimSpace(out), "\n") {
-			if line = strings.TrimSpace(line); line != "" {
-				stdlibSet[line] = true
-			}
-		}
-	})
-	if stdlibErr != nil {
-		t.Fatalf("go list std: %v", stdlibErr)
+		stdlibOnce.Do(func() { stdlibOut, stdlibErr = run(dir, extraEnv, args...) })
+		return stdlibOut, stdlibErr
 	}
-	return stdlibSet
+}
+
+// parseStdlib turns `go list std` output into a set. Using toolchain truth
+// rather than the "first path segment has no dot" heuristic matters: that
+// heuristic misclassifies vendored and versioned paths.
+func parseStdlib(out string) map[string]bool {
+	set := make(map[string]bool, 512)
+	for _, line := range strings.Split(strings.TrimSpace(out), "\n") {
+		if line = strings.TrimSpace(line); line != "" {
+			set[line] = true
+		}
+	}
+	return set
 }
 
 // runGo executes a go subcommand in dir with extra environment entries.
@@ -262,7 +270,7 @@ func (e *goListError) Error() string {
 func loadGraph(t *testing.T, dir string, extraEnv ...string) *graph {
 	t.Helper()
 
-	g, err := buildGraph(runGo, stdlibPackages(t), dir, extraEnv)
+	g, err := buildGraph(cachingStdlibRunner(runGo), dir, extraEnv)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -282,7 +290,7 @@ type goRunner func(dir string, extraEnv []string, args ...string) (string, error
 // It reports failures instead of ending the test, which is what separates it
 // from loadGraph: the interesting thing about this function is what it does
 // when the toolchain does not cooperate, and a t.Fatalf cannot be observed.
-func buildGraph(run goRunner, stdlib map[string]bool, dir string, extraEnv []string) (*graph, error) {
+func buildGraph(run goRunner, dir string, extraEnv []string) (*graph, error) {
 	modulePath, err := run(dir, extraEnv, "list", "-m")
 	if err != nil {
 		return nil, fmt.Errorf("resolving module path: %w", err)
@@ -293,9 +301,23 @@ func buildGraph(run goRunner, stdlib map[string]bool, dir string, extraEnv []str
 		return nil, fmt.Errorf("listing packages: %w", err)
 	}
 
+	// The standard-library set is the last of the three, and it is the one
+	// call deliberately not made in dir with extraEnv: the standard library
+	// does not depend on which module is being loaded, and a fixture's
+	// GOWORK=off has nothing to say about it.
+	//
+	// It fails like the other two rather than ending the test. A missing
+	// stdlib set classifies every standard-library import as external, which
+	// would turn a healthy tree into a wall of violations -- a failure worth
+	// naming for what it is.
+	stdlibListed, err := run(".", nil, "list", "std")
+	if err != nil {
+		return nil, fmt.Errorf("listing the standard library: %w", err)
+	}
+
 	g := &graph{
 		modulePath: strings.TrimSpace(modulePath),
-		stdlib:     stdlib,
+		stdlib:     parseStdlib(stdlibListed),
 	}
 	decoder := json.NewDecoder(strings.NewReader(listed))
 	for decoder.More() {
