@@ -96,14 +96,22 @@ go test ./...
 that contradicts an accepted ADR merges without a superseding ADR.
 
 ```
+cmd/*       ──▶  internal/bootstrap  ──▶  (every layer, wiring only)
 adapters/*  ──▶  internal/application  ──▶  internal/domain/*
-platform/*  ──▶  internal/application
+adapters/*  ──▶  internal/domain/*      (ports and contractual types only)
+platform/*  ──▶  stdlib, platform/* internals
 ```
 
-- `adapters/*` and `platform/*` must never reach into `internal/domain/*`, except
-  for an adapter implementing a port contract declared there.
+- `platform/*` is cross-cutting infrastructure. It depends on nothing above it:
+  not `internal/application`, and never `internal/domain/*`.
+- `adapters/*` may import `internal/domain/*` only to implement a port contract
+  declared there, never to call domain logic.
 - `internal/domain/*` must never import application, platform, or adapters.
-- Automated enforcement arrives with #65 ATOM-BOOT-005. Until then, review is the gate.
+- `cmd/*` sees `internal/bootstrap` and the standard library only.
+- Enforcement is automated: `internal/architecture` runs the ADR-0001 table as
+  tests on every `go test ./...`. The allowlist is default-deny, so a new
+  cross-boundary import fails until it is added to the ADR-0001 table and to
+  `allowedLayerEdges`, in the same change, with the justification in the PR.
 
 ### Module layout
 
@@ -114,7 +122,11 @@ release lifecycle that would justify a second module.
 
 - Never add a `go.mod` under `internal/`, `platform/`, or `adapters/`. The
   commands in [Verifying a change](#verifying-a-change) run from the repository
-  root and already cover the whole tree.
+  root and already cover the whole tree. The one exception is a `testdata/`
+  directory: the Go toolchain ignores `testdata/` entirely, so a module there
+  is never built, tested, or released with the real one. The architecture
+  fixtures in `internal/architecture/testdata/` use this to give `go list` a
+  module boundary for deliberately-wrong import graphs.
 - There is no `go.work`. A workspace file only has an effect across two or more
   modules; with one module it is a no-op that every contributor still has to
   read and reason about.
