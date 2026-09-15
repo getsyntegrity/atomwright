@@ -206,13 +206,10 @@ func TestArchitecture(t *testing.T) {
 func TestToolchainBoundary(t *testing.T) {
 	specs.Describe(t, "loading the import graph from the Go toolchain", func(s *specs.Spec) {
 		s.When("the toolchain answers normally", func(s *specs.Spec) {
-			s.It("asks for the module path and the package list, in that order, in the requested directory", func(ctx *specs.Context) {
-				run, calls := recordingRunner(map[string]string{
-					"list -m":          "example.test/mod\n",
-					"list -json ./...": `{"ImportPath":"example.test/mod/internal/domain/execution"}`,
-				})
+			s.It("issues exactly three subcommands, in the order the graph depends on", func(ctx *specs.Context) {
+				run, calls := recordingRunner(nil)
 
-				g, err := buildGraph(run, map[string]bool{}, "/somewhere", []string{"GOWORK=off"})
+				g, err := buildGraph(run, "/somewhere", []string{"GOWORK=off"})
 
 				ctx.Expect(err == nil).To(specs.BeTrue())
 				specs.EqualTo(ctx, g.modulePath, "example.test/mod")
@@ -220,22 +217,62 @@ func TestToolchainBoundary(t *testing.T) {
 
 				// Order matters: the module path is what every import in the
 				// listing is classified against, so it has to be resolved
-				// first. CalledWith answers "did this happen at all", so the
-				// order itself is read off the recorded calls.
-				specs.EqualTo(ctx, calls.CallCount(), 2)
+				// first. The count is asserted too, because an extra
+				// subprocess nobody specified is exactly how `go list std`
+				// escaped this boundary before.
+				specs.EqualTo(ctx, calls.CallCount(), 3)
 				recorded := calls.Calls()
 				specs.EqualTo(ctx, recorded[0].Args[2].(string), "list -m")
 				specs.EqualTo(ctx, recorded[1].Args[2].(string), "list -json ./...")
+				specs.EqualTo(ctx, recorded[2].Args[2].(string), "list std")
+			})
 
-				// And both ran in the directory asked for, with the caller's
-				// environment pinned -- the fixtures depend on GOWORK=off
-				// reaching the toolchain rather than being dropped.
+			// The fixtures under testdata/ are each their own module, loaded
+			// with GOWORK=off so an inherited workspace file cannot make the
+			// toolchain reject them. That only holds if the variable reaches
+			// the call that reads the fixture, so each subcommand is named
+			// exactly -- mock.Any() here would be satisfied by `list -m`
+			// alone and prove nothing about the listing.
+			s.It("pins the caller's environment on both calls that read the module", func(ctx *specs.Context) {
+				run, calls := recordingRunner(nil)
+
+				_, err := buildGraph(run, "/somewhere", []string{"GOWORK=off"})
+
+				ctx.Expect(err == nil).To(specs.BeTrue())
 				ctx.Expect(calls.CalledWith(
 					mock.Equal("/somewhere"), mock.Equal("GOWORK=off"), mock.Equal("list -m"),
 				)).To(specs.BeTrue())
 				ctx.Expect(calls.CalledWith(
-					mock.Equal("/somewhere"), mock.Equal("GOWORK=off"), mock.Any(),
+					mock.Equal("/somewhere"), mock.Equal("GOWORK=off"), mock.Equal("list -json ./..."),
 				)).To(specs.BeTrue())
+			})
+
+			// And the third one deliberately does not carry either: the
+			// standard library is the same set whichever module is being
+			// loaded, so a fixture's directory and GOWORK have nothing to say
+			// about it. Stated as a spec so the asymmetry is a decision on
+			// record rather than something a reader has to infer.
+			s.It("asks for the standard library outside the module being loaded", func(ctx *specs.Context) {
+				run, calls := recordingRunner(nil)
+
+				_, err := buildGraph(run, "/somewhere", []string{"GOWORK=off"})
+
+				ctx.Expect(err == nil).To(specs.BeTrue())
+				ctx.Expect(calls.CalledWith(
+					mock.Equal("."), mock.Equal(""), mock.Equal("list std"),
+				)).To(specs.BeTrue())
+			})
+
+			s.It("classifies an import as standard library from what the toolchain listed", func(ctx *specs.Context) {
+				run, _ := recordingRunner(map[string]string{"list std": "errors\nfmt\n"})
+
+				g, err := buildGraph(run, "/somewhere", nil)
+
+				ctx.Expect(err == nil).To(specs.BeTrue())
+				specs.EqualTo(ctx, g.classify("fmt"), layerStdlib)
+				// Not in the listing, so not standard library, however much
+				// the path shape suggests it.
+				specs.EqualTo(ctx, g.classify("unicode/utf8"), layerExternal)
 			})
 		})
 
@@ -244,7 +281,7 @@ func TestToolchainBoundary(t *testing.T) {
 				boom := errors.New("go: cannot find main module")
 				run, calls := failingRunner("list -m", boom)
 
-				g, err := buildGraph(run, map[string]bool{}, "/somewhere", nil)
+				g, err := buildGraph(run, "/somewhere", nil)
 
 				ctx.Expect(g == nil).To(specs.BeTrue())
 				ctx.Expect(errors.Is(err, boom)).To(specs.BeTrue())
@@ -258,10 +295,29 @@ func TestToolchainBoundary(t *testing.T) {
 				boom := errors.New("go: build constraints exclude all Go files")
 				run, _ := failingRunner("list -json ./...", boom)
 
-				_, err := buildGraph(run, map[string]bool{}, "/somewhere", nil)
+				_, err := buildGraph(run, "/somewhere", nil)
 
 				ctx.Expect(errors.Is(err, boom)).To(specs.BeTrue())
 				ctx.Expect(strings.Contains(err.Error(), "listing packages")).To(specs.BeTrue())
+			})
+
+			// This one used to end the test with t.Fatalf from outside the
+			// runner, so it could not be specified at all. Losing the stdlib
+			// set is not a small failure: every standard-library import would
+			// classify as external and a healthy tree would come back as a
+			// wall of violations.
+			s.It("reports a failure to list the standard library as its own step", func(ctx *specs.Context) {
+				boom := errors.New("go: cannot determine GOROOT")
+				run, calls := failingRunner("list std", boom)
+
+				g, err := buildGraph(run, "/somewhere", nil)
+
+				ctx.Expect(g == nil).To(specs.BeTrue())
+				ctx.Expect(errors.Is(err, boom)).To(specs.BeTrue())
+				ctx.Expect(strings.Contains(err.Error(), "listing the standard library")).To(specs.BeTrue())
+				// It got that far: the first two succeeded, so the failure is
+				// attributed to the step that actually broke.
+				specs.EqualTo(ctx, calls.CallCount(), 3)
 			})
 		})
 
@@ -275,7 +331,7 @@ func TestToolchainBoundary(t *testing.T) {
 					"list -json ./...": "",
 				})
 
-				g, err := buildGraph(run, map[string]bool{}, "/empty", nil)
+				g, err := buildGraph(run, "/empty", nil)
 
 				ctx.Expect(g == nil).To(specs.BeTrue())
 				ctx.Expect(err != nil).To(specs.BeTrue())
@@ -292,7 +348,7 @@ func TestToolchainBoundary(t *testing.T) {
 					"list -json ./...": "this is not json",
 				})
 
-				_, err := buildGraph(run, map[string]bool{}, "/broken", nil)
+				_, err := buildGraph(run, "/broken", nil)
 
 				ctx.Expect(err != nil).To(specs.BeTrue())
 				ctx.Expect(strings.Contains(err.Error(), "decoding go list -json output")).To(specs.BeTrue())

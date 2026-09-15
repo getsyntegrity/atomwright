@@ -40,18 +40,25 @@ func (f *fakeToolchain) run(dir string, extraEnv []string, args ...string) (stri
 }
 
 // workingToolchainResponses are the answers a healthy toolchain gives for the
-// two subcommands buildGraph issues.
+// three subcommands buildGraph issues.
 func workingToolchainResponses() map[string]string {
 	return map[string]string{
 		"list -m":          "example.test/mod\n",
 		"list -json ./...": `{"ImportPath":"example.test/mod/internal/domain/execution"}`,
+		"list std":         "errors\nfmt\nstrings\n",
 	}
 }
 
 // recordingRunner answers each go subcommand with a canned response and never
-// fails, so a spec can inspect what the boundary was asked for.
+// fails, so a spec can inspect what the boundary was asked for. Any subcommand
+// the caller does not override is answered the way a healthy toolchain would,
+// so a spec states only the answer it is actually about.
 func recordingRunner(responses map[string]string) (goRunner, *mock.Spy) {
-	f := &fakeToolchain{spy: mock.New().Spy("go"), responses: responses}
+	answers := workingToolchainResponses()
+	for command, response := range responses {
+		answers[command] = response
+	}
+	f := &fakeToolchain{spy: mock.New().Spy("go"), responses: answers}
 	return f.run, f.spy
 }
 
