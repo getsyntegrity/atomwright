@@ -5,7 +5,13 @@
 Accepted; superseded in part by [ADR-0002](0002-atomwright-identity-and-greenfield-baseline.md).
 
 The Non-goals covering the Go module path, and the plan to keep `cmd/gentle-ai` as a temporary
-legacy alias, are no longer in force. Every other decision in this record stands.
+legacy alias, are no longer in force.
+
+Amended on one point by [ADR-0003](0003-test-only-third-party-imports.md): the `stdlib` rows for
+`platform/*` and `internal/domain/*` in the dependency table below govern production imports only,
+and both layers may take third-party imports from `_test.go` files.
+
+Every other decision in this record stands.
 
 ## Date
 

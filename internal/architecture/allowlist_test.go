@@ -13,8 +13,8 @@ package architecture
 //	adapters/*           -> internal/application
 //	adapters/*           -> internal/domain/*      [ports and contractual types only]
 //	internal/application -> internal/domain/*
-//	platform/*           -> stdlib, platform/* internals
-//	internal/domain/*    -> stdlib, other internal/domain/* packages (explicitly shared concepts only)
+//	platform/*           -> stdlib, platform/* internals, third-party in test files only
+//	internal/domain/*    -> stdlib, other internal/domain/* packages (explicitly shared concepts only), third-party in test files only
 //
 // and the anti-edges:
 //
@@ -24,6 +24,10 @@ package architecture
 //	internal/application -X-> adapters/* (concrete)
 //	cmd/*                -X-> adapters/* (concrete)
 //	cmd/*                -X-> internal/application, internal/domain/*, platform/* (directly)
+//
+// The two "third-party in test files only" qualifiers are ADR-0003's
+// amendment to that table. The production import set of those two layers is
+// unchanged: standard library plus their own layer.
 //
 // allowedLayerEdges below is that first block, entry for entry, in the same
 // order. Nothing else is in it. Note what is deliberately absent: there is no
@@ -82,6 +86,31 @@ var externalImportsAllowed = map[layer]bool{
 	layerAdapters:    true,
 	layerDomain:      false,
 	layerPlatform:    false,
+}
+
+// testOnlyExternalImportsAllowed says whether a layer may import a third-party
+// package from a _test.go file -- go list's TestImports/XTestImports -- while
+// externalImportsAllowed still denies it in production code. This is
+// ADR-0003's amendment.
+//
+// It is a second explicit map rather than a widened default:
+// externalImportsAllowed stays default-deny for production, and a layer gains
+// this permission only by being written down here. The reason
+// internal/domain/* and platform/* are standard-library-only is that a shipped
+// binary must not carry vendor coupling through its centre; the Go toolchain
+// excludes _test.go files from a non-test build, so a test-only import is
+// never in that binary.
+//
+// Every governed layer states a value, including the four whose third-party
+// imports are already unconstrained above, so a missing entry cannot pass for
+// a considered deny -- TestAllowlistIsDefaultDeny enforces that.
+var testOnlyExternalImportsAllowed = map[layer]bool{
+	layerCmd:         true,
+	layerBootstrap:   true,
+	layerApplication: true,
+	layerAdapters:    true,
+	layerDomain:      true,
+	layerPlatform:    true,
 }
 
 // domainImporters are the layers ADR-0001 permits to import internal/domain/*

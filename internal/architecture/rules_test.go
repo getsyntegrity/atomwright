@@ -41,8 +41,11 @@ func allRules() []rule {
 
 // eachGovernedImport walks every import of every governed-source package in
 // the module, skipping self-imports (an external test package importing the
-// package under test).
-func eachGovernedImport(g *graph, visit func(pkgRel string, from layer, importPath string, to layer)) {
+// package under test). The origin of each import is passed through so a rule
+// can tell a production dependency from a test-only one (ADR-0003); a rule
+// that ignores it keeps applying to both, which is what every layer edge and
+// anti-edge does.
+func eachGovernedImport(g *graph, visit func(pkgRel string, from layer, importPath string, to layer, origin importOrigin)) {
 	for _, p := range g.packages {
 		pkgRel, local := g.rel(p.ImportPath)
 		if !local {
@@ -52,11 +55,11 @@ func eachGovernedImport(g *graph, visit func(pkgRel string, from layer, importPa
 		if !isGovernedSource(from) {
 			continue
 		}
-		for _, importPath := range p.allImports() {
-			if importPath == p.ImportPath {
+		for _, imported := range p.classifiedImports() {
+			if imported.path == p.ImportPath {
 				continue
 			}
-			visit(pkgRel, from, importPath, g.classify(importPath))
+			visit(pkgRel, from, imported.path, g.classify(imported.path), imported.origin)
 		}
 	}
 }
@@ -87,7 +90,8 @@ func (dependencyRule) name() string { return "dependencyRule" }
 
 func (r dependencyRule) check(g *graph) []violation {
 	var found []violation
-	eachGovernedImport(g, func(pkgRel string, from layer, importPath string, to layer) {
+	eachGovernedImport(g, func(pkgRel string, from layer, importPath string, to layer, _ importOrigin) {
+		// No origin check: an anti-edge is an anti-edge in test code too.
 		for _, forbidden := range forbiddenLayerEdges {
 			if forbidden.from == from && forbidden.to == to {
 				found = append(found, violation{
@@ -204,7 +208,8 @@ func (r compositionRootRule) check(g *graph) []violation {
 	forbiddenFromCmd := []layer{layerAdapters, layerApplication, layerDomain, layerPlatform}
 
 	var found []violation
-	eachGovernedImport(g, func(pkgRel string, from layer, importPath string, to layer) {
+	eachGovernedImport(g, func(pkgRel string, from layer, importPath string, to layer, _ importOrigin) {
+		// No origin check: the composition root holds in test code too.
 		if from != layerCmd || !slices.Contains(forbiddenFromCmd, to) {
 			return
 		}
@@ -230,7 +235,9 @@ func (r compositionRootRule) check(g *graph) []violation {
 //   - the standard library, allowed everywhere;
 //   - an edge between ADR-0001 layers listed in allowedLayerEdges;
 //   - a third-party module, and only from a layer whose ADR-0001 row is not
-//     restricted to the standard library (see externalImportsAllowed).
+//     restricted to the standard library (see externalImportsAllowed), or --
+//     under ADR-0003 -- from a test file of a layer that permits test-only
+//     third-party imports (see testOnlyExternalImportsAllowed).
 //
 // Anything else fails, including an import of a module package that belongs to
 // no layer at all. There is no exemption list to fall back on: see the closing
@@ -245,7 +252,7 @@ func (moduleDependencyRule) name() string { return "moduleDependencyRule" }
 
 func (r moduleDependencyRule) check(g *graph) []violation {
 	var found []violation
-	eachGovernedImport(g, func(pkgRel string, from layer, importPath string, to layer) {
+	eachGovernedImport(g, func(pkgRel string, from layer, importPath string, to layer, origin importOrigin) {
 		switch to {
 		case layerStdlib:
 			return
@@ -253,12 +260,14 @@ func (r moduleDependencyRule) check(g *graph) []violation {
 			if externalImportsAllowed[from] {
 				return
 			}
+			if origin == originTest && testOnlyExternalImportsAllowed[from] {
+				return
+			}
 			found = append(found, violation{
 				rule:    r.name(),
 				pkg:     pkgRel,
 				imports: importPath,
-				reason: fmt.Sprintf(
-					"ADR-0001 restricts %s to the standard library and its own layer; a third-party import is not allowed there", from),
+				reason:  externalImportReason(from),
 			})
 		case layerUngoverned:
 			found = append(found, violation{
@@ -284,6 +293,17 @@ func (r moduleDependencyRule) check(g *graph) []violation {
 		}
 	})
 	return found
+}
+
+// externalImportReason states why a third-party import was refused, naming
+// the test-only escape hatch when the layer has one.
+func externalImportReason(from layer) string {
+	if testOnlyExternalImportsAllowed[from] {
+		return fmt.Sprintf(
+			"ADR-0001 as amended by ADR-0003 restricts %s to the standard library and its own layer in production code; a third-party import there is allowed only from a test file", from)
+	}
+	return fmt.Sprintf(
+		"ADR-0001 restricts %s to the standard library and its own layer; a third-party import is not allowed there", from)
 }
 
 // checkAll runs every rule and returns the violations in rule order.
