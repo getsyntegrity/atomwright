@@ -9,8 +9,10 @@ A greenfield skeleton. The inherited implementation was removed; see
 [ADR-0002](docs/adr/0002-atomwright-identity-and-greenfield-baseline.md).
 
 - Module path: `github.com/getsyntegrity/atomwright`
-- Seventeen packages, each holding only a `doc.go`
-- No binary and no CI until #66 ATOM-BOOT-006 lands
+- The ADR-0001 layers, most packages still holding only a `doc.go`
+- One binary, `cmd/atomwright`, wired through `internal/bootstrap` (#66 ATOM-BOOT-006).
+  It builds and runs; no functional command is attached to it yet
+- One gate, `make check`, run identically by CI
 
 ## Read before writing code
 
@@ -23,25 +25,31 @@ A greenfield skeleton. The inherited implementation was removed; see
 ## Dependency direction
 
 ```
+cmd/*       ──▶  internal/bootstrap  ──▶  (every layer, wiring only)
 adapters/*  ──▶  internal/application  ──▶  internal/domain/*
-platform/*  ──▶  internal/application
+platform/*  ──▶  stdlib, platform/* internals
 ```
 
-- `adapters/*` and `platform/*` must never reach into `internal/domain/*`, except for an
-  adapter implementing a port contract declared there.
+- `cmd/*` sees `internal/bootstrap` and the standard library only. `internal/bootstrap`
+  is the single composition root; it is the one package that may see every layer at once.
+- `adapters/*` may reach into `internal/domain/*` only to implement a port contract
+  declared there. `platform/*` must never reach into it at all.
 - `internal/domain/*` must never import application, platform, or adapters.
-- Automated enforcement arrives with #65 ATOM-BOOT-005. Until then, review is the gate.
+- Enforcement is automated (#65 ATOM-BOOT-005): `internal/architecture` runs the ADR-0001
+  table as tests, default-deny, on every `make check`.
 
 ## Verifying a change
 
-There is no CI. Run these yourself and report the real output:
+Run the gate yourself and report the real output:
 
 ```sh
-go build ./...
-go vet ./...
-gofmt -l .
-go test ./...
+make check
 ```
+
+It runs `gofmt`, `go vet`, `go mod tidy -diff`, `go build`, `go test`, and the
+ADR-0001 architecture checks. CI runs the identical target, so a green `make check`
+locally is the same gate that blocks the PR. Never add a gate to one side only —
+`internal/gates` fails the build when the Makefile and the workflow drift apart.
 
 `go build` alone is not verification — it compiles without running tests.
 

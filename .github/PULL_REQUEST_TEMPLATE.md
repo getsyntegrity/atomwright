@@ -57,23 +57,19 @@ mechanical transformations do not need to be itemized. See
 
 ## 🧪 Test Plan
 
-There is no CI in this repository. Run these yourself and paste the real output:
+CI runs this exact target on your PR. Run it yourself first and paste the real output:
 
 ```bash
-go build ./...
-go vet ./...
-gofmt -l .
-go test ./...
+make check
 ```
 
-- [ ] `go build ./...` passes
-- [ ] `go vet ./...` passes
-- [ ] `gofmt -l .` reports nothing
-- [ ] `go test ./...` passes
+- [ ] `make check` passes locally
 - [ ] Manually verified where automated checks cannot reach
 
 <!-- Paste the actual output above. "go build" alone is not verification —
-     it compiles without running tests. -->
+     it compiles without running tests. `make check` runs gofmt, go vet,
+     go mod tidy -diff, go build, go test, and the ADR-0001 architecture
+     checks. -->
 
 ---
 
