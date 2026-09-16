@@ -24,6 +24,12 @@
 // _test.go file. Like internal/architecture it belongs to no ADR-0001
 // layer, so no governed package may import it -- moduleDependencyRule
 // enforces that.
+//
+// The suite is written with go-specs, like every other suite in the
+// module. These specs live in the package rather than in an external one
+// for the same reason internal/architecture's do: every file here is a
+// _test.go file, so there is no exported surface an external test package
+// could reach.
 package gates
 
 import (
@@ -33,6 +39,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/pablogore/go-specs/specs"
 )
 
 const (
@@ -110,61 +118,80 @@ func workflowRunCommands(t *testing.T, path string) []string {
 	return commands
 }
 
-func TestCheckRunsEveryRequiredGate(t *testing.T) {
-	targets := makefileTargets(t)
+// checkCommand is the one command the gate workflow is allowed to run, and
+// the one a contributor runs locally.
+const checkCommand = "make " + checkTarget
 
-	prerequisites, ok := targets[checkTarget]
-	if !ok {
-		t.Fatalf("%s defines no %q target; it is the entry point for every gate", makefilePath, checkTarget)
-	}
+func TestGates(t *testing.T) {
+	specs.Describe(t, "the single gate every contributor and every pull request runs", func(s *specs.Spec) {
+		s.Describe("the Makefile", func(s *specs.Spec) {
+			s.When("the check target is the entry point for every gate", func(s *specs.Spec) {
+				s.It("defines the check target at all", func(ctx *specs.Context) {
+					_, ok := makefileTargets(ctx.T)[checkTarget]
 
-	for _, gate := range requiredGates {
-		if !slices.Contains(prerequisites, gate) {
-			t.Errorf("`make %s` does not run the %q gate (prerequisites: %v); #66 requires fmt, vet, tidy, build, test, and the architecture checks", checkTarget, gate, prerequisites)
-		}
-	}
-}
+					ctx.Expect(ok).To(specs.BeTrue())
+				})
 
-func TestEveryCheckPrerequisiteIsADefinedTarget(t *testing.T) {
-	targets := makefileTargets(t)
+				// #66 requires fmt, vet, tidy, build, test, and the
+				// architecture checks. One spec per gate names which one
+				// went missing instead of reporting that something did.
+				for _, gate := range requiredGates {
+					s.It("runs the "+gate+" gate", func(ctx *specs.Context) {
+						prerequisites, ok := makefileTargets(ctx.T)[checkTarget]
+						if !ok {
+							ctx.T.Fatalf("%s defines no %q target; it is the entry point for every gate", makefilePath, checkTarget)
+						}
 
-	for _, prerequisite := range targets[checkTarget] {
-		if _, ok := targets[prerequisite]; !ok {
-			t.Errorf("`make %s` depends on %q, which is not a target in %s", checkTarget, prerequisite, makefilePath)
-		}
-	}
-}
+						ctx.Expect(slices.Contains(prerequisites, gate)).To(specs.BeTrue())
+					})
+				}
 
-// The gate workflow runs `make check` and nothing else. A second step
-// bolted onto it -- `go test -race ./...`, a coverage upload that fails
-// the job -- is a gate that exists in CI and nowhere else, which is the
-// drift this package exists to catch. Comparing parsed run commands rather
-// than searching the file for a substring is what catches it: `make check`
-// is present either way.
-//
-// Only this workflow is constrained. Any other workflow, whatever it
-// triggers on, is free to run whatever it needs.
-func TestTheCheckWorkflowRunsNothingButMakeCheck(t *testing.T) {
-	want := "make " + checkTarget
+				s.It("depends on nothing the Makefile does not define as a target", func(ctx *specs.Context) {
+					targets := makefileTargets(ctx.T)
 
-	for _, command := range workflowRunCommands(t, workflowPath) {
-		if command != want {
-			t.Errorf("%s runs %q; every step of the gate must be `%s` so no gate exists in CI that a contributor cannot run locally", workflowPath, command, want)
-		}
-	}
-}
+					for _, prerequisite := range targets[checkTarget] {
+						_, defined := targets[prerequisite]
+						if !defined {
+							ctx.T.Errorf("`make %s` depends on %q, which is not a target in %s", checkTarget, prerequisite, makefilePath)
+						}
+						ctx.Expect(defined).To(specs.BeTrue())
+					}
+				})
+			})
+		})
 
-// The mirror of the test above: running nothing but `make check` is also
-// satisfied by running nothing, so the workflow that actually gates a PR
-// has to invoke it -- on a pull request, which is what makes it a gate.
-func TestTheCheckWorkflowRunsTheCheckTargetOnAPullRequest(t *testing.T) {
-	want := "make " + checkTarget
+		// Only this workflow is constrained. Any other workflow, whatever
+		// it triggers on, is free to run whatever it needs.
+		s.Describe("the gate workflow", func(s *specs.Spec) {
+			s.When("its run steps are compared with the Makefile", func(s *specs.Spec) {
+				// The gate workflow runs `make check` and nothing else. A
+				// second step bolted onto it -- `go test -race ./...`, a
+				// coverage upload that fails the job -- is a gate that
+				// exists in CI and nowhere else, which is the drift this
+				// package exists to catch. Comparing parsed run commands
+				// rather than searching the file for a substring is what
+				// catches it: `make check` is present either way.
+				s.It("runs no step other than the check target", func(ctx *specs.Context) {
+					for _, command := range workflowRunCommands(ctx.T, workflowPath) {
+						if command != checkCommand {
+							ctx.T.Errorf("%s runs %q; every step of the gate must be `%s` so no gate exists in CI that a contributor cannot run locally", workflowPath, command, checkCommand)
+						}
+						specs.EqualTo(ctx, command, checkCommand)
+					}
+				})
 
-	if !pullRequestTrigger(read(t, workflowPath)) {
-		t.Fatalf("%s does not run on a pull request; it is the workflow that gates every PR", workflowPath)
-	}
+				// The mirror of the spec above: running nothing but `make
+				// check` is also satisfied by running nothing, so the
+				// workflow that actually gates a PR has to invoke it.
+				s.It("does run the check target, so the local gate and the PR gate are the same target", func(ctx *specs.Context) {
+					ctx.Expect(slices.Contains(workflowRunCommands(ctx.T, workflowPath), checkCommand)).To(specs.BeTrue())
+				})
 
-	if !slices.Contains(workflowRunCommands(t, workflowPath), want) {
-		t.Errorf("%s never runs `%s`; the local gate and the PR gate must be the same target", workflowPath, want)
-	}
+				// ...and on a pull request, which is what makes it a gate.
+				s.It("is triggered by a pull request", func(ctx *specs.Context) {
+					ctx.Expect(pullRequestTrigger(read(ctx.T, workflowPath))).To(specs.BeTrue())
+				})
+			})
+		})
+	})
 }

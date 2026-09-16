@@ -1,3 +1,11 @@
+// Package bootstrap_test exercises the composition root from outside the
+// package, which is the only way to prove the exported surface alone is enough
+// to wire an application and run it.
+//
+// The suite is written with go-specs. internal/bootstrap is the composition
+// root, so its imports are unconstrained by ADR-0001 -- and even in a
+// standard-library-only layer this import would be permitted, because it
+// appears only in a _test.go file (ADR-0003).
 package bootstrap_test
 
 import (
@@ -10,80 +18,102 @@ import (
 	"testing"
 
 	"github.com/getsyntegrity/atomwright/internal/bootstrap"
+	"github.com/pablogore/go-specs/specs"
 )
 
-func TestNewRejectsMissingWriters(t *testing.T) {
-	tests := map[string]bootstrap.Config{
-		"no stdout": {Stderr: io.Discard},
-		"no stderr": {Stdout: io.Discard},
-		"neither":   {},
-	}
+// miswired is one Config the composition root must refuse, because a missing
+// writer means output would be silently discarded.
+type miswired struct {
+	behaviour string
+	cfg       bootstrap.Config
+}
 
-	for name, cfg := range tests {
-		t.Run(name, func(t *testing.T) {
-			app, err := bootstrap.New(cfg)
-			if err == nil {
-				t.Fatalf("New(%+v) succeeded; want an error", cfg)
-			}
-			if app != nil {
-				t.Errorf("New returned a non-nil app alongside an error: %+v", app)
-			}
-		})
+func miswiredConfigs() []miswired {
+	return []miswired{
+		{"refuses to wire an application with nowhere to write program output", bootstrap.Config{Stderr: io.Discard}},
+		{"refuses to wire an application with nowhere to write diagnostics", bootstrap.Config{Stdout: io.Discard}},
+		{"refuses to wire an application with no writers at all", bootstrap.Config{}},
 	}
 }
 
-func TestRunReportsTheWiredStateOnStdout(t *testing.T) {
-	var stdout, stderr bytes.Buffer
+// wireAndRun wires the composition root onto fresh buffers and runs it against
+// runCtx, so a spec can state what reached each stream and how the run ended.
+// Wiring is a precondition here, not the behaviour under test, so a failure to
+// wire stops the spec rather than being asserted on.
+func wireAndRun(ctx *specs.Context, level slog.Level, runCtx context.Context) (stdout, stderr *bytes.Buffer, err error) {
+	stdout, stderr = &bytes.Buffer{}, &bytes.Buffer{}
 
-	app, err := bootstrap.New(bootstrap.Config{Stdout: &stdout, Stderr: &stderr, LogLevel: slog.LevelInfo})
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
-	if err := app.Run(t.Context()); err != nil {
-		t.Fatalf("Run: %v", err)
+	app, wireErr := bootstrap.New(bootstrap.Config{Stdout: stdout, Stderr: stderr, LogLevel: level})
+	if wireErr != nil {
+		ctx.T.Fatalf("wiring the composition root: %v", wireErr)
 	}
 
-	if got := stdout.String(); !strings.Contains(got, "atomwright") {
-		t.Errorf("Run wrote no recognisable status line to stdout\ngot: %q", got)
-	}
+	return stdout, stderr, app.Run(runCtx)
 }
 
-// Diagnostics belong on stderr so stdout stays usable as a data stream for
-// the CLI surfaces the functional epics will add.
-func TestRunKeepsDiagnosticsOffStdout(t *testing.T) {
-	var stdout, stderr bytes.Buffer
-
-	app, err := bootstrap.New(bootstrap.Config{Stdout: &stdout, Stderr: &stderr, LogLevel: slog.LevelDebug})
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
-	if err := app.Run(t.Context()); err != nil {
-		t.Fatalf("Run: %v", err)
-	}
-
-	if stderr.Len() == 0 {
-		t.Error("Run logged nothing at debug level; the composition root should be observable")
-	}
-	if got := stdout.String(); strings.Contains(got, "level=") {
-		t.Errorf("log records leaked onto stdout\ngot: %q", got)
-	}
-}
-
-func TestRunStopsOnACancelledContext(t *testing.T) {
-	var stdout, stderr bytes.Buffer
-
-	app, err := bootstrap.New(bootstrap.Config{Stdout: &stdout, Stderr: &stderr})
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
+// cancelledContext is a context that is already done before the run begins.
+func cancelledContext(t *testing.T) context.Context {
+	t.Helper()
 
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
+	return ctx
+}
 
-	if err := app.Run(ctx); !errors.Is(err, context.Canceled) {
-		t.Fatalf("Run(cancelled ctx) = %v; want context.Canceled", err)
-	}
-	if stdout.Len() != 0 {
-		t.Errorf("Run wrote to stdout after cancellation\ngot: %q", stdout.String())
-	}
+func TestBootstrap(t *testing.T) {
+	specs.Describe(t, "the composition root", func(s *specs.Spec) {
+		s.When("a writer the application needs is missing", func(s *specs.Spec) {
+			for _, c := range miswiredConfigs() {
+				s.It(c.behaviour, func(ctx *specs.Context) {
+					app, err := bootstrap.New(c.cfg)
+
+					// It fails at construction, and hands back nothing a
+					// caller could mistake for a wired application.
+					ctx.Expect(err != nil).To(specs.BeTrue())
+					ctx.Expect(app == nil).To(specs.BeTrue())
+				})
+			}
+		})
+
+		s.When("every writer is supplied and the run completes", func(s *specs.Spec) {
+			s.It("reports the wired state on stdout", func(ctx *specs.Context) {
+				stdout, _, err := wireAndRun(ctx, slog.LevelInfo, ctx.T.Context())
+
+				ctx.Expect(err == nil).To(specs.BeTrue())
+				ctx.Expect(strings.Contains(stdout.String(), "atomwright")).To(specs.BeTrue())
+			})
+		})
+
+		// Diagnostics belong on stderr so stdout stays usable as a data stream
+		// for the CLI surfaces the functional epics will add.
+		s.When("the logger is admitting debug records", func(s *specs.Spec) {
+			s.It("makes the composition root observable on stderr", func(ctx *specs.Context) {
+				_, stderr, err := wireAndRun(ctx, slog.LevelDebug, ctx.T.Context())
+
+				ctx.Expect(err == nil).To(specs.BeTrue())
+				ctx.Expect(stderr.Len() > 0).To(specs.BeTrue())
+			})
+
+			s.It("leaks no log record onto stdout", func(ctx *specs.Context) {
+				stdout, _, err := wireAndRun(ctx, slog.LevelDebug, ctx.T.Context())
+
+				ctx.Expect(err == nil).To(specs.BeTrue())
+				ctx.Expect(strings.Contains(stdout.String(), "level=")).To(specs.BeFalse())
+			})
+		})
+
+		s.When("the context is already cancelled before the run begins", func(s *specs.Spec) {
+			s.It("stops with the cancellation the caller asked for", func(ctx *specs.Context) {
+				_, _, err := wireAndRun(ctx, 0, cancelledContext(ctx.T))
+
+				ctx.Expect(errors.Is(err, context.Canceled)).To(specs.BeTrue())
+			})
+
+			s.It("writes nothing to stdout", func(ctx *specs.Context) {
+				stdout, _, _ := wireAndRun(ctx, 0, cancelledContext(ctx.T))
+
+				specs.EqualTo(ctx, stdout.Len(), 0)
+			})
+		})
+	})
 }

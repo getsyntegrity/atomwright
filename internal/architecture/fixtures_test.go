@@ -141,14 +141,12 @@ func fixtureCases() []fixtureCase {
 // violation it claims to catch, and that the claims themselves stay honest.
 //
 // The fixture matrix is enumerated as one generated It per fixture rather than
-// through the go-specs path builder. s.Paths would be the natural fit for a
-// parameter space this shape, but it does not execute under a top-level
-// Describe in the pinned v0.0.9: the library's own
-// TestPathsExecutesAllCombinations is t.Skip'ed with "paths combinatorial
-// execution with top-level Describe deferred to post-v1.0.0", and
-// ctx.Path().Value returns nil there. Generating the specs in a loop is the
-// same enumeration, is deterministic, and names each fixture's claim -- revisit
-// the path builder when go-specs lands that execution mode.
+// through the go-specs path builder. s.Paths explores a parameter space, taking
+// the Cartesian product of independent dimensions; this is not one. It is an
+// explicit list of (dir, wantRules, wantEdges, why) fixtures, each a hand-chosen
+// violation paired with the exact rules it must provoke, and no two of them
+// combine. Generating the specs in a loop is that same enumeration, is
+// deterministic, and names each fixture's claim.
 func TestFixtures(t *testing.T) {
 	specs.Describe(t, "the testdata fixtures that keep the rules honest", func(s *specs.Spec) {
 		s.When("a fixture module is loaded and checked", func(s *specs.Spec) {
