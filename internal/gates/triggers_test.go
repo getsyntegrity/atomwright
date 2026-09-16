@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/pablogore/go-specs/specs"
 )
 
 var (
@@ -64,73 +66,66 @@ func pullRequestTrigger(workflow string) bool {
 	return false
 }
 
-// #66 ATOM-BOOT-006 is about the gate a contributor runs locally being the
-// gate that blocks a PR, so the gate workflow has to actually run on a
-// pull request. These cases cover the YAML shapes GitHub accepts for that
-// declaration, and the near misses that must not be mistaken for it.
-func TestPullRequestTrigger(t *testing.T) {
-	tests := []struct {
-		name            string
-		workflow        string
-		wantPullRequest bool
-	}{
-		{
-			name:            "block form naming pull_request",
-			workflow:        "name: check\n\non:\n  pull_request:\n  push:\n    branches: [main]\n",
-			wantPullRequest: true,
-		},
-		{
-			name:            "flow sequence naming pull_request",
-			workflow:        "on: [push, pull_request]\n",
-			wantPullRequest: true,
-		},
-		{
-			name:            "scalar naming pull_request",
-			workflow:        "on: pull_request\n",
-			wantPullRequest: true,
-		},
-		{
-			name:            "quoted key",
-			workflow:        "\"on\":\n  pull_request:\n",
-			wantPullRequest: true,
-		},
-		{
-			name:            "pull_request_target also runs on a pull request",
-			workflow:        "on:\n  pull_request_target:\n    types: [opened]\n",
-			wantPullRequest: true,
-		},
-		{
-			name:            "pull_request_review is a different event",
-			workflow:        "on:\n  pull_request_review:\n    types: [submitted]\n",
-			wantPullRequest: false,
-		},
-		{
-			name:            "a release workflow does not run on a pull request",
-			workflow:        "name: release\n\non:\n  push:\n    tags: ['v*']\n  workflow_dispatch:\n\njobs:\n  publish:\n    steps:\n      - run: make binary\n",
-			wantPullRequest: false,
-		},
-		{
-			name:            "a job mentioning pull_request does not widen the trigger block",
-			workflow:        "on:\n  workflow_dispatch:\n\njobs:\n  publish:\n    if: github.event_name == 'pull_request'\n    steps:\n      - run: make binary\n",
-			wantPullRequest: false,
-		},
-		{
-			name:            "a comment after the key does not hide the block",
-			workflow:        "on: # when this runs\n  pull_request:\n",
-			wantPullRequest: true,
-		},
-		{
-			name:            "a workflow with no trigger block runs on nothing",
-			workflow:        "name: broken\n\njobs:\n  check:\n    steps:\n      - run: make check\n",
-			wantPullRequest: false,
-		},
-	}
+// declaration is one workflow the check must read a verdict from, paired
+// with the behaviour that reading it proves.
+type declaration struct {
+	behaviour string
+	workflow  string
+}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			if got := pullRequestTrigger(test.workflow); got != test.wantPullRequest {
-				t.Errorf("triggers on a pull request = %v, want %v", got, test.wantPullRequest)
+// recognised are the YAML shapes GitHub accepts for declaring a
+// pull-request trigger. #66 ATOM-BOOT-006 is about the gate a contributor
+// runs locally being the gate that blocks a PR, so the check has to see a
+// pull-request trigger in every shape the gate workflow might use.
+func recognisedTriggers() []declaration {
+	return []declaration{
+		{"recognises a pull-request trigger declared as an indented block",
+			"name: check\n\non:\n  pull_request:\n  push:\n    branches: [main]\n"},
+		{"recognises a pull-request trigger listed in a flow sequence",
+			"on: [push, pull_request]\n"},
+		{"recognises a pull-request trigger written as a bare scalar",
+			"on: pull_request\n"},
+		{"recognises a pull-request trigger under a quoted on key",
+			"\"on\":\n  pull_request:\n"},
+		{"treats pull_request_target as running on a pull request too",
+			"on:\n  pull_request_target:\n    types: [opened]\n"},
+		{"reads past a comment following the on key to the block below it",
+			"on: # when this runs\n  pull_request:\n"},
+	}
+}
+
+// nearMisses are the shapes that must not be mistaken for a pull-request
+// trigger. Without them the check could report true for everything and
+// still satisfy every case above.
+func nearMissTriggers() []declaration {
+	return []declaration{
+		{"does not mistake pull_request_review for a pull-request trigger",
+			"on:\n  pull_request_review:\n    types: [submitted]\n"},
+		{"reports no pull-request trigger for a workflow that runs on tags and manual dispatch",
+			"name: release\n\non:\n  push:\n    tags: ['v*']\n  workflow_dispatch:\n\njobs:\n  publish:\n    steps:\n      - run: make binary\n"},
+		{"does not let a pull_request named in a job condition widen the trigger block",
+			"on:\n  workflow_dispatch:\n\njobs:\n  publish:\n    if: github.event_name == 'pull_request'\n    steps:\n      - run: make binary\n"},
+		{"reports no pull-request trigger for a workflow with no trigger block at all",
+			"name: broken\n\njobs:\n  check:\n    steps:\n      - run: make check\n"},
+	}
+}
+
+func TestPullRequestTrigger(t *testing.T) {
+	specs.Describe(t, "the pull-request trigger check", func(s *specs.Spec) {
+		s.When("a workflow declares a pull-request trigger", func(s *specs.Spec) {
+			for _, c := range recognisedTriggers() {
+				s.It(c.behaviour, func(ctx *specs.Context) {
+					ctx.Expect(pullRequestTrigger(c.workflow)).To(specs.BeTrue())
+				})
 			}
 		})
-	}
+
+		s.When("a workflow declares something that only looks like one", func(s *specs.Spec) {
+			for _, c := range nearMissTriggers() {
+				s.It(c.behaviour, func(ctx *specs.Context) {
+					ctx.Expect(pullRequestTrigger(c.workflow)).To(specs.BeFalse())
+				})
+			}
+		})
+	})
 }
