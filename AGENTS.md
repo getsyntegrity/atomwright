@@ -34,7 +34,11 @@ platform/*  ──▶  stdlib, platform/* internals
   is the single composition root; it is the one package that may see every layer at once.
 - `adapters/*` may reach into `internal/domain/*` only to implement a port contract
   declared there. `platform/*` must never reach into it at all.
-- `internal/domain/*` must never import application, platform, or adapters.
+- `internal/domain/*` must never import application, platform, or adapters — including from a
+  `_test.go` file.
+- `internal/domain/*` and `platform/*` may import a third-party package from a `_test.go` file
+  only; their production imports stay standard library plus their own layer
+  ([ADR-0003](docs/adr/0003-test-only-third-party-imports.md)).
 - Enforcement is automated (#65 ATOM-BOOT-005): `internal/architecture` runs the ADR-0001
   table as tests, default-deny, on every `make check`.
 

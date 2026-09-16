@@ -78,11 +78,64 @@ type pkg struct {
 
 // allImports merges production, in-package test, and external test imports.
 // A domain package that reaches for an adapter only from its test file has
-// still broken the dependency direction, so tests are not a loophole.
+// still broken the dependency direction, so tests are not a loophole for any
+// layer edge. The one thing tests do change is third-party reach -- see
+// importOrigin and ADR-0003.
 func (p pkg) allImports() []string {
 	merged := slices.Concat(p.Imports, p.TestImports, p.XTestImports)
 	slices.Sort(merged)
 	return slices.Compact(merged)
+}
+
+// importOrigin says which go list import set an import came from. ADR-0003
+// amends ADR-0001 so a standard-library-only layer may take a third-party
+// import through TestImports/XTestImports but never through Imports, and that
+// is only decidable if the sets stay distinguishable.
+type importOrigin int
+
+const (
+	// originProduction is an import from go list's Imports set: a file the
+	// non-test build compiles and links into the shipped binary.
+	originProduction importOrigin = iota
+	// originTest is an import seen only in TestImports or XTestImports.
+	// The Go toolchain excludes _test.go files from a non-test build, so
+	// nothing reached this way is linked into a shipped binary.
+	originTest
+)
+
+// classifiedImport is one import path together with where it came from.
+type classifiedImport struct {
+	path   string
+	origin importOrigin
+}
+
+// classifiedImports returns every import of p attributed to an origin.
+//
+// FAIL CLOSED: an import that cannot be attributed to a known set is treated
+// as a production import, because originProduction is the denying side of
+// every ADR-0003 permission. Production also wins over test when a path
+// appears in both sets: it is linked into the binary either way. So the only
+// imports that gain the test-only permission are the ones positively proven
+// to come from TestImports or XTestImports alone.
+func (p pkg) classifiedImports() []classifiedImport {
+	origins := make(map[string]importOrigin, len(p.Imports)+len(p.TestImports)+len(p.XTestImports))
+	for _, path := range slices.Concat(p.TestImports, p.XTestImports) {
+		origins[path] = originTest
+	}
+	for _, path := range p.Imports { // second, so production overwrites test
+		origins[path] = originProduction
+	}
+
+	all := p.allImports()
+	out := make([]classifiedImport, 0, len(all))
+	for _, path := range all {
+		origin, known := origins[path]
+		if !known {
+			origin = originProduction
+		}
+		out = append(out, classifiedImport{path: path, origin: origin})
+	}
+	return out
 }
 
 // graph is an import graph plus everything needed to classify a path.
